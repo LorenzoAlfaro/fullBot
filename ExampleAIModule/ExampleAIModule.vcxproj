@@ -90,6 +90,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\auxFun.cpp" />
     <ClCompile Include="Source\BuildManager.cpp" />
     <ClCompile Include="Source\CommMngr.cpp" />
     <ClCompile Include="Source\Dll.cpp" />
@@ -98,6 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Source\auxFun.h" />
     <ClInclude Include="Source\BuildManager.h" />
     <ClInclude Include="Source\CommMngr.h" />
     <ClInclude Include="Source\ExampleAIModule.h" />

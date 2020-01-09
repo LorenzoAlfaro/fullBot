@@ -9,6 +9,9 @@ class CommMngr
 		static void attackUnits(std::list<Unit> units, Position myPos);
 		static void moveUnits(std::list<Unit> units, Position myPos);
 		static void setRallyPoint(std::list<Unit> buildings, Position myPos);
+		static void scvManager(std::list<int> Miners, std::list<Unit> workers);
+		static void buildSCVs(std::list<Unit> commandCenters);
+		static void trainMarines(std::list<Unit> barracks);
 
 };
 

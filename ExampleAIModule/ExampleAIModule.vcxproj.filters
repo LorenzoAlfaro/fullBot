@@ -12,6 +12,9 @@
     <ClCompile Include="Source\CommMngr.cpp">
       <Filter>CommandManager</Filter>
     </ClCompile>
+    <ClCompile Include="Source\auxFun.cpp">
+      <Filter>AuxFun</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -24,6 +27,9 @@
     </ClInclude>
     <ClInclude Include="Source\CommMngr.h">
       <Filter>CommandManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\auxFun.h">
+      <Filter>AuxFun</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -38,6 +44,9 @@
     </Filter>
     <Filter Include="CommandManager">
       <UniqueIdentifier>{f3c0f5c0-a124-4625-9817-67ed608901d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AuxFun">
+      <UniqueIdentifier>{3f92d090-a3fb-4dde-ad4c-b846db85038f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

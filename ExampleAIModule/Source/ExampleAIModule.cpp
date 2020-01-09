@@ -2,6 +2,7 @@
 #include "UnitFun.h"
 #include "BuildManager.h"
 #include "CommMngr.h"
+#include "auxFun.h"
 #include <iostream>
 
 
@@ -115,17 +116,7 @@ bool validFrame()
 #pragma endregion
 
 #pragma region SupplyInfoMethods
-int SupplyTotal(int commandCenterCount, int supplyDepotCount)
-{
-    int total = (commandCenterCount * 10) + (supplyDepotCount * 8);
-    return total;
-}
 
-int usedSupplyTotal(int marineCount, int scvCount)
-{
-    int total = (marineCount * 1) + (scvCount * 1);
-    return total;
-}
 
 void updateUnitCount(bool created, BWAPI::Unit unit)
 {
@@ -170,9 +161,9 @@ void updateUnitCount(bool created, BWAPI::Unit unit)
                 commandCenterCount = commandCenterCount + 1;
             }
 
-            supplyLimit = SupplyTotal(commandCenterCount, supplyDepotsCount);
+            supplyLimit = auxFun::SupplyTotal(commandCenterCount, supplyDepotsCount);
 
-            supplyLeft = supplyLimit - usedSupplyTotal(marineCount, scvCount);
+            supplyLeft = supplyLimit - auxFun::usedSupplyTotal(marineCount, scvCount);
 
         }
         else
@@ -205,19 +196,11 @@ void updateUnitCount(bool created, BWAPI::Unit unit)
             {
                 commandCenterCount = commandCenterCount - 1;
             }
-            supplyLimit = SupplyTotal(commandCenterCount, supplyDepotsCount);
+            supplyLimit = auxFun::SupplyTotal(commandCenterCount, supplyDepotsCount);
 
-            supplyLeft = supplyLimit - usedSupplyTotal(marineCount, scvCount);
+            supplyLeft = supplyLimit - auxFun::usedSupplyTotal(marineCount, scvCount);
         }
     }
-}
-
-int roomNeeded()
-{
-    int offset = 1;
-    int supply = offset + commandCenterCount * 1 + barrackCount * 1; //will need finer adjuments
-
-    return supply;
 }
 
 void displayInsights()
@@ -231,9 +214,8 @@ void displayInsights()
     //Broodwar->drawTextScreen(200, 100, "Mouse Cursor: %d  %d", Broodwar->getMousePosition().x, Broodwar->getMousePosition().y);
     //Broodwar->drawTextScreen(200, 120, "Screen: %d  %d", Broodwar->getScreenPosition().x, Broodwar->getScreenPosition().y);
     Broodwar->drawTextScreen(200, 140, "supply limit: %d ", supplyLeft);
-    Broodwar->drawTextScreen(200, 120, "room for next round: %d ", roomNeeded());
+    Broodwar->drawTextScreen(200, 120, "room for next round: %d ", auxFun::roomNeeded(commandCenterCount,barrackCount));
 }
-
 #pragma endregion
 
 #pragma region UnitHandlers
@@ -321,41 +303,6 @@ void supplyBlock(Unit CommandCenter)
         almostSupplyBlock(CommandCenter);
         
     } // closure: insufficient supply
-}
-
-void scvManager()
-{
-    for (auto& ID : Miners)
-    {
-        Unit u = UnitFun::getUnitByID(workers,ID);
-        if (u->isIdle())
-        {
-            u->gather(u->getClosestUnit(IsMineralField || IsRefinery));
-        }
-    }
-}
-
-void buildSCVs()
-{
-    for (auto& u : commandCenters)
-    {
-        if (u->isIdle())
-        {
-            u->train(BWAPI::UnitTypes::Terran_SCV);
-        }
-    }
-}
-
-void trainMarines()
-{
-    for (auto& u : barracks)
-    {
-        if (u->isIdle() && !u->train(BWAPI::UnitTypes::Terran_Marine))
-        {
-            //supplyBlock(u);
-
-        } // closure: failed to train idle unit
-    }
 }
 
 void unitHandler(Unitset units)
@@ -463,19 +410,19 @@ void productionManager()
     //int supplyLeft = SupplyTotal(commandCenterCount, supplyDepots) - usedSupplyTotal(marineCount, scvCount);
     almostSupplyBlocked = false;
 
-    if (supplyLeft < roomNeeded()) { //instead of 4,should be the max output of production at a given time
+    if (supplyLeft < auxFun::roomNeeded(commandCenterCount,barrackCount)) { //instead of 4,should be the max output of production at a given time
 
         almostSupplyBlocked = true;
     }
-    scvManager();
+    CommMngr::scvManager(Miners,workers);
     if (!almostSupplyBlocked)
     {
         if (scvCount < 50)
         {
-            buildSCVs();
+            CommMngr::buildSCVs(commandCenters);
         }
         
-        trainMarines();
+        CommMngr::trainMarines(barracks);
 
         if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && barrackCount < maxBarracks & scvCount > 10)
         {
