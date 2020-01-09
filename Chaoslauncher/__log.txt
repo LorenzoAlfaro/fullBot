@@ -22,3 +22,39 @@
 [12/19/2019 1:24:22 PM] Injected into process "Chaoslauncher.exe"
 [12/19/2019 1:24:22 PM] ICC module loaded
 [12/19/2019 4:19:09 PM] ICC module unloaded
+[12/20/2019 11:51:34 AM] ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[12/20/2019 11:51:34 AM] Injected into process "Chaoslauncher.exe"
+[12/20/2019 11:51:34 AM] ICC module loaded
+[12/20/2019 11:56:41 AM] ICC module unloaded
+[12/20/2019 12:14:33 PM] ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[12/20/2019 12:14:33 PM] Injected into process "Chaoslauncher.exe"
+[12/20/2019 12:14:33 PM] ICC module loaded
+[12/20/2019 12:30:51 PM] ICC module unloaded
+[12/20/2019 3:24:57 PM] ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[12/20/2019 3:24:57 PM] Injected into process "Chaoslauncher.exe"
+[12/20/2019 3:24:57 PM] ICC module loaded
+[12/20/2019 3:25:08 PM] ICC module unloaded
+[12/20/2019 3:25:11 PM] ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[12/20/2019 3:25:11 PM] Injected into process "Chaoslauncher.exe"
+[12/20/2019 3:25:11 PM] ICC module loaded
+[12/20/2019 4:35:01 PM] ICC module unloaded
+[12/23/2019 2:51:50 PM] ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[12/23/2019 2:51:50 PM] Injected into process "Chaoslauncher.exe"
+[12/23/2019 2:51:50 PM] ICC module loaded
+[12/23/2019 4:12:07 PM] ICC module unloaded
+[12/24/2019 11:38:06 AM] ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[12/24/2019 11:38:06 AM] Injected into process "Chaoslauncher.exe"
+[12/24/2019 11:38:06 AM] ICC module loaded
+[12/24/2019 12:15:40 PM] ICC module unloaded
+[12/24/2019 12:22:49 PM] ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[12/24/2019 12:22:49 PM] Injected into process "Chaoslauncher.exe"
+[12/24/2019 12:22:49 PM] ICC module loaded
+[12/24/2019 3:06:21 PM] ICC module unloaded
+[12/24/2019 3:06:39 PM] ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[12/24/2019 3:06:39 PM] Injected into process "Chaoslauncher - MultiInstance.exe"
+[12/24/2019 3:06:39 PM] ICC module loaded
+[12/24/2019 3:34:02 PM] ICC module unloaded
+[12/31/2019 2:39:35 PM] ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[12/31/2019 2:39:35 PM] Injected into process "Chaoslauncher.exe"
+[12/31/2019 2:39:35 PM] ICC module loaded
+[12/31/2019 4:07:27 PM] ICC module unloaded

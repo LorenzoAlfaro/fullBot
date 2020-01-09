@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Source\Dll.cpp" />
+    <ClCompile Include="Source\ExampleAIModule.cpp" />
+    <ClCompile Include="Source\UnitFun.cpp">
+      <Filter>UnitFun</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\BuildManager.cpp">
+      <Filter>BuildManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CommMngr.cpp">
+      <Filter>CommandManager</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Source\ExampleAIModule.h" />
+    <ClInclude Include="Source\UnitFun.h">
+      <Filter>UnitFun</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\BuildManager.h">
+      <Filter>BuildManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CommMngr.h">
+      <Filter>CommandManager</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ExampleAIModule.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="UnitFun">
+      <UniqueIdentifier>{67a5882f-0c16-4005-a581-99d1e7ca828e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BuildManager">
+      <UniqueIdentifier>{d3bd6d20-d6fb-4962-84d1-3d453e10990f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CommandManager">
+      <UniqueIdentifier>{f3c0f5c0-a124-4625-9817-67ed608901d2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
