@@ -16,7 +16,6 @@ bool displayStats = false;
 #pragma endregion
 
 #pragma region UnitLists
-
 std::list<Unit> commandCenters;
 std::list<Unit> workers;
 std::list<Unit> barracks;
@@ -57,6 +56,8 @@ int supplyLeft = 0; //how many units can I support yet
 
 int roomForProduction = 0; //how much before I need to build supply depots
 
+//add an array parallel to the unit array that should be a regulator array, the target array
+
 #pragma endregion
 
 #pragma region BoolVariable
@@ -74,50 +75,7 @@ int virtualBudget = 0;
 
 //methods
 
-#pragma region VerificationMethods
-bool validUnit(Unit u)
-{
-    bool valid = false;
-    // Ignore the unit if it no longer exists
-    // Make sure to include this block when handling any Unit pointer!
-    if (u->exists())
-    {
-        if (!u->isLockedDown() && !u->isMaelstrommed() && !u->isStasised())
-        {
-            if (!u->isLoaded() && u->isPowered() && !u->isStuck())
-            {
-                if (u->isCompleted() && !u->isConstructing())
-                {
-                    valid = true;
-                }
-            }
-        }
-    }
-
-    return valid;
-}
-
-bool validFrame()
-{
-    bool valid = false;
-    // Return if the game is a replay or is paused
-    if (!Broodwar->isReplay() && !Broodwar->isPaused() && Broodwar->self())
-    {
-        // Prevent spamming by only running our onFrame once every number of latency frames.
-        // Latency frames are the number of frames before commands are processed.
-        if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() == 0)
-        {
-            valid = true;
-        }
-    }
-
-    return valid;
-}
-#pragma endregion
-
 #pragma region SupplyInfoMethods
-
-
 void updateUnitCount(bool created, BWAPI::Unit unit)
 {
     if (IsOwned(unit))
@@ -202,7 +160,6 @@ void updateUnitCount(bool created, BWAPI::Unit unit)
         }
     }
 }
-
 void displayInsights()
 {
     Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
@@ -310,7 +267,7 @@ void unitHandler(Unitset units)
     for (auto& u : units)
     {
         // Finally make the unit do some stuff!
-        if (validUnit(u))
+        if (auxFun::validUnit(u))
         {
             // If the unit is a worker unit
             if (u->getType().isWorker())
@@ -388,21 +345,19 @@ void initialAssigment(Unitset units)
 {
     for (auto& u : units)
     {
-        if (validUnit(u))
+        if (auxFun::validUnit(u))
         {
             if (u->getType().isWorker())
             {
                 workers.push_back(u);
                 Miners.push_back(u->getID());
             }
-
             if (u->getType().isResourceDepot())
             {
                 commandCenters.push_back(u);
             }
         }
     }
-
 }
 
 void productionManager()
@@ -441,29 +396,18 @@ void productionManager()
 
 #pragma region MainEvents
 
-
 void ExampleAIModule::onFrame()
 {
     // Called once every game frame
-
     // Display the game frame rate as text in the upper left area of the screen
-
-
     if (displayStats)
     {
         displayInsights();
     }
-
-    if (validFrame())
+    if (auxFun::validFrame())
     {
-        productionManager();
-        // Iterate through all the units that we own
-        //unitHandler(Broodwar->self()->getUnits());
-        //trainMarines();
+        productionManager();        
     }
-
-
-
 }
 
 void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
@@ -597,7 +541,6 @@ void ExampleAIModule::onStart()
     }
 
 }
-
 
 #pragma endregion
 

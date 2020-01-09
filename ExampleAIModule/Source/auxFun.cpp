@@ -1,5 +1,6 @@
 #include "auxFun.h"
 
+
 int auxFun::SupplyTotal(int commandCenterCount, int supplyDepotCount)
 {
     int total = (commandCenterCount * 10) + (supplyDepotCount * 8);
@@ -19,4 +20,41 @@ int auxFun::roomNeeded(int commandCenterCount, int barrackCount)
     int supply = offset + commandCenterCount * 1 + barrackCount * 1; //will need finer adjuments
 
     return supply;
+}
+
+bool auxFun::validUnit(BWAPI::Unit u)
+{
+    bool valid = false;
+    // Ignore the unit if it no longer exists
+    // Make sure to include this block when handling any Unit pointer!
+    if (u->exists())
+    {
+        if (!u->isLockedDown() && !u->isMaelstrommed() && !u->isStasised())
+        {
+            if (!u->isLoaded() && u->isPowered() && !u->isStuck())
+            {
+                if (u->isCompleted() && !u->isConstructing())
+                {
+                    valid = true;
+                }
+            }
+        }
+    }
+    return valid;
+}
+
+bool auxFun::validFrame()
+{
+    bool valid = false;
+    // Return if the game is a replay or is paused
+    if (!BWAPI::Broodwar->isReplay() && !BWAPI::Broodwar->isPaused() && BWAPI::Broodwar->self())
+    {
+        // Prevent spamming by only running our onFrame once every number of latency frames.
+        // Latency frames are the number of frames before commands are processed.
+        if (BWAPI::Broodwar->getFrameCount() % BWAPI::Broodwar->getLatencyFrames() == 0)
+        {
+            valid = true;
+        }
+    }
+    return valid;
 }
