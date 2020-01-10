@@ -9,6 +9,11 @@
 using namespace BWAPI;
 using namespace Filter;
 
+int UnitCount[2] = {0,0}; //SCV,Marines, Medics, etc
+int maxUnit[2] = {50,150}; //SCV,Marines, Medics, etc
+int BuildingCount[3]={0,0,0}; //CC, supplydepots, barracks
+int maxBuilding[3] = { 3,20,4 }; //CC, supplydepots, barracks
+
 #pragma region globalVariables
 
 bool displayStats = false;
@@ -32,45 +37,20 @@ UnitType supplyProviderType = BWAPI::UnitTypes::Terran_Supply_Depot;
 
 #pragma endregion
 
-#pragma region UnitCount
-
-int scvCount = 0;
-int marineCount = 0;
-int maxBarracks = 4;
-#pragma endregion
-
-#pragma region BuildingCount
-
-int commandCenterCount = 0;
-int supplyDepotsCount = 0; //completed supplydepots
-int barrackCount = 0;
-
-#pragma endregion
-
 #pragma region MaxCount
-
-int maxScvCount = 40;
-
 int supplyLimit = 0; // max supply 200
 int supplyLeft = 0; //how many units can I support yet
-
 int roomForProduction = 0; //how much before I need to build supply depots
-
 //add an array parallel to the unit array that should be a regulator array, the target array
 
 #pragma endregion
 
 #pragma region BoolVariable
-
 bool almostSupplyBlocked = false; //when true AI needs to build supplydepots pre emptively
-
-
 #pragma endregion
 
 #pragma region MacroVariables
-
 int virtualBudget = 0;
-
 #pragma endregion
 
 //methods
@@ -94,34 +74,34 @@ void updateUnitCount(bool created, BWAPI::Unit unit)
             }
             if (myType == BWAPI::UnitTypes::Terran_Barracks)
             {
-                barrackCount = barrackCount + 1;
+                BuildingCount[2] = BuildingCount[2] + 1;
                 barracks.push_back(unit);
             }
             if (myType == BWAPI::UnitTypes::Terran_Marine)
             {
-                marineCount = marineCount + 1;
+                UnitCount[1] = UnitCount[1] + 1;
 
                 marines.push_back(unit); //how to remove the dead ones?
             }
             if (myType == BWAPI::UnitTypes::Terran_SCV)
             {
-                scvCount = scvCount + 1;
+                UnitCount[0] = UnitCount[0] + 1;
                 workers.push_back(unit);
                 Miners.push_back(unit->getID());//assign to mine
             }
             if (myType == BWAPI::UnitTypes::Terran_Supply_Depot)
             {
-                supplyDepotsCount = supplyDepotsCount + 1;
+                BuildingCount[1] = BuildingCount[1] + 1;
                 supplyDepots.push_back(unit);
             }
             if (myType == BWAPI::UnitTypes::Terran_Command_Center)
             {
-                commandCenterCount = commandCenterCount + 1;
+                BuildingCount[0] = BuildingCount[0] + 1;
             }
 
-            supplyLimit = auxFun::SupplyTotal(commandCenterCount, supplyDepotsCount);
+            supplyLimit = auxFun::SupplyTotal(BuildingCount[0], BuildingCount[1]);
 
-            supplyLeft = supplyLimit - auxFun::usedSupplyTotal(marineCount, scvCount);
+            supplyLeft = supplyLimit - auxFun::usedSupplyTotal(UnitCount[1], UnitCount[0]);
 
         }
         else
@@ -136,27 +116,27 @@ void updateUnitCount(bool created, BWAPI::Unit unit)
 
             if (myType == BWAPI::UnitTypes::Terran_Barracks)
             {
-                barrackCount = barrackCount - 1;
+                BuildingCount[2] = BuildingCount[2] - 1;
             }
             if (myType == BWAPI::UnitTypes::Terran_Marine)
             {
-                marineCount = marineCount - 1;
+                UnitCount[1] = UnitCount[1] - 1;
             }
             if (myType == BWAPI::UnitTypes::Terran_SCV)
             {
-                scvCount = scvCount - 1;
+                UnitCount[0] = UnitCount[0] - 1;
             }
             if (myType == BWAPI::UnitTypes::Terran_Supply_Depot)
             {
-                supplyDepotsCount = supplyDepotsCount - 1;
+                BuildingCount[1] = BuildingCount[1] - 1;
             }
             if (myType == BWAPI::UnitTypes::Terran_Command_Center)
             {
-                commandCenterCount = commandCenterCount - 1;
+                BuildingCount[0] = BuildingCount[0] - 1;
             }
-            supplyLimit = auxFun::SupplyTotal(commandCenterCount, supplyDepotsCount);
+            supplyLimit = auxFun::SupplyTotal(BuildingCount[0], BuildingCount[1]);
 
-            supplyLeft = supplyLimit - auxFun::usedSupplyTotal(marineCount, scvCount);
+            supplyLeft = supplyLimit - auxFun::usedSupplyTotal(UnitCount[1], UnitCount[0]);
         }
     }
 }
@@ -164,14 +144,14 @@ void displayInsights()
 {
     Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
     //Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
-    Broodwar->drawTextScreen(200, 40, "Barrack Count: %d", barrackCount);
-    Broodwar->drawTextScreen(200, 60, "Marine Count: %d", marineCount);
-    Broodwar->drawTextScreen(200, 80, "SCV Count: %d", scvCount);
+    Broodwar->drawTextScreen(200, 40, "Barrack Count: %d", BuildingCount[2]);
+    Broodwar->drawTextScreen(200, 60, "Marine Count: %d", UnitCount[1]);
+    Broodwar->drawTextScreen(200, 80, "SCV Count: %d", UnitCount[0]);
     Broodwar->drawTextScreen(200, 100, "Builders: %d", Builders.size());
     //Broodwar->drawTextScreen(200, 100, "Mouse Cursor: %d  %d", Broodwar->getMousePosition().x, Broodwar->getMousePosition().y);
     //Broodwar->drawTextScreen(200, 120, "Screen: %d  %d", Broodwar->getScreenPosition().x, Broodwar->getScreenPosition().y);
     Broodwar->drawTextScreen(200, 140, "supply limit: %d ", supplyLeft);
-    Broodwar->drawTextScreen(200, 120, "room for next round: %d ", auxFun::roomNeeded(commandCenterCount,barrackCount));
+    Broodwar->drawTextScreen(200, 120, "room for next round: %d ", auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]));
 }
 #pragma endregion
 
@@ -275,7 +255,7 @@ void unitHandler(Unitset units)
                 // if our worker is idle
                 if (u->isIdle())
                 {
-                    if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && barrackCount < 4)
+                    if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && BuildingCount[2] < 4)
                     {
                         Unit supplyBuilder = u;
 
@@ -303,9 +283,7 @@ void unitHandler(Unitset units)
 
             }
             else if (u->getType().isResourceDepot()) // A resource depot is a Command Center, Nexus, or Hatchery
-            {
-
-                //int supplyLeft = SupplyTotal(commandCenterCount, supplyDepots) - usedSupplyTotal(marineCount, scvCount);
+            {                
                 almostSupplyBlocked = false;
 
                 if (supplyLeft < 4) {
@@ -317,7 +295,7 @@ void unitHandler(Unitset units)
                 }
                 // Order the depot to construct more workers! But only when it is idle.
 
-                if (scvCount < 50)
+                if (UnitCount[0] < maxUnit[0])
                 {
                     if (u->isIdle())
                     {
@@ -361,25 +339,24 @@ void initialAssigment(Unitset units)
 }
 
 void productionManager()
-{
-    //int supplyLeft = SupplyTotal(commandCenterCount, supplyDepots) - usedSupplyTotal(marineCount, scvCount);
+{    
     almostSupplyBlocked = false;
 
-    if (supplyLeft < auxFun::roomNeeded(commandCenterCount,barrackCount)) { //instead of 4,should be the max output of production at a given time
+    if (supplyLeft < auxFun::roomNeeded(BuildingCount[0], BuildingCount[2])) { //instead of 4,should be the max output of production at a given time
 
         almostSupplyBlocked = true;
     }
     CommMngr::scvManager(Miners,workers);
     if (!almostSupplyBlocked)
     {
-        if (scvCount < 50)
+        if (UnitCount[0] < maxUnit[0])
         {
             CommMngr::buildSCVs(commandCenters);
         }
         
         CommMngr::trainMarines(barracks);
 
-        if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && barrackCount < maxBarracks & scvCount > 10)
+        if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && BuildingCount[2] < maxBuilding[2] & UnitCount[0] > 10)
         {
             antiSpammingBarracks(commandCenters.front(), Colors::Green, 200,1);
         }
