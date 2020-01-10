@@ -5,7 +5,6 @@
 #include "auxFun.h"
 #include <iostream>
 
-
 using namespace BWAPI;
 using namespace Filter;
 
@@ -14,47 +13,35 @@ int maxUnit[2] = {50,150}; //SCV,Marines, Medics, etc
 int BuildingCount[3]={0,0,0}; //CC, supplydepots, barracks
 int maxBuilding[3] = { 3,20,4 }; //CC, supplydepots, barracks
 
-#pragma region globalVariables
-
-bool displayStats = false;
-
-#pragma endregion
-
 #pragma region UnitLists
 std::list<Unit> commandCenters;
 std::list<Unit> workers;
 std::list<Unit> barracks;
 std::list<Unit> marines;
-std::list<int> Miners;
-std::list<int> Builders;
 std::list<Unit> supplyDepots;
+
+std::list<int> Miners; //could be replace byd an array
+std::list<int> Builders; //could be replaced by an array
 #pragma endregion
 
 #pragma region uniqueUnits
-
-Unit myBuilder;
 UnitType supplyProviderType = BWAPI::UnitTypes::Terran_Supply_Depot;
-
 #pragma endregion
 
 #pragma region MaxCount
 int supplyLimit = 0; // max supply 200
 int supplyLeft = 0; //how many units can I support yet
 int roomForProduction = 0; //how much before I need to build supply depots
+int virtualBudget = 0;
 //add an array parallel to the unit array that should be a regulator array, the target array
-
 #pragma endregion
 
 #pragma region BoolVariable
 bool almostSupplyBlocked = false; //when true AI needs to build supplydepots pre emptively
-#pragma endregion
-
-#pragma region MacroVariables
-int virtualBudget = 0;
+bool displayStats = false;
 #pragma endregion
 
 //methods
-
 #pragma region SupplyInfoMethods
 void updateUnitCount(bool created, BWAPI::Unit unit)
 {
@@ -231,6 +218,7 @@ void almostSupplyBlock(Unit CommandCenter)
 void supplyBlock(Unit CommandCenter)
 {
     Error lastErr = Broodwar->getLastError();
+    
 
     BuildManager::createEventTag(CommandCenter, lastErr);
             
