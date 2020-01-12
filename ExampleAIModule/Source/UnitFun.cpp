@@ -19,7 +19,7 @@ Unit UnitFun::getUnitByID(std::list<Unit> Units, int ID)
     return myUnit;
 }
 
-Unit UnitFun::getSCVfromCC(Unit CommandCenter, std::list<int> Miners, std::list<int> Builders, UnitType supplyProviderType)
+Unit UnitFun::getSCVfromCC(Unit CommandCenter, std::list<int> &Miners, std::list<int> &Builders, UnitType supplyProviderType)
 {
     Unit worker = CommandCenter->getClosestUnit(GetType == supplyProviderType.whatBuilds().first &&
         (IsIdle || IsGatheringMinerals) && IsOwned);
@@ -45,7 +45,7 @@ Unit UnitFun::returnFirstAvaibleBuilder(std::list<int> Builders, std::list<Unit>
     return builder;
 }
 
-Unit UnitFun::getWorker(Unit CommandCenter, std::list<int> Miners, std::list<int> Builders, UnitType supplyProviderType, std::list<Unit> workers)
+Unit UnitFun::getWorker(Unit CommandCenter, std::list<int> &Miners, std::list<int> &Builders, UnitType supplyProviderType, std::list<Unit> workers)
 {
     Unit worker;
 
@@ -55,7 +55,7 @@ Unit UnitFun::getWorker(Unit CommandCenter, std::list<int> Miners, std::list<int
         //worker = getUnitByID(workers,Builders.front()); //needs improvement
         if (worker == NULL)
         {
-            worker = UnitFun::getSCVfromCC(CommandCenter, Miners, Builders, supplyProviderType);
+                worker = UnitFun::getSCVfromCC(CommandCenter, Miners, Builders, supplyProviderType);
         }
     }
     else

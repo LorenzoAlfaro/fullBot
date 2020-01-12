@@ -4,6 +4,7 @@
 #include "CommMngr.h"
 #include "auxFun.h"
 #include <iostream>
+#include <array>
 
 using namespace BWAPI;
 using namespace Filter;
@@ -142,16 +143,18 @@ void displayInsights()
 }
 #pragma endregion
 
-#pragma region UnitHandlers
+std::list<std::array<int,5>> taskQueue;
+
+#pragma region UnitHandler
 
 void antiSpammingBuilding(Unit commandCenter, UnitType Building, Color color, int offSet)
-{
+{  
     static int lastChecked = 0;
 
     if (lastChecked + offSet < Broodwar->getFrameCount() &&
         Broodwar->self()->incompleteUnitCount(Building) == 0)
     {
-        lastChecked = Broodwar->getFrameCount();                      
+        lastChecked = Broodwar->getFrameCount();    //is int big enough to hold this?                  
         BuildManager::buildBuilding(UnitFun::getWorker(commandCenter, Miners, Builders, supplyProviderType,workers), Building, color, commandCenter->getTilePosition());
     } 
 }
@@ -301,6 +304,16 @@ void unitHandler(Unitset units)
             }
         }
     } // closure: unit iteratore
+}
+
+void CreateTask(std::list<std::array<int, 5>> &myTaskQueue,int timeStamp, int action, int workerId, int squadronID, int status)
+{
+    //add the logic for adding a task to the queueu
+    //task = timestamp / action / assign worker id / assign squadron / status /
+    
+    std::array<int, 5> newArray{timeStamp,action,workerId,squadronID,status};   
+    myTaskQueue.push_back(newArray);
+    
 }
 
 #pragma endregion
