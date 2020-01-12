@@ -317,20 +317,31 @@ void CreateTask(std::list<std::array<int, 6>> &myTaskQueue,int timeStamp,int cal
     
 }
 
-void taskManager(std::list<std::array<int, 5>>& myTaskQueue)
+void taskManager(std::list<std::array<int, 6>>& myTaskQueue)
 {
     for (auto& task : myTaskQueue)
-    {
-        if (task[0] + task[1] < Broodwar->getFrameCount())
-        {
-
-        }
-
+    {      
         if (task[4]==0)
         {
             //if my task status is 0, not started, check timestamp
+            //0 created, 1 reviewed but no resources to assign, 2 assigned with resources, 3 started, 4 completed, 5 cancel
+            assessTask(task);
+        }        
+        else if (Broodwar->getFrameCount() > task[0] + task[1])//timeStamp + callbackTime
+        {
+            //dont bother me until 5mins (offset have passed)
+            //ok what do you want now?
+
+
         }
     }
+}
+
+void assessTask(std::array<int, 6> newTask)
+{
+    //ok new task, what do you want?
+    //do we have resources to complete your task?
+    // what priority should I give you?
 }
 
 #pragma endregion
