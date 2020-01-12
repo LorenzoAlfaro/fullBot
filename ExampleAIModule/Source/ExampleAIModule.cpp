@@ -141,9 +141,10 @@ void displayInsights()
     Broodwar->drawTextScreen(200, 140, "supply limit: %d ", supplyLeft);
     Broodwar->drawTextScreen(200, 120, "room for next round: %d ", auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]));
 }
+
 #pragma endregion
 
-std::list<std::array<int,5>> taskQueue;
+std::list<std::array<int,6>> taskQueue;
 
 #pragma region UnitHandler
 
@@ -306,14 +307,30 @@ void unitHandler(Unitset units)
     } // closure: unit iteratore
 }
 
-void CreateTask(std::list<std::array<int, 5>> &myTaskQueue,int timeStamp, int action, int workerId, int squadronID, int status)
+void CreateTask(std::list<std::array<int, 6>> &myTaskQueue,int timeStamp,int callbackTime, int action, int workerId, int squadronID, int status)
 {
     //add the logic for adding a task to the queueu
     //task = timestamp / action / assign worker id / assign squadron / status /
     
-    std::array<int, 5> newArray{timeStamp,action,workerId,squadronID,status};   
+    std::array<int, 6> newArray{timeStamp,callbackTime,action,workerId,squadronID,status};   
     myTaskQueue.push_back(newArray);
     
+}
+
+void taskManager(std::list<std::array<int, 5>>& myTaskQueue)
+{
+    for (auto& task : myTaskQueue)
+    {
+        if (task[0] + task[1] < Broodwar->getFrameCount())
+        {
+
+        }
+
+        if (task[4]==0)
+        {
+            //if my task status is 0, not started, check timestamp
+        }
+    }
 }
 
 #pragma endregion
