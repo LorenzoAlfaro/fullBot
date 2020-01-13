@@ -13,6 +13,34 @@ int UnitCount[2] = {0,0}; //SCV,Marines, Medics, etc
 int maxUnit[2] = {50,150}; //SCV,Marines, Medics, etc
 int BuildingCount[3]={0,0,0}; //CC, supplydepots, barracks
 int maxBuilding[3] = { 3,20,4 }; //CC, supplydepots, barracks
+std::list<std::array<int,6>> taskQueue; //0=timeStamp,1=callbacktime,2=action,3=SCVID, 4=taskOwner,5=status
+enum class taskStatus {
+    Created,
+    Reviewed,
+    Assigned,  // has an SCV ID assign to build, or the building ID to research upgrade 
+    waitingMin,  //the task is waiting for minerals
+    waitingGas, //the task is waiting for gas
+    waitingClear, // the task is waiting for the building place to clear, or the building to stop to add-on
+    Started,
+    Completed,
+    Paused,
+    Cancelled
+};
+
+enum class action {
+    BuildSupplyDepot,
+    BuildBarrack,
+    BuildExtractor,
+    BuildEngineeringBay,
+    researchStim
+};
+
+enum class taskOwner {
+    ProductionManager,
+    StratManager,
+    Commander
+};
+
 
 #pragma region UnitLists
 std::list<Unit> commandCenters;
@@ -142,9 +170,57 @@ void displayInsights()
     Broodwar->drawTextScreen(200, 120, "room for next round: %d ", auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]));
 }
 
+
+bool isMyTaskInQueue(std::list<std::array<int, 6>>& myTaskQueue, int taskOwner, int action)
+{
+    bool taskInQueue = false;
+    for (auto& task : myTaskQueue)
+    {
+        if (task[4] == taskOwner)
+        {
+            if (task[2] = action)//task action, build supplydepot, build barrack, etc
+            {
+                int status = task[5];
+                //found a task that belongs to me
+                if (status != (int)taskStatus::Completed ||
+                    status != (int)taskStatus::Cancelled)
+                {
+                    taskInQueue = true;
+                }                    
+            }            
+        }        
+    }
+
+    return taskInQueue;
+}
+
+bool resourcesAvailable(std::array<int,6> task)
+{
+    bool resourcesAvailabilty = false;
+
+    int mineralCost;
+    int gasCost;
+
+
+
+
+}
+
+std::array<int, 2> resourceCost(std::array<int, 6> task)
+{
+
+
+}
+
+bool tasksWaitingResources(std::list<std::array<int, 6>>& myTaskQueue)
+{
+    //dont keep pumping units until we can start the building of depots or etc...
+}
+
 #pragma endregion
 
-std::list<std::array<int,6>> taskQueue;
+
+
 
 #pragma region UnitHandler
 
@@ -152,7 +228,7 @@ void antiSpammingBuilding(Unit commandCenter, UnitType Building, Color color, in
 {  
     static int lastChecked = 0;
 
-    if (lastChecked + offSet < Broodwar->getFrameCount() &&
+    if (Broodwar->getFrameCount() > lastChecked + offSet &&
         Broodwar->self()->incompleteUnitCount(Building) == 0)
     {
         lastChecked = Broodwar->getFrameCount();    //is int big enough to hold this?                  
@@ -164,7 +240,7 @@ void antiSpammingDepots(Unit commandCenter, Color color, int offSet, int numberN
 {
     static int lastChecked = 0;
 
-    if (lastChecked + offSet < Broodwar->getFrameCount() &&
+    if (Broodwar->getFrameCount() > lastChecked + offSet &&
         Broodwar->self()->incompleteUnitCount(BWAPI::UnitTypes::Terran_Supply_Depot) != numberNeeded)
     {
         lastChecked = Broodwar->getFrameCount();
@@ -193,7 +269,7 @@ void antiSpammingBarracks(Unit commandCenter, Color color, int offSet, int numbe
 {
     static int lastChecked = 0;
 
-    if (lastChecked + offSet < Broodwar->getFrameCount() &&
+    if (Broodwar->getFrameCount() > lastChecked + offSet &&
         Broodwar->self()->incompleteUnitCount(BWAPI::UnitTypes::Terran_Barracks) != numberNeeded)
     {
         lastChecked = Broodwar->getFrameCount();
@@ -307,25 +383,36 @@ void unitHandler(Unitset units)
     } // closure: unit iteratore
 }
 
-void CreateTask(std::list<std::array<int, 6>> &myTaskQueue,int timeStamp,int callbackTime, int action, int workerId, int squadronID, int status)
+void CreateTask(std::list<std::array<int, 6>> &myTaskQueue,int timeStamp,int taskOwner, int action)
 {
     //add the logic for adding a task to the queueu
-    //task = timestamp / action / assign worker id / assign squadron / status /
+    //task = timestamp / action / assign worker id / taskOwner / status /
     
-    std::array<int, 6> newArray{timeStamp,callbackTime,action,workerId,squadronID,status};   
+    std::array<int, 6> newArray{timeStamp,0,action,0,taskOwner,(int)taskStatus::Created};   
     myTaskQueue.push_back(newArray);
     
 }
+void assessTask(std::array<int, 6> &newTask)
+{
+    //ok new task, what do you want?
+    //do we have resources to complete your task?
+    // what priority should I give you?
 
-void taskManager(std::list<std::array<int, 6>>& myTaskQueue)
+
+}
+
+void taskManager(std::list<std::array<int, 6>> &myTaskQueue)
 {
     for (auto& task : myTaskQueue)
     {      
-        if (task[4]==0)
+        if (task[5]== (int)taskStatus::Created)
         {
             //if my task status is 0, not started, check timestamp
             //0 created, 1 reviewed but no resources to assign, 2 assigned with resources, 3 started, 4 completed, 5 cancel
+            //production manager checks if there are tasks waiting for minerals before pumping units
             assessTask(task);
+
+            //do we have resources? assign, no? set callback time
         }        
         else if (Broodwar->getFrameCount() > task[0] + task[1])//timeStamp + callbackTime
         {
@@ -337,12 +424,7 @@ void taskManager(std::list<std::array<int, 6>>& myTaskQueue)
     }
 }
 
-void assessTask(std::array<int, 6> newTask)
-{
-    //ok new task, what do you want?
-    //do we have resources to complete your task?
-    // what priority should I give you?
-}
+
 
 #pragma endregion
 
@@ -387,12 +469,24 @@ void productionManager()
 
         if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && BuildingCount[2] < maxBuilding[2] & UnitCount[0] > 10)
         {
-            antiSpammingBarracks(commandCenters.front(), Colors::Green, 200,1);
+            //antiSpammingBarracks(commandCenters.front(), Colors::Green, 200,1);
+
+            if (isMyTaskInQueue(taskQueue,(int)taskOwner::ProductionManager, (int)action::BuildBarrack))
+            {
+                CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager,(int)action::BuildBarrack);
+            }
+
+            
         }
     }
     else
     {
-        antiSpammingDepots(commandCenters.front(), Colors::Blue, 250, 1);
+        if (isMyTaskInQueue(taskQueue, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot))
+        {
+            CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot);
+        }
+        
+        //antiSpammingDepots(commandCenters.front(), Colors::Blue, 250, 1);
         //almostSupplyBlock();
         //Broodwar->sendText("Supply Blocked");
     }
