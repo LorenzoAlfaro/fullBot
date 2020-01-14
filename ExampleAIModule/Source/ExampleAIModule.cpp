@@ -170,7 +170,18 @@ void displayInsights()
     Broodwar->drawTextScreen(200, 120, "room for next round: %d ", auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]));
 }
 
-
+std::array<int, 6> findTaskAssignedToID(int ID, std::list<std::array<int, 6>> &Tasks)
+{
+    std::array<int, 6> mytask = {0,0,0,0,0,0};
+    for (auto& task : Tasks)
+    {
+        if (task[3] == ID)
+        {
+            mytask = task;
+        }
+    }
+    return mytask;
+}
 bool isMyTaskInQueue(std::list<std::array<int, 6>>& myTaskQueue, int taskOwner, int action)
 {
     bool taskInQueue = false;
@@ -193,28 +204,87 @@ bool isMyTaskInQueue(std::list<std::array<int, 6>>& myTaskQueue, int taskOwner, 
 
     return taskInQueue;
 }
+std::array<int, 2> resourceCost(std::array<int, 6> Task)
+{
+    std::array<int, 2> price;
+    switch (Task[2])
+    {
+    case (int)action::BuildBarrack:
 
-bool resourcesAvailable(std::array<int,6> task)
+        price[0] = 150;
+        price[1] = 0;
+
+        break;
+    case (int)action::BuildSupplyDepot:
+
+        price[0] = 100;
+        price[1] = 0;
+
+        break;
+
+    default:
+
+        break;
+    }
+    return price;
+}
+
+bool mineralsAvailable(std::array<int, 6> task)
+{
+    bool resourcesAvailabilty = false;
+    
+    std::array<int, 2> price = resourceCost(task);
+
+    if (Broodwar->self()->minerals() >= price[0])
+    {
+        resourcesAvailabilty = true;
+    }
+    return resourcesAvailabilty;
+}
+bool gasAvailable(std::array<int, 6> task)
 {
     bool resourcesAvailabilty = false;
 
-    int mineralCost;
-    int gasCost;
+    std::array<int, 2> price = resourceCost(task);
 
-
-
-
+    if (Broodwar->self()->gas() >= price[1])
+    {
+        resourcesAvailabilty = true;
+    }
+    return resourcesAvailabilty;
 }
 
-std::array<int, 2> resourceCost(std::array<int, 6> task)
-{
-
-
-}
-
-bool tasksWaitingResources(std::list<std::array<int, 6>>& myTaskQueue)
+bool tasksWaitingResources(std::list<std::array<int, 6>> &myTaskQueue)
 {
     //dont keep pumping units until we can start the building of depots or etc...
+    bool waiting = false;
+    for (auto& task : myTaskQueue)
+    {        
+        int status = task[5];        
+        if (status == (int)taskStatus::waitingGas ||
+            status != (int)taskStatus::waitingMin)
+        {
+            waiting = true;
+        }                  
+    }
+    return waiting;    
+}
+
+void taskStartedUpdate(std::list<std::array<int, 6>> &myTaskQueue, Unit Building) 
+{
+    Unit builder = Building->getBuildUnit();
+    std::array<int, 6> currentTask;
+
+    currentTask = findTaskAssignedToID(builder->getID(), myTaskQueue);
+
+    //in case there is no real task returned
+    if (currentTask[0]!=0)
+    {
+        currentTask[5] = (int)taskStatus::Started;
+        currentTask[3] = Building->getID(); //updated the task scvID to the building currently in progress
+    }
+    
+    
 }
 
 #pragma endregion
@@ -401,6 +471,31 @@ void assessTask(std::array<int, 6> &newTask)
 
 }
 
+void startTask(std::array<int, 6>& Task)
+{
+    TilePosition targetBuildLocation;
+    targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, workers.front()->getTilePosition());
+    //TODO: better target location method needed
+    Unit builder = UnitFun::getUnitByID(workers, Task[3]); //the task has an available worker assigned
+
+    switch (Task[2]) 
+    {
+    case (int)action::BuildBarrack:
+               
+        BuildManager::buildBuilding(builder, BWAPI::UnitTypes::Terran_Barracks, Colors::Green, targetBuildLocation);
+
+        break; //optional
+    case (int)action::BuildSupplyDepot:
+        //statement(s);
+        break; //optional
+
+     // you can have any number of case statements.
+    default: //Optional
+        //statement(s);
+        break;
+    }
+}
+
 void taskManager(std::list<std::array<int, 6>> &myTaskQueue)
 {
     for (auto& task : myTaskQueue)
@@ -419,7 +514,15 @@ void taskManager(std::list<std::array<int, 6>> &myTaskQueue)
             //dont bother me until 5mins (offset have passed)
             //ok what do you want now?
 
-
+            if (mineralsAvailable(task) && gasAvailable(task)) //and location available
+            {
+                startTask(task);
+            }
+            else
+            {
+                task[1] = 500; //frames
+                task[5] = (int)taskStatus::waitingMin;//need to implement mineralsAvailable
+            }
         }
     }
 }
@@ -458,11 +561,11 @@ void productionManager()
         almostSupplyBlocked = true;
     }
     CommMngr::scvManager(Miners,workers);
-    if (!almostSupplyBlocked)
+    if (!almostSupplyBlocked & !tasksWaitingResources(taskQueue))
     {
         if (UnitCount[0] < maxUnit[0])
         {
-            CommMngr::buildSCVs(commandCenters);
+            CommMngr::buildSCVs(commandCenters); 
         }
         
         CommMngr::trainMarines(barracks);
@@ -474,9 +577,7 @@ void productionManager()
             if (!isMyTaskInQueue(taskQueue,(int)taskOwner::ProductionManager, (int)action::BuildBarrack))
             {
                 CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager,(int)action::BuildBarrack);
-            }
-
-            
+            }            
         }
     }
     else
@@ -484,11 +585,7 @@ void productionManager()
         if (!isMyTaskInQueue(taskQueue, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot))
         {
             CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot);
-        }
-        
-        //antiSpammingDepots(commandCenters.front(), Colors::Blue, 250, 1);
-        //almostSupplyBlock();
-        //Broodwar->sendText("Supply Blocked");
+        }                
     }
 }
 
@@ -506,6 +603,7 @@ void ExampleAIModule::onFrame()
     }
     if (auxFun::validFrame())
     {
+        taskManager(taskQueue);
         productionManager();        
     }
 }
@@ -513,6 +611,9 @@ void ExampleAIModule::onFrame()
 void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 {
     updateUnitCount(true, unit);
+
+    taskStartedUpdate( taskQueue, unit);//only for buildings
+
     if (Broodwar->isReplay())
     {
         // if we are in a replay, then we will print out the build order of the structures
