@@ -95,6 +95,7 @@
     <ClCompile Include="Source\CommMngr.cpp" />
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\ExampleAIModule.cpp" />
+    <ClCompile Include="Source\TaskFun.cpp" />
     <ClCompile Include="Source\UnitFun.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +104,7 @@
     <ClInclude Include="Source\BuildManager.h" />
     <ClInclude Include="Source\CommMngr.h" />
     <ClInclude Include="Source\ExampleAIModule.h" />
+    <ClInclude Include="Source\TaskFun.h" />
     <ClInclude Include="Source\UnitFun.h" />
   </ItemGroup>
   <ItemGroup>

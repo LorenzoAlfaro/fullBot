@@ -15,6 +15,9 @@
     <ClCompile Include="Source\auxFun.cpp">
       <Filter>AuxFun</Filter>
     </ClCompile>
+    <ClCompile Include="Source\TaskFun.cpp">
+      <Filter>TaskFun</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -30,6 +33,9 @@
     </ClInclude>
     <ClInclude Include="Source\auxFun.h">
       <Filter>AuxFun</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\TaskFun.h">
+      <Filter>TaskFun</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -47,6 +53,9 @@
     </Filter>
     <Filter Include="AuxFun">
       <UniqueIdentifier>{3f92d090-a3fb-4dde-ad4c-b846db85038f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TaskFun">
+      <UniqueIdentifier>{6ba0dd50-2c4e-4821-953c-8bb22b708a3a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

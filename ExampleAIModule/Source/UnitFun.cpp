@@ -5,7 +5,8 @@ using namespace BWAPI;
 using namespace Filter;
 
 Unit UnitFun::getUnitByID(std::list<Unit> Units, int ID)
-{    
+{   
+    //TODO: TaskManager is not assigning the SCV to build, error
     Unit myUnit;
 
     for (auto& u : Units)

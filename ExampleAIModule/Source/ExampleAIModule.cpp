@@ -5,7 +5,7 @@
 #include "auxFun.h"
 #include <iostream>
 #include <array>
-
+#include "TaskFun.h"
 using namespace BWAPI;
 using namespace Filter;
 
@@ -14,32 +14,6 @@ int maxUnit[2] = {50,150}; //SCV,Marines, Medics, etc
 int BuildingCount[3]={0,0,0}; //CC, supplydepots, barracks
 int maxBuilding[3] = { 3,20,4 }; //CC, supplydepots, barracks
 std::list<std::array<int,6>> taskQueue; //0=timeStamp,1=callbacktime,2=action,3=SCVID, 4=taskOwner,5=status
-enum class taskStatus {
-    Created,
-    Reviewed,
-    Assigned,  // has an SCV ID assign to build, or the building ID to research upgrade 
-    waitingMin,  //the task is waiting for minerals
-    waitingGas, //the task is waiting for gas
-    waitingClear, // the task is waiting for the building place to clear, or the building to stop to add-on
-    Started,
-    Completed,
-    Paused,
-    Cancelled
-};
-
-enum class action {
-    BuildSupplyDepot,
-    BuildBarrack,
-    BuildExtractor,
-    BuildEngineeringBay,
-    researchStim
-};
-
-enum class taskOwner {
-    ProductionManager,
-    StratManager,
-    Commander
-};
 
 
 #pragma region UnitLists
@@ -158,133 +132,17 @@ void updateUnitCount(bool created, BWAPI::Unit unit)
 }
 void displayInsights()
 {
-    Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
+    Broodwar->drawTextScreen(100, 0, "FPS: %d", Broodwar->getFPS());
     //Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
-    Broodwar->drawTextScreen(200, 40, "Barrack Count: %d", BuildingCount[2]);
-    Broodwar->drawTextScreen(200, 60, "Marine Count: %d", UnitCount[1]);
-    Broodwar->drawTextScreen(200, 80, "SCV Count: %d", UnitCount[0]);
-    Broodwar->drawTextScreen(200, 100, "Builders: %d", Builders.size());
+    Broodwar->drawTextScreen(100, 40, "Barrack Count: %d", BuildingCount[2]);
+    Broodwar->drawTextScreen(100, 60, "Marine Count: %d", UnitCount[1]);
+    Broodwar->drawTextScreen(100, 80, "SCV Count: %d", UnitCount[0]);
+    Broodwar->drawTextScreen(100, 100, "Builders: %d", Builders.size());
     //Broodwar->drawTextScreen(200, 100, "Mouse Cursor: %d  %d", Broodwar->getMousePosition().x, Broodwar->getMousePosition().y);
     //Broodwar->drawTextScreen(200, 120, "Screen: %d  %d", Broodwar->getScreenPosition().x, Broodwar->getScreenPosition().y);
-    Broodwar->drawTextScreen(200, 140, "supply limit: %d ", supplyLeft);
-    Broodwar->drawTextScreen(200, 120, "room for next round: %d ", auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]));
-}
-
-std::array<int, 6> findTaskAssignedToID(int ID, std::list<std::array<int, 6>> &Tasks)
-{
-    std::array<int, 6> mytask = {0,0,0,0,0,0};
-    for (auto& task : Tasks)
-    {
-        if (task[3] == ID)
-        {
-            mytask = task;
-        }
-    }
-    return mytask;
-}
-bool isMyTaskInQueue(std::list<std::array<int, 6>>& myTaskQueue, int taskOwner, int action)
-{
-    bool taskInQueue = false;
-    for (auto& task : myTaskQueue)
-    {
-        if (task[4] == taskOwner)
-        {
-            if (task[2] = action)//task action, build supplydepot, build barrack, etc
-            {
-                int status = task[5];
-                //found a task that belongs to me
-                if (status != (int)taskStatus::Completed ||
-                    status != (int)taskStatus::Cancelled)
-                {
-                    taskInQueue = true;
-                }                    
-            }            
-        }        
-    }
-
-    return taskInQueue;
-}
-std::array<int, 2> resourceCost(std::array<int, 6> Task)
-{
-    std::array<int, 2> price;
-    switch (Task[2])
-    {
-    case (int)action::BuildBarrack:
-
-        price[0] = 150;
-        price[1] = 0;
-
-        break;
-    case (int)action::BuildSupplyDepot:
-
-        price[0] = 100;
-        price[1] = 0;
-
-        break;
-
-    default:
-
-        break;
-    }
-    return price;
-}
-
-bool mineralsAvailable(std::array<int, 6> task)
-{
-    bool resourcesAvailabilty = false;
-    
-    std::array<int, 2> price = resourceCost(task);
-
-    if (Broodwar->self()->minerals() >= price[0])
-    {
-        resourcesAvailabilty = true;
-    }
-    return resourcesAvailabilty;
-}
-bool gasAvailable(std::array<int, 6> task)
-{
-    bool resourcesAvailabilty = false;
-
-    std::array<int, 2> price = resourceCost(task);
-
-    if (Broodwar->self()->gas() >= price[1])
-    {
-        resourcesAvailabilty = true;
-    }
-    return resourcesAvailabilty;
-}
-
-bool tasksWaitingResources(std::list<std::array<int, 6>> &myTaskQueue)
-{
-    //dont keep pumping units until we can start the building of depots or etc...
-    bool waiting = false;
-    for (auto& task : myTaskQueue)
-    {        
-        int status = task[5];        
-        if (status == (int)taskStatus::waitingGas ||
-            status != (int)taskStatus::waitingMin)
-        {
-            waiting = true;
-        }                  
-    }
-    return waiting;    
-}
-
-void taskStartedUpdate(std::list<std::array<int, 6>> &myTaskQueue, Unit Building) 
-{
-    Unit builder = Building->getBuildUnit();
-    std::array<int, 6> currentTask;
-
-    currentTask = findTaskAssignedToID(builder->getID(), myTaskQueue);
-
-    //in case there is no real task returned
-    if (currentTask[0]!=0)
-    {
-        currentTask[5] = (int)taskStatus::Started;
-        currentTask[3] = Building->getID(); //updated the task scvID to the building currently in progress
-    }
-    
-    
+    Broodwar->drawTextScreen(100, 140, "Tasks: %d ", taskQueue.size());
+    Broodwar->drawTextScreen(100, 110, "supply limit: %d ", supplyLeft);
+    Broodwar->drawTextScreen(100, 120, "room for next round: %d ", auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]));
 }
 
 #pragma endregion
@@ -505,16 +363,8 @@ void taskManager(std::list<std::array<int, 6>> &myTaskQueue)
             //if my task status is 0, not started, check timestamp
             //0 created, 1 reviewed but no resources to assign, 2 assigned with resources, 3 started, 4 completed, 5 cancel
             //production manager checks if there are tasks waiting for minerals before pumping units
-            assessTask(task);
-
-            //do we have resources? assign, no? set callback time
-        }        
-        else if (Broodwar->getFrameCount() > task[0] + task[1])//timeStamp + callbackTime
-        {
-            //dont bother me until 5mins (offset have passed)
-            //ok what do you want now?
-
-            if (mineralsAvailable(task) && gasAvailable(task)) //and location available
+            //assessTask(task);
+            if (TaskFun::mineralsAvailable(task, Broodwar->self()->minerals()) && TaskFun::gasAvailable(task, Broodwar->self()->gas())) //and location available
             {
                 startTask(task);
             }
@@ -523,11 +373,30 @@ void taskManager(std::list<std::array<int, 6>> &myTaskQueue)
                 task[1] = 500; //frames
                 task[5] = (int)taskStatus::waitingMin;//need to implement mineralsAvailable
             }
+
+            //do we have resources? assign, no? set callback time
+        }        
+        else if (Broodwar->getFrameCount() > (task[0] + task[1]) && task[5] != (int)taskStatus::Started
+            && task[5] != (int)taskStatus::Completed
+            && task[5] != (int)taskStatus::Cancelled)            
+        {
+            //dont bother me until 5mins (offset have passed)
+            //ok what do you want now?
+            //timeStamp + callbackTime
+
+            if (TaskFun::mineralsAvailable(task, Broodwar->self()->minerals()) && TaskFun::gasAvailable(task, Broodwar->self()->gas())) //and location available
+            {
+                startTask(task);
+            }
+            else
+            {
+                task[0] = Broodwar->getFrameCount(); //reset timer
+                task[1] = 500; //frames
+                task[5] = (int)taskStatus::waitingMin;//need to implement mineralsAvailable
+            }
         }
     }
 }
-
-
 
 #pragma endregion
 
@@ -561,7 +430,7 @@ void productionManager()
         almostSupplyBlocked = true;
     }
     CommMngr::scvManager(Miners,workers);
-    if (!almostSupplyBlocked & !tasksWaitingResources(taskQueue))
+    if (!almostSupplyBlocked & !TaskFun::tasksWaitingResources(taskQueue))
     {
         if (UnitCount[0] < maxUnit[0])
         {
@@ -574,7 +443,7 @@ void productionManager()
         {
             //antiSpammingBarracks(commandCenters.front(), Colors::Green, 200,1);
 
-            if (!isMyTaskInQueue(taskQueue,(int)taskOwner::ProductionManager, (int)action::BuildBarrack))
+            if (!TaskFun::isMyTaskInQueue(taskQueue,(int)taskOwner::ProductionManager, (int)action::BuildBarrack))
             {
                 CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager,(int)action::BuildBarrack);
             }            
@@ -582,7 +451,7 @@ void productionManager()
     }
     else
     {
-        if (!isMyTaskInQueue(taskQueue, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot))
+        if (!TaskFun::isMyTaskInQueue(taskQueue, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot))
         {
             CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot);
         }                
@@ -612,7 +481,11 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 {
     updateUnitCount(true, unit);
 
-    taskStartedUpdate( taskQueue, unit);//only for buildings
+    if (taskQueue.size() != 0)
+    {
+        TaskFun::taskStartedUpdate(taskQueue, unit);//only for buildings
+    }
+    
 
     if (Broodwar->isReplay())
     {
@@ -629,8 +502,11 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 
 void ExampleAIModule::onUnitComplete(BWAPI::Unit unit)
 {
-
-
+    if (!unit->canAttack()) //avoid running in buildings
+    {
+        TaskFun::taskCompleted(taskQueue, unit);//for building
+    }
+        
     //updateUnitCount(true, unit);
 
 
