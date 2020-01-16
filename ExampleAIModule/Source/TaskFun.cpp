@@ -97,7 +97,7 @@ bool TaskFun::tasksWaitingResources(std::list<std::array<int, 6>>& myTaskQueue)
     {
         int status = task[5];
         if (status == (int)taskStatus::waitingGas ||
-            status != (int)taskStatus::waitingMin)
+            status == (int)taskStatus::waitingMin)
         {
             waiting = true;
         }

@@ -13,7 +13,7 @@ int UnitCount[2] = {0,0}; //SCV,Marines, Medics, etc
 int maxUnit[2] = {50,150}; //SCV,Marines, Medics, etc
 int BuildingCount[3]={0,0,0}; //CC, supplydepots, barracks
 int maxBuilding[3] = { 3,20,4 }; //CC, supplydepots, barracks
-std::list<std::array<int,6>> taskQueue; //0=timeStamp,1=callbacktime,2=action,3=SCVID, 4=taskOwner,5=status
+std::list<std::array<int,6>> taskQueue; //0=timeStamp,1=callbacktime,2=action,3=SCVID or build, 4=taskOwner,5=status
 
 
 #pragma region UnitLists
@@ -146,9 +146,6 @@ void displayInsights()
 }
 
 #pragma endregion
-
-
-
 
 #pragma region UnitHandler
 
@@ -310,23 +307,22 @@ void unitHandler(Unitset units)
         }
     } // closure: unit iteratore
 }
+#pragma endregion
 
-void CreateTask(std::list<std::array<int, 6>> &myTaskQueue,int timeStamp,int taskOwner, int action)
-{
-    //add the logic for adding a task to the queueu
-    //task = timestamp / action / assign worker id / taskOwner / status /
-    
-    std::array<int, 6> newArray{timeStamp,0,action,0,taskOwner,(int)taskStatus::Created};   
-    myTaskQueue.push_back(newArray);
-    
-}
-void assessTask(std::array<int, 6> &newTask)
+#pragma region TasksFunctions
+void assessTask(std::array<int, 6>& newTask)
 {
     //ok new task, what do you want?
     //do we have resources to complete your task?
     // what priority should I give you?
+}
 
-
+void CreateTask(std::list<std::array<int, 6>>& myTaskQueue, int timeStamp, int taskOwner, int action)
+{
+    //add the logic for adding a task to the queueu
+    //task = timestamp / action / assign worker id / taskOwner / status /    
+    std::array<int, 6> newArray{ timeStamp,0,action,0,taskOwner,(int)taskStatus::Created };
+    myTaskQueue.push_back(newArray);
 }
 
 void startTask(std::array<int, 6>& Task)
@@ -336,65 +332,24 @@ void startTask(std::array<int, 6>& Task)
     //TODO: better target location method needed
     Unit builder = UnitFun::getUnitByID(workers, Task[3]); //the task has an available worker assigned
 
-    switch (Task[2]) 
+    switch (Task[2])
     {
-    case (int)action::BuildBarrack:
-               
-        BuildManager::buildBuilding(builder, BWAPI::UnitTypes::Terran_Barracks, Colors::Green, targetBuildLocation);
 
-        break; //optional
     case (int)action::BuildSupplyDepot:
-        //statement(s);
+
+        BuildManager::buildBuilding(builder, BWAPI::UnitTypes::Terran_Supply_Depot, Colors::Blue, targetBuildLocation);
+        Task[5] = (int)taskStatus::Assigned;
+        break; //optional
+    case (int)action::BuildBarrack:
+
+        BuildManager::buildBuilding(builder, BWAPI::UnitTypes::Terran_Barracks, Colors::Green, targetBuildLocation);
+        Task[5] = (int)taskStatus::Assigned;
         break; //optional
 
      // you can have any number of case statements.
     default: //Optional
         //statement(s);
         break;
-    }
-}
-
-void taskManager(std::list<std::array<int, 6>> &myTaskQueue)
-{
-    for (auto& task : myTaskQueue)
-    {      
-        if (task[5]== (int)taskStatus::Created)
-        {
-            //if my task status is 0, not started, check timestamp
-            //0 created, 1 reviewed but no resources to assign, 2 assigned with resources, 3 started, 4 completed, 5 cancel
-            //production manager checks if there are tasks waiting for minerals before pumping units
-            //assessTask(task);
-            if (TaskFun::mineralsAvailable(task, Broodwar->self()->minerals()) && TaskFun::gasAvailable(task, Broodwar->self()->gas())) //and location available
-            {
-                startTask(task);
-            }
-            else
-            {
-                task[1] = 500; //frames
-                task[5] = (int)taskStatus::waitingMin;//need to implement mineralsAvailable
-            }
-
-            //do we have resources? assign, no? set callback time
-        }        
-        else if (Broodwar->getFrameCount() > (task[0] + task[1]) && task[5] != (int)taskStatus::Started
-            && task[5] != (int)taskStatus::Completed
-            && task[5] != (int)taskStatus::Cancelled)            
-        {
-            //dont bother me until 5mins (offset have passed)
-            //ok what do you want now?
-            //timeStamp + callbackTime
-
-            if (TaskFun::mineralsAvailable(task, Broodwar->self()->minerals()) && TaskFun::gasAvailable(task, Broodwar->self()->gas())) //and location available
-            {
-                startTask(task);
-            }
-            else
-            {
-                task[0] = Broodwar->getFrameCount(); //reset timer
-                task[1] = 500; //frames
-                task[5] = (int)taskStatus::waitingMin;//need to implement mineralsAvailable
-            }
-        }
     }
 }
 
@@ -429,20 +384,21 @@ void productionManager()
 
         almostSupplyBlocked = true;
     }
-    CommMngr::scvManager(Miners,workers);
+    CommMngr::scvManager(Miners,workers);//go mine for me minions!
     if (!almostSupplyBlocked & !TaskFun::tasksWaitingResources(taskQueue))
     {
         if (UnitCount[0] < maxUnit[0])
         {
-            CommMngr::buildSCVs(commandCenters); 
+            CommMngr::buildSCVs(commandCenters);//train SCVs until 50
         }
         
-        CommMngr::trainMarines(barracks);
+        CommMngr::trainMarines(barracks);//pump marines
 
         if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && BuildingCount[2] < maxBuilding[2] & UnitCount[0] > 10)
         {
             //antiSpammingBarracks(commandCenters.front(), Colors::Green, 200,1);
 
+            //Test isMyTaskInQueue
             if (!TaskFun::isMyTaskInQueue(taskQueue,(int)taskOwner::ProductionManager, (int)action::BuildBarrack))
             {
                 CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager,(int)action::BuildBarrack);
@@ -455,6 +411,40 @@ void productionManager()
         {
             CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot);
         }                
+    }
+}
+
+void taskManager(std::list<std::array<int, 6>>& myTaskQueue)
+{
+    //if my task status is 0, not started, check timestamp
+    //0 created, 1 reviewed but no resources to assign, 2 assigned with resources, 3 started, 4 completed, 5 cancel
+    //production manager checks if there are tasks waiting for minerals before pumping units
+    //assessTask(task) will determine wich task has high priority, for now if resources available just start them
+    for (auto& task : myTaskQueue)
+    {
+        int taskStatus = task[5];
+        if (Broodwar->getFrameCount() > (task[0] + task[1])
+            && taskStatus != (int)taskStatus::Started
+            && taskStatus != (int)taskStatus::Completed
+            && taskStatus != (int)taskStatus::Cancelled
+            && taskStatus != (int)taskStatus::Assigned)
+        {
+            if (TaskFun::mineralsAvailable(task, Broodwar->self()->minerals()) && TaskFun::gasAvailable(task, Broodwar->self()->gas())) //and location available
+            {
+                //assign SCV
+                Unit SCV = UnitFun::getWorker(commandCenters.front(), Miners, Builders, supplyProviderType, workers);
+                int id = SCV->getID();
+                task[3] = id; //assign the worker id to the task
+                startTask(task);
+            }
+            else
+            {
+                //do we have resources? assign, no? set callback time
+                task[0] = Broodwar->getFrameCount(); //reset timer
+                task[1] = 200; //frames
+                task[5] = (int)taskStatus::waitingMin;
+            }
+        }
     }
 }
 
@@ -473,7 +463,7 @@ void ExampleAIModule::onFrame()
     if (auxFun::validFrame())
     {
         taskManager(taskQueue);
-        productionManager();        
+        productionManager(); //eventually productionManager will be another task run by taskManager    
     }
 }
 
@@ -506,7 +496,8 @@ void ExampleAIModule::onUnitComplete(BWAPI::Unit unit)
     {
         TaskFun::taskCompleted(taskQueue, unit);//for building
     }
-        
+      //TODO: test remove  
+    //taskQueue.remove(TaskFun::findTaskAssignedToID(unit->getID(),taskQueue));
     //updateUnitCount(true, unit);
 
 
