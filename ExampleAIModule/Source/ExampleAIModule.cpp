@@ -338,7 +338,7 @@ void startTask(std::array<int, 6>& Task)
     case (int)action::BuildSupplyDepot:
 
         BuildManager::buildBuilding(builder, BWAPI::UnitTypes::Terran_Supply_Depot, Colors::Blue, targetBuildLocation);
-        Task[5] = (int)taskStatus::Assigned;
+        Task[5] = (int)taskStatus::Assigned; //make sure nothings steals the minerals until it starts
         break; //optional
     case (int)action::BuildBarrack:
 
@@ -414,7 +414,7 @@ void productionManager()
     }
 }
 
-void taskManager(std::list<std::array<int, 6>>& myTaskQueue)
+void taskManager(std::list<std::array<int, 6>> &myTaskQueue)
 {
     //if my task status is 0, not started, check timestamp
     //0 created, 1 reviewed but no resources to assign, 2 assigned with resources, 3 started, 4 completed, 5 cancel
@@ -441,7 +441,7 @@ void taskManager(std::list<std::array<int, 6>>& myTaskQueue)
             {
                 //do we have resources? assign, no? set callback time
                 task[0] = Broodwar->getFrameCount(); //reset timer
-                task[1] = 200; //frames
+                task[1] = 200; //frames, should be determined by the income rate, (miners working)
                 task[5] = (int)taskStatus::waitingMin;
             }
         }
@@ -471,7 +471,7 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 {
     updateUnitCount(true, unit);
 
-    if (taskQueue.size() != 0)
+    if (taskQueue.size() != 0 & !unit->canAttack())
     {
         TaskFun::taskStartedUpdate(taskQueue, unit);//only for buildings
     }
@@ -492,7 +492,7 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 
 void ExampleAIModule::onUnitComplete(BWAPI::Unit unit)
 {
-    if (!unit->canAttack()) //avoid running in buildings
+    if (taskQueue.size() != 0 & !unit->canAttack()) //avoid running in buildings
     {
         TaskFun::taskCompleted(taskQueue, unit);//for building
     }

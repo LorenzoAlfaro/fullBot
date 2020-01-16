@@ -5,7 +5,7 @@
 class TaskFun
 {
 public:
-	static std::array<int, 6> findTaskAssignedToID(int ID, std::list<std::array<int, 6>>& Tasks);
+	static std::array<int, 6>* findTaskAssignedToID(int ID, std::list<std::array<int, 6>>& Tasks);
 	static bool isMyTaskInQueue(std::list<std::array<int, 6>>& myTaskQueue, int taskOwner, int action);
     static std::array<int, 2> resourceCost(std::array<int, 6> Task);
     static bool mineralsAvailable(std::array<int, 6> task, int CurrentMinerals);

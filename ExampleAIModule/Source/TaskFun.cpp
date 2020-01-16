@@ -2,20 +2,22 @@
 using namespace BWAPI;
 
 
-std::array<int, 6> TaskFun::findTaskAssignedToID(int ID, std::list<std::array<int, 6>>& Tasks)
+std::array<int, 6>* TaskFun::findTaskAssignedToID(int ID, std::list<std::array<int, 6>> &Tasks)
 {
-    std::array<int, 6> mytask = { 0,0,0,0,0,0 };
+
+    std::array<int, 6>* mytask; //pass the address of the array//initialize first to something
+
     for (auto& task : Tasks)
     {
         if (task[3] == ID)
         {
-            mytask = task;
+            mytask = &task;
         }
     }
     return mytask;
 }
 
-bool TaskFun::isMyTaskInQueue(std::list<std::array<int, 6>>& myTaskQueue, int taskOwner, int action)
+bool TaskFun::isMyTaskInQueue(std::list<std::array<int, 6>> &myTaskQueue, int taskOwner, int action)
 {
     bool taskInQueue = false;
     for (auto& task : myTaskQueue)
@@ -89,7 +91,7 @@ bool TaskFun::gasAvailable(std::array<int, 6> task, int CurrentGas)
     return resourcesAvailabilty;
 }
 
-bool TaskFun::tasksWaitingResources(std::list<std::array<int, 6>>& myTaskQueue)
+bool TaskFun::tasksWaitingResources(std::list<std::array<int, 6>> &myTaskQueue)
 {
     //dont keep pumping units until we can start the building of depots or etc...
     bool waiting = false;
@@ -97,6 +99,7 @@ bool TaskFun::tasksWaitingResources(std::list<std::array<int, 6>>& myTaskQueue)
     {
         int status = task[5];
         if (status == (int)taskStatus::waitingGas ||
+            status == (int)taskStatus::Assigned ||  //make sure production doesn't steal minerals while scv travelling
             status == (int)taskStatus::waitingMin)
         {
             waiting = true;
@@ -105,32 +108,44 @@ bool TaskFun::tasksWaitingResources(std::list<std::array<int, 6>>& myTaskQueue)
     return waiting;
 }
 
-void TaskFun::taskStartedUpdate(std::list<std::array<int, 6>>& myTaskQueue, Unit Building)
+void TaskFun::taskStartedUpdate(std::list<std::array<int, 6>> &myTaskQueue, Unit Building)
 {
     Unit builder = Building->getBuildUnit();
-    std::array<int, 6> currentTask;
+    //std::array<int, 6> currentTask = *TaskFun::findTaskAssignedToID(builder->getID(), myTaskQueue);//seems the addres is setup here
 
-    currentTask = TaskFun::findTaskAssignedToID(builder->getID(), myTaskQueue);
+    //int point = TaskFun::findTaskAssignedToID(builder->getID(), myTaskQueue);
+
+    //currentTask = *TaskFun::findTaskAssignedToID(builder->getID(), myTaskQueue);
+
+    for (auto& task : myTaskQueue)
+    {
+        if (&task == TaskFun::findTaskAssignedToID(builder->getID(), myTaskQueue))
+        {
+            task[5] = (int)taskStatus::Started;
+            task[3] = Building->getID(); //updated the task scvID to the building currently in progress
+        }
+    }
 
     //in case there is no real task returned
-    if (currentTask[0] != 0)
-    {
-        currentTask[5] = (int)taskStatus::Started;
-        currentTask[3] = Building->getID(); //updated the task scvID to the building currently in progress
-    }
+    //if (currentTask[0] != 0)
+    //{
+    //    currentTask[5] = (int)taskStatus::Started;
+    //    currentTask[3] = Building->getID(); //updated the task scvID to the building currently in progress
+    //}
 }
 
-void TaskFun::taskCompleted(std::list<std::array<int, 6>>& myTaskQueue, Unit Building)
+void TaskFun::taskCompleted(std::list<std::array<int, 6>> &myTaskQueue, Unit Building)
 {
     //Unit builder = Building->getBuildUnit();
-    std::array<int, 6> currentTask;
+    
 
-    currentTask = TaskFun::findTaskAssignedToID(Building->getID(), myTaskQueue);
-
-    //in case there is no real task returned
-    if (currentTask[0] != 0)
+    for (auto& task : myTaskQueue)
     {
-        currentTask[5] = (int)taskStatus::Completed;
-        //currentTask[3] = Building->getID(); //updated the task scvID to the building currently in progress
+        if (&task == TaskFun::findTaskAssignedToID(Building->getID(), myTaskQueue))
+        {
+            task[5] = (int)taskStatus::Completed;
+            task[3] = Building->getID(); //updated the task scvID to the building currently in progress
+        }
     }
+    
 }
