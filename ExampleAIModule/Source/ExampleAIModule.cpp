@@ -317,7 +317,7 @@ void assessTask(std::array<int, 6>& newTask)
     // what priority should I give you?
 }
 
-void CreateTask(std::list<std::array<int, 6>>& myTaskQueue, int timeStamp, int taskOwner, int action)
+void CreateTask(std::list<std::array<int, 6>> &myTaskQueue, int timeStamp, int taskOwner, int action)
 {
     //add the logic for adding a task to the queueu
     //task = timestamp / action / assign worker id / taskOwner / status /    
@@ -325,13 +325,14 @@ void CreateTask(std::list<std::array<int, 6>>& myTaskQueue, int timeStamp, int t
     myTaskQueue.push_back(newArray);
 }
 
-void startTask(std::array<int, 6>& Task)
+void startTask(std::array<int, 6> &Task)
 {
-    TilePosition targetBuildLocation;
-    targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, workers.front()->getTilePosition());
-    //TODO: better target location method needed
     Unit builder = UnitFun::getUnitByID(workers, Task[3]); //the task has an available worker assigned
-
+    int builderID = builder->getID();
+    TilePosition targetBuildLocation; //TODO: improve space allocation
+    targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, builder->getTilePosition());
+    //TODO: better target location method needed
+    
     switch (Task[2])
     {
 
@@ -339,11 +340,15 @@ void startTask(std::array<int, 6>& Task)
 
         BuildManager::buildBuilding(builder, BWAPI::UnitTypes::Terran_Supply_Depot, Colors::Blue, targetBuildLocation);
         Task[5] = (int)taskStatus::Assigned; //make sure nothings steals the minerals until it starts
+        Task[0] = Broodwar->getFrameCount(); //reset timer
+        Task[1] = 200; //check if an error happend
         break; //optional
     case (int)action::BuildBarrack:
 
         BuildManager::buildBuilding(builder, BWAPI::UnitTypes::Terran_Barracks, Colors::Green, targetBuildLocation);
         Task[5] = (int)taskStatus::Assigned;
+        Task[0] = Broodwar->getFrameCount(); //reset timer
+        Task[1] = 200; //check if an error happend)
         break; //optional
 
      // you can have any number of case statements.
@@ -385,7 +390,7 @@ void productionManager()
         almostSupplyBlocked = true;
     }
     CommMngr::scvManager(Miners,workers);//go mine for me minions!
-    if (!almostSupplyBlocked & !TaskFun::tasksWaitingResources(taskQueue))
+    if (!almostSupplyBlocked && !TaskFun::tasksWaitingResources(taskQueue))
     {
         if (UnitCount[0] < maxUnit[0])
         {
@@ -394,7 +399,7 @@ void productionManager()
         
         CommMngr::trainMarines(barracks);//pump marines
 
-        if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && BuildingCount[2] < maxBuilding[2] & UnitCount[0] > 10)
+        if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && BuildingCount[2] < maxBuilding[2] && UnitCount[0] > 10)
         {
             //antiSpammingBarracks(commandCenters.front(), Colors::Green, 200,1);
 
@@ -445,6 +450,11 @@ void taskManager(std::list<std::array<int, 6>> &myTaskQueue)
                 task[5] = (int)taskStatus::waitingMin;
             }
         }
+        else if (Broodwar->getFrameCount() > (task[0] + task[1]) && taskStatus == (int)taskStatus::Assigned)
+        {
+            task[5] = (int)taskStatus::Cancelled;
+            Broodwar->sendText("TaskMngr: Failed to start task id: %d : ", task[3]); //for some error
+        }
     }
 }
 
@@ -471,12 +481,23 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 {
     updateUnitCount(true, unit);
 
-    if (taskQueue.size() != 0 & !unit->canAttack())
+    if (taskQueue.size() != 0 && !unit->canAttack() 
+        && unit->getType() != UnitTypes::Terran_SCV
+        && unit->getType() != UnitTypes::Terran_Marine)
     {
-        TaskFun::taskStartedUpdate(taskQueue, unit);//only for buildings
-    }
-    
-
+        Unit builder = unit->getBuildUnit();
+        int builderID = builder->getID();
+        int BuildingID = unit->getID();        
+        //only for buildings
+        if (TaskFun::taskStatusUpdate(builderID, taskQueue, BuildingID, (int)taskStatus::Started))
+        {
+            Broodwar->sendText("Started task id: %d : %s", unit->getID(), unit->getType().c_str());
+        }
+        else
+        {
+            Broodwar->sendText("failed update to started task id: %d : %s", unit->getID(), unit->getType().c_str());
+        }
+    }    
     if (Broodwar->isReplay())
     {
         // if we are in a replay, then we will print out the build order of the structures
@@ -492,15 +513,20 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 
 void ExampleAIModule::onUnitComplete(BWAPI::Unit unit)
 {
-    if (taskQueue.size() != 0 & !unit->canAttack()) //avoid running in buildings
-    {
-        TaskFun::taskCompleted(taskQueue, unit);//for building
+    if (taskQueue.size() != 0 && !unit->canAttack()) //avoid running in buildings
+    {        
+        if (TaskFun::taskStatusUpdate(unit->getID(), taskQueue, unit->getID(), (int)taskStatus::Completed))
+        {
+            Broodwar->sendText("Completed task id: %d : %s", unit->getID(), unit->getType().c_str());
+        }
+        else
+        {
+            Broodwar->sendText("failed update to completed task id: %d : %s", unit->getID(), unit->getType().c_str());
+        }        
     }
       //TODO: test remove  
     //taskQueue.remove(TaskFun::findTaskAssignedToID(unit->getID(),taskQueue));
     //updateUnitCount(true, unit);
-
-
 }
 
 void ExampleAIModule::onUnitDestroy(BWAPI::Unit unit)

@@ -28,7 +28,7 @@ bool TaskFun::isMyTaskInQueue(std::list<std::array<int, 6>> &myTaskQueue, int ta
             {
                 int status = task[5];
                 //found a task that belongs to me
-                if (status != (int)taskStatus::Completed ||
+                if (status != (int)taskStatus::Completed &&
                     status != (int)taskStatus::Cancelled)
                 {
                     taskInQueue = true;
@@ -148,4 +148,21 @@ void TaskFun::taskCompleted(std::list<std::array<int, 6>> &myTaskQueue, Unit Bui
         }
     }
     
+}
+
+bool TaskFun::taskStatusUpdate(int ID, std::list<std::array<int, 6>> &Tasks, int newID, int newStatus)
+{
+    bool updatedTask = false;
+    for (auto& task : Tasks)
+    {
+        if (task[3] == ID)
+        {
+            //task[5] = (int)taskStatus::Started;
+            task[5] = newStatus;
+            //task[3] = Building->getID(); //updated the task scvID to the building currently in progress
+            task[3] = newID;
+            updatedTask = true;
+        }
+    }
+    return updatedTask;
 }

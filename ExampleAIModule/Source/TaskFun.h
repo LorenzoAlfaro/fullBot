@@ -13,6 +13,7 @@ public:
     static bool tasksWaitingResources(std::list<std::array<int, 6>>& myTaskQueue);
     static void taskStartedUpdate(std::list<std::array<int, 6>>& myTaskQueue, BWAPI::Unit Building);
     static void taskCompleted(std::list<std::array<int, 6>>& myTaskQueue, BWAPI::Unit Building);
+    static bool taskStatusUpdate(int ID, std::list<std::array<int, 6>>& Tasks, int newID, int newStatus);   
 };
 
 enum class taskStatus {
