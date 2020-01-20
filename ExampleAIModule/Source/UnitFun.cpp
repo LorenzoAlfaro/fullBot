@@ -38,7 +38,7 @@ Unit UnitFun::returnFirstAvaibleBuilder(std::list<int> Builders, std::list<Unit>
     for (auto& u : Builders)
     {
         Unit myBuilder = UnitFun::getUnitByID(workers, u);
-        if (!myBuilder->isConstructing())
+        if (!myBuilder->isConstructing() && myBuilder->exists())
         {
             builder = myBuilder;
         }

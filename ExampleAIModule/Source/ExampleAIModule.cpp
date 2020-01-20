@@ -479,25 +479,32 @@ void ExampleAIModule::onFrame()
 
 void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 {
-    updateUnitCount(true, unit);
 
-    if (taskQueue.size() != 0 && !unit->canAttack() 
-        && unit->getType() != UnitTypes::Terran_SCV
-        && unit->getType() != UnitTypes::Terran_Marine)
+    if (IsOwned(unit))
     {
-        Unit builder = unit->getBuildUnit();
-        int builderID = builder->getID();
-        int BuildingID = unit->getID();        
-        //only for buildings
-        if (TaskFun::taskStatusUpdate(builderID, taskQueue, BuildingID, (int)taskStatus::Started))
+        updateUnitCount(true, unit);
+
+        if (taskQueue.size() != 0 && !unit->canAttack()
+            && unit->getType() != UnitTypes::Terran_SCV
+            && unit->getType() != UnitTypes::Terran_Marine)
         {
-            Broodwar->sendText("Started task id: %d : %s", unit->getID(), unit->getType().c_str());
+            Unit builder = unit->getBuildUnit();
+            int builderID = builder->getID();
+            int BuildingID = unit->getID();
+            //only for buildings
+            if (TaskFun::taskStatusUpdate(builderID, taskQueue, BuildingID, (int)taskStatus::Started))
+            {
+                Broodwar->sendText("Started task id: %d : %s", unit->getID(), unit->getType().c_str());
+            }
+            else
+            {
+                Broodwar->sendText("failed update to started task id: %d : %s", unit->getID(), unit->getType().c_str());
+            }
         }
-        else
-        {
-            Broodwar->sendText("failed update to started task id: %d : %s", unit->getID(), unit->getType().c_str());
-        }
-    }    
+    }
+
+
+        
     if (Broodwar->isReplay())
     {
         // if we are in a replay, then we will print out the build order of the structures
@@ -513,20 +520,24 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 
 void ExampleAIModule::onUnitComplete(BWAPI::Unit unit)
 {
-    if (taskQueue.size() != 0 && !unit->canAttack()) //avoid running in buildings
-    {        
-        if (TaskFun::taskStatusUpdate(unit->getID(), taskQueue, unit->getID(), (int)taskStatus::Completed))
+    if (IsOwned(unit))
+    {
+        if (taskQueue.size() != 0 && !unit->canAttack()) //avoid running in buildings
         {
-            Broodwar->sendText("Completed task id: %d : %s", unit->getID(), unit->getType().c_str());
+            if (TaskFun::taskStatusUpdate(unit->getID(), taskQueue, unit->getID(), (int)taskStatus::Completed))
+            {
+                Broodwar->sendText("Completed task id: %d : %s", unit->getID(), unit->getType().c_str());
+            }
+            else
+            {
+                Broodwar->sendText("failed update to completed task id: %d : %s", unit->getID(), unit->getType().c_str());
+            }
         }
-        else
-        {
-            Broodwar->sendText("failed update to completed task id: %d : %s", unit->getID(), unit->getType().c_str());
-        }        
+        //TODO: test remove  
+      //taskQueue.remove(TaskFun::findTaskAssignedToID(unit->getID(),taskQueue));
+      //updateUnitCount(true, unit);
     }
-      //TODO: test remove  
-    //taskQueue.remove(TaskFun::findTaskAssignedToID(unit->getID(),taskQueue));
-    //updateUnitCount(true, unit);
+    
 }
 
 void ExampleAIModule::onUnitDestroy(BWAPI::Unit unit)
