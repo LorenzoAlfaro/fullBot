@@ -25,15 +25,20 @@ void CommMngr::setRallyPoint(std::list<Unit> buildings, Position myPos)
     }
 }
 
-void CommMngr::scvManager(std::list<int> Miners, std::list<Unit> workers)
+void CommMngr::scvManager(std::list<int> Miners)
 {
     for (auto& ID : Miners)
     {
-        Unit u = UnitFun::getUnitByID(workers, ID);
-        if (u->isIdle())
+        //Unit u = UnitFun::getUnitByID(workers, ID);
+        Unit u = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), ID);
+        if (u != NULL)
         {
-            u->gather(u->getClosestUnit(IsMineralField || IsRefinery));
+            if (u->isIdle())
+            {
+                u->gather(u->getClosestUnit(IsMineralField || IsRefinery));
+            }
         }
+        
     }
 }
 

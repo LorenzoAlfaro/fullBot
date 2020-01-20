@@ -13,18 +13,20 @@ int UnitCount[2] = {0,0}; //SCV,Marines, Medics, etc
 int maxUnit[2] = {50,150}; //SCV,Marines, Medics, etc
 int BuildingCount[3]={0,0,0}; //CC, supplydepots, barracks
 int maxBuilding[3] = { 3,20,4 }; //CC, supplydepots, barracks
+int deadSCVs = 0;
 std::list<std::array<int,6>> taskQueue; //0=timeStamp,1=callbacktime,2=action,3=SCVID or build, 4=taskOwner,5=status
 
 
 #pragma region UnitLists
 std::list<Unit> commandCenters;
-std::list<Unit> workers;
-std::list<Unit> barracks;
-std::list<Unit> marines;
+//std::list<Unit> workers; //dont try to maitain this
+//std::list<Unit> barracks;
+//std::list<Unit> marines;
 std::list<Unit> supplyDepots;
 
 std::list<int> Miners; //could be replace byd an array
 std::list<int> Builders; //could be replaced by an array
+std::list<int> deadUnits;
 #pragma endregion
 
 #pragma region uniqueUnits
@@ -46,6 +48,7 @@ bool displayStats = false;
 
 //methods
 #pragma region SupplyInfoMethods
+
 void updateUnitCount(bool created, BWAPI::Unit unit)
 {   
     UnitType myType = unit->getType();
@@ -62,18 +65,18 @@ void updateUnitCount(bool created, BWAPI::Unit unit)
         if (myType == BWAPI::UnitTypes::Terran_Barracks)
         {
             BuildingCount[2] = BuildingCount[2] + 1;
-            barracks.push_back(unit);
+            //barracks.push_back(unit);
         }
         if (myType == BWAPI::UnitTypes::Terran_Marine)
         {
             UnitCount[1] = UnitCount[1] + 1;
 
-            marines.push_back(unit); //how to remove the dead ones?
+            //marines.push_back(unit); //how to remove the dead ones?
         }
         if (myType == BWAPI::UnitTypes::Terran_SCV)
         {
             UnitCount[0] = UnitCount[0] + 1;
-            workers.push_back(unit);
+            //workers.push_back(unit);
             Miners.push_back(unit->getID());//assign to mine
         }
         if (myType == BWAPI::UnitTypes::Terran_Supply_Depot)
@@ -141,8 +144,10 @@ void displayInsights()
     Broodwar->drawTextScreen(100, 140, "Tasks: %d ", taskQueue.size());
     Broodwar->drawTextScreen(100, 110, "supply limit: %d ", supplyLeft);
     Broodwar->drawTextScreen(100, 120, "supply limit2: %d ", supplyLeft2);
-    Broodwar->drawTextScreen(100, 130, "room for next round: %d ", auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]));
+    Broodwar->drawTextScreen(100, 130, "room for next round: %d ", auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]));    
+    Broodwar->drawTextScreen(100, 160, "Dead: %d ", deadUnits.size());
 }
+
 
 #pragma endregion
 
@@ -155,7 +160,7 @@ void supplyBlock(Unit CommandCenter)
     // If we are supply blocked and haven't tried constructing more recently
     if (lastErr == Errors::Insufficient_Supply )
     {  
-        BuildManager::antiSpammingDepots(CommandCenter, Colors::Blue, 400, 2, Miners, Builders, supplyProviderType, workers, supplyDepots);        
+        BuildManager::antiSpammingDepots(CommandCenter, Colors::Blue, 400, 2, Miners, Builders, supplyProviderType, supplyDepots);        
         
     } // closure: insufficient supply
 }
@@ -165,7 +170,7 @@ void unitHandler(Unitset units)
     for (auto& u : units)
     {
         // Finally make the unit do some stuff!
-        if (auxFun::validUnit(u))
+        if (auxFun::validUnit(u, deadUnits))
         {
             // If the unit is a worker unit
             if (u->getType().isWorker())
@@ -252,7 +257,7 @@ void CreateTask(std::list<std::array<int, 6>> &myTaskQueue, int timeStamp, int t
 
 void startTask(std::array<int, 6> &Task)
 {
-    Unit builder = UnitFun::getUnitByID(workers, Task[3]); //the task has an available worker assigned
+    Unit builder = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), Task[3]); //the task has an available worker assigned
     int builderID = builder->getID();
     TilePosition targetBuildLocation; //TODO: improve space allocation
     targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, builder->getTilePosition());
@@ -291,12 +296,12 @@ void initialAssigment(Unitset units)
 {
     for (auto& u : units)
     {
-        if (auxFun::validUnit(u))
+        if (auxFun::validUnit(u, deadUnits))
         {
             if (u->getType().isWorker())
             {
-                workers.push_back(u);
-                Miners.push_back(u->getID());
+                //workers.push_back(u);
+                //Miners.push_back(u->getID());
             }
             if (u->getType().isResourceDepot())
             {
@@ -319,7 +324,7 @@ void productionManager()
 
         almostSupplyBlocked = true;
     }
-    CommMngr::scvManager(Miners,workers);//go mine for me minions!
+    CommMngr::scvManager(Miners);//go mine for me minions!
     if (!almostSupplyBlocked && !TaskFun::tasksWaitingResources(taskQueue))
     {
         if (UnitCount[0] < maxUnit[0])
@@ -327,12 +332,10 @@ void productionManager()
             CommMngr::buildSCVs(commandCenters);//train SCVs until 50
         }
         
-        CommMngr::trainMarines(barracks);//pump marines
+        CommMngr::trainMarines(UnitFun::getListofUnitType(BWAPI::UnitTypes::Terran_Barracks, Broodwar->self()->getUnits(),deadUnits));//pump marines
 
         if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && BuildingCount[2] < maxBuilding[2] && UnitCount[0] > 10)
-        {
-            //antiSpammingBarracks(commandCenters.front(), Colors::Green, 200,1);
-
+        {            
             //Test isMyTaskInQueue
             if (!TaskFun::isMyTaskInQueue(taskQueue,(int)taskOwner::ProductionManager, (int)action::BuildBarrack))
             {
@@ -367,7 +370,7 @@ void taskManager(std::list<std::array<int, 6>> &myTaskQueue)
             if (TaskFun::mineralsAvailable(task, Broodwar->self()->minerals()) && TaskFun::gasAvailable(task, Broodwar->self()->gas())) //and location available
             {
                 //assign SCV
-                Unit SCV = UnitFun::getWorker(commandCenters.front(), Miners, Builders, supplyProviderType, workers);
+                Unit SCV = UnitFun::getWorker(commandCenters.front(), Miners, Builders, supplyProviderType);
                 int id = SCV->getID();
                 task[3] = id; //assign the worker id to the task
                 startTask(task);
@@ -474,6 +477,8 @@ void ExampleAIModule::onUnitDestroy(BWAPI::Unit unit)
 {
     updateUnitCount(false, unit);
 
+    deadUnits.push_back(unit->getID());
+
 }
 
 void ExampleAIModule::onSendText(std::string text)
@@ -489,22 +494,23 @@ void ExampleAIModule::onSendText(std::string text)
     }
     if (text == "'")
     {
-        CommMngr::attackUnits(marines, myPos);
+        CommMngr::attackUnits(UnitFun::getListofUnitType(BWAPI::UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
     }
     if (text == ";")
     {
-        CommMngr::moveUnits(marines, myPos);
+        CommMngr::moveUnits(UnitFun::getListofUnitType(BWAPI::UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
     }
     if (text == "p")
     {       
-        CommMngr::setRallyPoint(barracks, myPos);
+        CommMngr::setRallyPoint(UnitFun::getListofUnitType(BWAPI::UnitTypes::Terran_Barracks, Broodwar->self()->getUnits(), deadUnits), myPos);
     }
     if (text == "q")
     {
         //Position myPos(Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x, Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
         for (auto& u : Miners)
         {            
-            Unit miner = UnitFun::getUnitByID(workers, u);            
+            //Unit miner = UnitFun::getUnitByID(workers, u);
+            Unit miner = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), u);
             miner->move(myPos);
             miner->stop(true);
             miner->gather(miner->getClosestUnit(IsMineralField),true); //the everyframe logic messes up this
@@ -512,13 +518,13 @@ void ExampleAIModule::onSendText(std::string text)
     }
     if (text == "w")
     {
-        Unit builder = UnitFun::returnFirstAvaibleBuilder(Builders, workers);
+        Unit builder = UnitFun::returnFirstAvaibleBuilder(Builders);
         builder->move(myPos);
         builder->build(BWAPI::UnitTypes::Terran_Command_Center, builder->getTilePosition());
     }
     if (text == "e")
     {
-        Unit builder = UnitFun::returnFirstAvaibleBuilder(Builders, workers);
+        Unit builder = UnitFun::returnFirstAvaibleBuilder(Builders);
         builder->move(myPos);
         builder->build(BWAPI::UnitTypes::Terran_Engineering_Bay, builder->getTilePosition());
     }

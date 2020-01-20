@@ -58,11 +58,11 @@ void BuildManager::antiSpammingBuilding(Unit commandCenter, UnitType Building, C
         Broodwar->self()->incompleteUnitCount(Building) == 0)
     {
         lastChecked = Broodwar->getFrameCount();    //is int big enough to hold this?                  
-        BuildManager::buildBuilding(UnitFun::getWorker(commandCenter, Miners, Builders, supplyProviderType, workers), Building, color, commandCenter->getTilePosition());
+        BuildManager::buildBuilding(UnitFun::getWorker(commandCenter, Miners, Builders, supplyProviderType), Building, color, commandCenter->getTilePosition());
     }
 }
 
-void BuildManager::antiSpammingDepots(Unit commandCenter, Color color, int offSet, int numberNeeded, std::list<int> Miners, std::list<int> Builders, UnitType supplyProviderType, std::list<Unit> workers, std::list<Unit> supplyDepots)
+void BuildManager::antiSpammingDepots(Unit commandCenter, Color color, int offSet, int numberNeeded, std::list<int> Miners, std::list<int> Builders, UnitType supplyProviderType, std::list<Unit> supplyDepots)
 {
     static int lastChecked = 0;
 
@@ -84,7 +84,7 @@ void BuildManager::antiSpammingDepots(Unit commandCenter, Color color, int offSe
             }
 
             //buildBuilding(getWorker(commandCenter), BWAPI::UnitTypes::Terran_Supply_Depot, color);
-            BuildManager::buildBuilding(UnitFun::getWorker(commandCenter, Miners, Builders, supplyProviderType, workers), BWAPI::UnitTypes::Terran_Supply_Depot, color, targetBuildLocation);
+            BuildManager::buildBuilding(UnitFun::getWorker(commandCenter, Miners, Builders, supplyProviderType), BWAPI::UnitTypes::Terran_Supply_Depot, color, targetBuildLocation);
         }
 
 
@@ -110,7 +110,7 @@ void BuildManager::antiSpammingBarracks(Unit commandCenter, Color color, int off
             {
                 targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, workers.front()->getTilePosition());
             }
-            BuildManager::buildBuilding(UnitFun::getWorker(commandCenter, Miners, Builders, supplyProviderType, workers), BWAPI::UnitTypes::Terran_Barracks, color, targetBuildLocation);
+            BuildManager::buildBuilding(UnitFun::getWorker(commandCenter, Miners, Builders, supplyProviderType), BWAPI::UnitTypes::Terran_Barracks, color, targetBuildLocation);
         }
 
     }

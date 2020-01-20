@@ -14,7 +14,7 @@ public:
 
 	static void antiSpammingBuilding(Unit commandCenter, UnitType Building, Color color, int offSet, std::list<int> Miners, std::list<int> Builders, UnitType supplyProviderType, std::list<Unit> workers);
 
-	static void antiSpammingDepots(Unit commandCenter, Color color, int offSet, int numberNeeded, std::list<int> Miners, std::list<int> Builders, UnitType supplyProviderType, std::list<Unit> workers, std::list<Unit> supplyDepots);
+	static void antiSpammingDepots(Unit commandCenter, Color color, int offSet, int numberNeeded, std::list<int> Miners, std::list<int> Builders, UnitType supplyProviderType, std::list<Unit> supplyDepots);
 
 	static void antiSpammingBarracks(Unit commandCenter, Color color, int offSet, int numberNeeded, std::list<int> Miners, std::list<int> Builders, UnitType supplyProviderType, std::list<Unit> workers, std::list<Unit> barracks);
 

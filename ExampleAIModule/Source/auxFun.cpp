@@ -22,24 +22,28 @@ int auxFun::roomNeeded(int commandCenterCount, int barrackCount)
     return supply;
 }
 
-bool auxFun::validUnit(BWAPI::Unit u)
+bool auxFun::validUnit(BWAPI::Unit u, std::list<int> deadUnits)
 {
     bool valid = false;
     // Ignore the unit if it no longer exists
     // Make sure to include this block when handling any Unit pointer!
-    if (u->exists())
+    if (!isUnitDead(deadUnits, u->getID()))
     {
-        if (!u->isLockedDown() && !u->isMaelstrommed() && !u->isStasised())
+        if (u->exists())
         {
-            if (!u->isLoaded() && u->isPowered() && !u->isStuck())
+            if (!u->isLockedDown() && !u->isMaelstrommed() && !u->isStasised())
             {
-                if (u->isCompleted() && !u->isConstructing())
+                if (!u->isLoaded() && u->isPowered() && !u->isStuck())
                 {
-                    valid = true;
+                    if (u->isCompleted() && !u->isConstructing())
+                    {
+                        valid = true;
+                    }
                 }
             }
         }
     }
+    
     return valid;
 }
 
@@ -57,4 +61,17 @@ bool auxFun::validFrame()
         }
     }
     return valid;
+}
+
+bool auxFun::isUnitDead(std::list<int> &deadUnits, int id)
+{
+    bool isDead = false;
+    for (auto& unit : deadUnits)
+    {
+        if (unit == id) 
+        {
+            isDead = true;
+        }
+    }
+    return isDead;
 }

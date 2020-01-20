@@ -1,13 +1,30 @@
 #include "UnitFun.h"
 #include <iostream>
+#include "auxFun.h"
 
 using namespace BWAPI;
 using namespace Filter;
 
-Unit UnitFun::getUnitByID(std::list<Unit> Units, int ID)
-{   
+//Unit UnitFun::getUnitByID(std::list<Unit> Units, int ID)
+//{   
+//    //TODO: TaskManager is not assigning the SCV to build, error
+//    Unit myUnit;
+//
+//    for (auto& u : Units)
+//    {
+//        if (u->getID() == ID)
+//        {
+//            myUnit = u;
+//        }
+//    }
+//
+//    return myUnit;
+//}
+
+Unit UnitFun::returnUnitByID(Unitset Units, int ID)
+{
     //TODO: TaskManager is not assigning the SCV to build, error
-    Unit myUnit;
+    Unit myUnit=NULL;
 
     for (auto& u : Units)
     {
@@ -32,13 +49,14 @@ Unit UnitFun::getSCVfromCC(Unit CommandCenter, std::list<int> &Miners, std::list
 
 }
 
-Unit UnitFun::returnFirstAvaibleBuilder(std::list<int> Builders, std::list<Unit> workers)
+Unit UnitFun::returnFirstAvaibleBuilder(std::list<int> Builders)
 {
     Unit builder = NULL;
     for (auto& u : Builders)
     {
-        Unit myBuilder = UnitFun::getUnitByID(workers, u);
-        if (!myBuilder->isConstructing() && myBuilder->exists())
+        Unit myBuilder = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), u);
+        //Unit myBuilder = UnitFun::getUnitByID(workers, u);
+        if (!myBuilder->isConstructing() && myBuilder->getHitPoints() != 0)
         {
             builder = myBuilder;
         }
@@ -46,13 +64,13 @@ Unit UnitFun::returnFirstAvaibleBuilder(std::list<int> Builders, std::list<Unit>
     return builder;
 }
 
-Unit UnitFun::getWorker(Unit CommandCenter, std::list<int> &Miners, std::list<int> &Builders, UnitType supplyProviderType, std::list<Unit> workers)
+Unit UnitFun::getWorker(Unit CommandCenter, std::list<int> &Miners, std::list<int> &Builders, UnitType supplyProviderType)
 {
     Unit worker;
 
     if (Builders.size() != 0)
     {
-        worker = UnitFun::returnFirstAvaibleBuilder(Builders, workers);
+        worker = UnitFun::returnFirstAvaibleBuilder(Builders);
         //worker = getUnitByID(workers,Builders.front()); //needs improvement
         if (worker == NULL)
         {
@@ -64,4 +82,21 @@ Unit UnitFun::getWorker(Unit CommandCenter, std::list<int> &Miners, std::list<in
         worker = UnitFun::getSCVfromCC(CommandCenter, Miners, Builders, supplyProviderType);
     }
     return worker;
+}
+
+std::list<Unit> UnitFun::getListofUnitType(UnitType myType, Unitset allUnits, std::list<int>& deadUnits)
+{
+    //TODO: TaskManager is not assigning the SCV to build, error
+    std::list<Unit> myUnits;
+
+    for (auto& u : allUnits)
+    {
+        int type = u->getType();
+        if (u->getType() == myType && auxFun::validUnit(u, deadUnits))
+        {
+            myUnits.push_back(u);
+        }
+    }
+
+    return myUnits;
 }
