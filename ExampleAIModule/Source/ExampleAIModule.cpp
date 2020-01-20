@@ -47,91 +47,89 @@ bool displayStats = false;
 //methods
 #pragma region SupplyInfoMethods
 void updateUnitCount(bool created, BWAPI::Unit unit)
-{
-    if (IsOwned(unit))
+{   
+    UnitType myType = unit->getType();
+    char result[100];
+    strcpy(result, "new: ");
+    strcat(result, myType.c_str());
+    if (created)
     {
-        UnitType myType = unit->getType();
-
-        char result[100];
-        strcpy(result, "new: ");
-        strcat(result, myType.c_str());
-        if (created)
+        if (displayStats)
         {
-            if (displayStats)
-            {
-                //Broodwar->sendText(result); //strcat crashing broodwar
-                result[0] = '\0'; //clear
-            }
-            if (myType == BWAPI::UnitTypes::Terran_Barracks)
-            {
-                BuildingCount[2] = BuildingCount[2] + 1;
-                barracks.push_back(unit);
-            }
-            if (myType == BWAPI::UnitTypes::Terran_Marine)
-            {
-                UnitCount[1] = UnitCount[1] + 1;
-
-                marines.push_back(unit); //how to remove the dead ones?
-            }
-            if (myType == BWAPI::UnitTypes::Terran_SCV)
-            {
-                UnitCount[0] = UnitCount[0] + 1;
-                workers.push_back(unit);
-                Miners.push_back(unit->getID());//assign to mine
-            }
-            if (myType == BWAPI::UnitTypes::Terran_Supply_Depot)
-            {
-                BuildingCount[1] = BuildingCount[1] + 1;
-                supplyDepots.push_back(unit);
-            }
-            if (myType == BWAPI::UnitTypes::Terran_Command_Center)
-            {
-                BuildingCount[0] = BuildingCount[0] + 1;
-            }
-
-            supplyLimit = auxFun::SupplyTotal(BuildingCount[0], BuildingCount[1]);
-
-            supplyLeft = supplyLimit - auxFun::usedSupplyTotal(UnitCount[1], UnitCount[0]);
-
+            //Broodwar->sendText(result); //strcat crashing broodwar
+            result[0] = '\0'; //clear
         }
-        else
+        if (myType == BWAPI::UnitTypes::Terran_Barracks)
         {
-            char result2[100];
-            strcpy(result2, "dead: ");
-            strcat(result2, myType.c_str());
-            if (displayStats)
-            {
-                //Broodwar->sendText(result2);
-            }
-
-            if (myType == BWAPI::UnitTypes::Terran_Barracks)
-            {
-                BuildingCount[2] = BuildingCount[2] - 1;
-            }
-            if (myType == BWAPI::UnitTypes::Terran_Marine)
-            {
-                UnitCount[1] = UnitCount[1] - 1;
-            }
-            if (myType == BWAPI::UnitTypes::Terran_SCV)
-            {
-                UnitCount[0] = UnitCount[0] - 1;
-            }
-            if (myType == BWAPI::UnitTypes::Terran_Supply_Depot)
-            {
-                BuildingCount[1] = BuildingCount[1] - 1;
-            }
-            if (myType == BWAPI::UnitTypes::Terran_Command_Center)
-            {
-                BuildingCount[0] = BuildingCount[0] - 1;
-            }
-            supplyLimit = auxFun::SupplyTotal(BuildingCount[0], BuildingCount[1]);
-
-            supplyLeft = supplyLimit - auxFun::usedSupplyTotal(UnitCount[1], UnitCount[0]);
+            BuildingCount[2] = BuildingCount[2] + 1;
+            barracks.push_back(unit);
         }
+        if (myType == BWAPI::UnitTypes::Terran_Marine)
+        {
+            UnitCount[1] = UnitCount[1] + 1;
+
+            marines.push_back(unit); //how to remove the dead ones?
+        }
+        if (myType == BWAPI::UnitTypes::Terran_SCV)
+        {
+            UnitCount[0] = UnitCount[0] + 1;
+            workers.push_back(unit);
+            Miners.push_back(unit->getID());//assign to mine
+        }
+        if (myType == BWAPI::UnitTypes::Terran_Supply_Depot)
+        {
+            BuildingCount[1] = BuildingCount[1] + 1;
+            supplyDepots.push_back(unit);
+        }
+        if (myType == BWAPI::UnitTypes::Terran_Command_Center)
+        {
+            BuildingCount[0] = BuildingCount[0] + 1;
+        }
+
+        supplyLimit = auxFun::SupplyTotal(BuildingCount[0], BuildingCount[1]);
+
+        supplyLeft = supplyLimit - auxFun::usedSupplyTotal(UnitCount[1], UnitCount[0]);
+
     }
+    else
+    {
+        char result2[100];
+        strcpy(result2, "dead: ");
+        strcat(result2, myType.c_str());
+        if (displayStats)
+        {
+            //Broodwar->sendText(result2);
+        }
+
+        if (myType == BWAPI::UnitTypes::Terran_Barracks)
+        {
+            BuildingCount[2] = BuildingCount[2] - 1;
+        }
+        if (myType == BWAPI::UnitTypes::Terran_Marine)
+        {
+            UnitCount[1] = UnitCount[1] - 1;
+        }
+        if (myType == BWAPI::UnitTypes::Terran_SCV)
+        {
+            UnitCount[0] = UnitCount[0] - 1;
+        }
+        if (myType == BWAPI::UnitTypes::Terran_Supply_Depot)
+        {
+            BuildingCount[1] = BuildingCount[1] - 1;
+        }
+        if (myType == BWAPI::UnitTypes::Terran_Command_Center)
+        {
+            BuildingCount[0] = BuildingCount[0] - 1;
+        }
+        supplyLimit = auxFun::SupplyTotal(BuildingCount[0], BuildingCount[1]);
+
+        supplyLeft = supplyLimit - auxFun::usedSupplyTotal(UnitCount[1], UnitCount[0]);
+    }
+    
 }
 void displayInsights()
 {
+    int supplyLeft2 = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();
     Broodwar->drawTextScreen(100, 0, "FPS: %d", Broodwar->getFPS());
     //Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
     Broodwar->drawTextScreen(100, 40, "Barrack Count: %d", BuildingCount[2]);
@@ -142,95 +140,22 @@ void displayInsights()
     //Broodwar->drawTextScreen(200, 120, "Screen: %d  %d", Broodwar->getScreenPosition().x, Broodwar->getScreenPosition().y);
     Broodwar->drawTextScreen(100, 140, "Tasks: %d ", taskQueue.size());
     Broodwar->drawTextScreen(100, 110, "supply limit: %d ", supplyLeft);
-    Broodwar->drawTextScreen(100, 120, "room for next round: %d ", auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]));
+    Broodwar->drawTextScreen(100, 120, "supply limit2: %d ", supplyLeft2);
+    Broodwar->drawTextScreen(100, 130, "room for next round: %d ", auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]));
 }
 
 #pragma endregion
 
 #pragma region UnitHandler
 
-void antiSpammingBuilding(Unit commandCenter, UnitType Building, Color color, int offSet)
-{  
-    static int lastChecked = 0;
-
-    if (Broodwar->getFrameCount() > lastChecked + offSet &&
-        Broodwar->self()->incompleteUnitCount(Building) == 0)
-    {
-        lastChecked = Broodwar->getFrameCount();    //is int big enough to hold this?                  
-        BuildManager::buildBuilding(UnitFun::getWorker(commandCenter, Miners, Builders, supplyProviderType,workers), Building, color, commandCenter->getTilePosition());
-    } 
-}
-
-void antiSpammingDepots(Unit commandCenter, Color color, int offSet, int numberNeeded)
-{
-    static int lastChecked = 0;
-
-    if (Broodwar->getFrameCount() > lastChecked + offSet &&
-        Broodwar->self()->incompleteUnitCount(BWAPI::UnitTypes::Terran_Supply_Depot) != numberNeeded)
-    {
-        lastChecked = Broodwar->getFrameCount();
-
-        for (int i =0;i < numberNeeded; i++)
-        {
-            TilePosition targetBuildLocation;
-            if (supplyDepots.size() != 0)
-            {
-               targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, supplyDepots.front()->getTilePosition());
-            }
-            else
-            {
-               targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, commandCenter->getTilePosition());
-            }
-
-            //buildBuilding(getWorker(commandCenter), BWAPI::UnitTypes::Terran_Supply_Depot, color);
-            BuildManager::buildBuilding(UnitFun::getWorker(commandCenter, Miners, Builders, supplyProviderType, workers), BWAPI::UnitTypes::Terran_Supply_Depot, color, targetBuildLocation);
-        }
-
-        
-    }
-}
-
-void antiSpammingBarracks(Unit commandCenter, Color color, int offSet, int numberNeeded)
-{
-    static int lastChecked = 0;
-
-    if (Broodwar->getFrameCount() > lastChecked + offSet &&
-        Broodwar->self()->incompleteUnitCount(BWAPI::UnitTypes::Terran_Barracks) != numberNeeded)
-    {
-        lastChecked = Broodwar->getFrameCount();
-        for (int i = 0; i < numberNeeded; i++)
-        {
-            TilePosition targetBuildLocation;
-            if (barracks.size() != 0)
-            {
-                targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, barracks.front()->getTilePosition());
-            }
-            else
-            {
-                targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, workers.front()->getTilePosition());
-            }
-            BuildManager::buildBuilding(UnitFun::getWorker(commandCenter, Miners, Builders, supplyProviderType, workers), BWAPI::UnitTypes::Terran_Barracks, color, targetBuildLocation);
-        }
-        
-    }
-}
-
-void almostSupplyBlock(Unit CommandCenter)
-{                     
-    antiSpammingDepots(CommandCenter, Colors::Blue, 400,2);    
-}
-
 void supplyBlock(Unit CommandCenter)
 {
-    Error lastErr = Broodwar->getLastError();
-    
-
-    BuildManager::createEventTag(CommandCenter, lastErr);
-            
+    Error lastErr = Broodwar->getLastError();   
+    BuildManager::createEventTag(CommandCenter, lastErr);            
     // If we are supply blocked and haven't tried constructing more recently
     if (lastErr == Errors::Insufficient_Supply )
-    {        
-        almostSupplyBlock(CommandCenter);
+    {  
+        BuildManager::antiSpammingDepots(CommandCenter, Colors::Blue, 400, 2, Miners, Builders, supplyProviderType, workers, supplyDepots);        
         
     } // closure: insufficient supply
 }
@@ -283,7 +208,7 @@ void unitHandler(Unitset units)
 
                     almostSupplyBlocked = true;
 
-                    almostSupplyBlock(u);
+                    supplyBlock(u);
 
                 }
                 // Order the depot to construct more workers! But only when it is idle.
@@ -384,6 +309,11 @@ void initialAssigment(Unitset units)
 void productionManager()
 {    
     almostSupplyBlocked = false;
+
+    //Broodwar->self()->allUnitCount();
+    //Broodwar->self()->completedUnitCount();
+    //Broodwar->self()->supplyTotal();
+    //Broodwar->self()->supplyUsed();
 
     if (supplyLeft < auxFun::roomNeeded(BuildingCount[0], BuildingCount[2])) { //instead of 4,should be the max output of production at a given time
 
@@ -498,7 +428,7 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
             }
             else
             {
-                Broodwar->sendText("failed update to started task id: %d : %s", unit->getID(), unit->getType().c_str());
+                Broodwar->sendText("Failed update to started task id: %d : %s", unit->getID(), unit->getType().c_str());
             }
         }
     }
@@ -551,7 +481,7 @@ void ExampleAIModule::onSendText(std::string text)
     Position myPos(Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x, Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
     if (text == "b")
     {
-        //build supply        
+        Broodwar->sendText("power overwhelming");      
     }
     if (text == "stats")
     {

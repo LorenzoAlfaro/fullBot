@@ -50,3 +50,70 @@ void BuildManager::buildBuilding(Unit supplyBuilder, UnitType Building, Color co
 }
 
 
+void BuildManager::antiSpammingBuilding(Unit commandCenter, UnitType Building, Color color, int offSet, std::list<int> Miners, std::list<int> Builders, UnitType supplyProviderType, std::list<Unit> workers)
+{
+    static int lastChecked = 0;
+
+    if (Broodwar->getFrameCount() > lastChecked + offSet &&
+        Broodwar->self()->incompleteUnitCount(Building) == 0)
+    {
+        lastChecked = Broodwar->getFrameCount();    //is int big enough to hold this?                  
+        BuildManager::buildBuilding(UnitFun::getWorker(commandCenter, Miners, Builders, supplyProviderType, workers), Building, color, commandCenter->getTilePosition());
+    }
+}
+
+void BuildManager::antiSpammingDepots(Unit commandCenter, Color color, int offSet, int numberNeeded, std::list<int> Miners, std::list<int> Builders, UnitType supplyProviderType, std::list<Unit> workers, std::list<Unit> supplyDepots)
+{
+    static int lastChecked = 0;
+
+    if (Broodwar->getFrameCount() > lastChecked + offSet &&
+        Broodwar->self()->incompleteUnitCount(BWAPI::UnitTypes::Terran_Supply_Depot) != numberNeeded)
+    {
+        lastChecked = Broodwar->getFrameCount();
+
+        for (int i = 0; i < numberNeeded; i++)
+        {
+            TilePosition targetBuildLocation;
+            if (supplyDepots.size() != 0)
+            {
+                targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, supplyDepots.front()->getTilePosition());
+            }
+            else
+            {
+                targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, commandCenter->getTilePosition());
+            }
+
+            //buildBuilding(getWorker(commandCenter), BWAPI::UnitTypes::Terran_Supply_Depot, color);
+            BuildManager::buildBuilding(UnitFun::getWorker(commandCenter, Miners, Builders, supplyProviderType, workers), BWAPI::UnitTypes::Terran_Supply_Depot, color, targetBuildLocation);
+        }
+
+
+    }
+}
+
+void BuildManager::antiSpammingBarracks(Unit commandCenter, Color color, int offSet, int numberNeeded, std::list<int> Miners, std::list<int> Builders, UnitType supplyProviderType, std::list<Unit> workers, std::list<Unit> barracks)
+{
+    static int lastChecked = 0;
+
+    if (Broodwar->getFrameCount() > lastChecked + offSet &&
+        Broodwar->self()->incompleteUnitCount(BWAPI::UnitTypes::Terran_Barracks) != numberNeeded)
+    {
+        lastChecked = Broodwar->getFrameCount();
+        for (int i = 0; i < numberNeeded; i++)
+        {
+            TilePosition targetBuildLocation;
+            if (barracks.size() != 0)
+            {
+                targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, barracks.front()->getTilePosition());
+            }
+            else
+            {
+                targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, workers.front()->getTilePosition());
+            }
+            BuildManager::buildBuilding(UnitFun::getWorker(commandCenter, Miners, Builders, supplyProviderType, workers), BWAPI::UnitTypes::Terran_Barracks, color, targetBuildLocation);
+        }
+
+    }
+}
+
+
