@@ -477,8 +477,10 @@ void ExampleAIModule::onUnitComplete(BWAPI::Unit unit)
 void ExampleAIModule::onUnitDestroy(BWAPI::Unit unit)
 {
     updateUnitCount(false, unit);
-
-    deadUnits.push_back(unit->getID());
+    if (IsOwned(unit))
+    {
+        deadUnits.push_back(unit->getID());
+    }
 
 }
 
