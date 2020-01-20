@@ -56,10 +56,17 @@ Unit UnitFun::returnFirstAvaibleBuilder(std::list<int> Builders)
     {
         Unit myBuilder = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), u);
         //Unit myBuilder = UnitFun::getUnitByID(workers, u);
-        if (!myBuilder->isConstructing() && myBuilder->getHitPoints() != 0)
+
+        if (myBuilder != NULL)
         {
-            builder = myBuilder;
+            if (!myBuilder->isConstructing() && myBuilder->getHitPoints() != 0)
+            {
+                builder = myBuilder;
+                break;
+            }
         }
+
+        
     }
     return builder;
 }

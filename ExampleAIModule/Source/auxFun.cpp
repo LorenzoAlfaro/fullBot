@@ -17,9 +17,9 @@ int auxFun::usedSupplyTotal(int marineCount, int scvCount)
 int auxFun::roomNeeded(int commandCenterCount, int barrackCount)
 {
     int offset = 1;
-    int supply = offset + commandCenterCount * 1 + barrackCount * 1; //will need finer adjuments
+    int supply = offset + commandCenterCount * 1 + barrackCount * 1; //will need finer adjuments per individual units
 
-    return supply;
+    return supply*2;
 }
 
 bool auxFun::validUnit(BWAPI::Unit u, std::list<int> deadUnits)

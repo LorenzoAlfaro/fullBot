@@ -88,11 +88,7 @@ void updateUnitCount(bool created, BWAPI::Unit unit)
         {
             BuildingCount[0] = BuildingCount[0] + 1;
         }
-
-        supplyLimit = auxFun::SupplyTotal(BuildingCount[0], BuildingCount[1]);
-
-        supplyLeft = supplyLimit - auxFun::usedSupplyTotal(UnitCount[1], UnitCount[0]);
-
+        
     }
     else
     {
@@ -124,10 +120,10 @@ void updateUnitCount(bool created, BWAPI::Unit unit)
         {
             BuildingCount[0] = BuildingCount[0] - 1;
         }
-        supplyLimit = auxFun::SupplyTotal(BuildingCount[0], BuildingCount[1]);
-
-        supplyLeft = supplyLimit - auxFun::usedSupplyTotal(UnitCount[1], UnitCount[0]);
+        
     }
+
+    supplyLeft = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed(); //x2
     
 }
 void displayInsights()
@@ -314,13 +310,14 @@ void initialAssigment(Unitset units)
 void productionManager()
 {    
     almostSupplyBlocked = false;
+    int roomNeeded = auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]);
 
     //Broodwar->self()->allUnitCount();
     //Broodwar->self()->completedUnitCount();
     //Broodwar->self()->supplyTotal();
     //Broodwar->self()->supplyUsed();
 
-    if (supplyLeft < auxFun::roomNeeded(BuildingCount[0], BuildingCount[2])) { //instead of 4,should be the max output of production at a given time
+    if (supplyLeft < roomNeeded) { //instead of 4,should be the max output of production at a given time
 
         almostSupplyBlocked = true;
     }
@@ -345,9 +342,13 @@ void productionManager()
     }
     else
     {
-        if (!TaskFun::isMyTaskInQueue(taskQueue, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot))
+        if (!TaskFun::isMyTaskInQueue(taskQueue, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot) && Broodwar->self()->supplyTotal() != 400)
         {
-            CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot);
+            for (size_t i = 0; i < roomNeeded; i+=7)
+            {
+                CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot);
+            }
+            
         }                
     }
 }
