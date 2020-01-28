@@ -5,15 +5,16 @@
 class TaskFun
 {
 public:
-	static std::array<int, 6>* findTaskAssignedToID(int ID, std::list<std::array<int, 6>>& Tasks);
-	static bool isMyTaskInQueue(std::list<std::array<int, 6>>& myTaskQueue, int taskOwner, int action);
-    static std::array<int, 2> resourceCost(std::array<int, 6> Task);
-    static bool mineralsAvailable(std::array<int, 6> task, int CurrentMinerals);
-    static bool gasAvailable(std::array<int, 6> task, int CurrentMinerals);
-    static bool tasksWaitingResources(std::list<std::array<int, 6>>& myTaskQueue);
-    static void taskStartedUpdate(std::list<std::array<int, 6>>& myTaskQueue, BWAPI::Unit Building);
-    static void taskCompleted(std::list<std::array<int, 6>>& myTaskQueue, BWAPI::Unit Building);
-    static bool taskStatusUpdate(int ID, std::list<std::array<int, 6>>& Tasks, int newID, int newStatus);   
+	static std::array<int, 7>* findTaskAssignedToUnit(int ID, std::list<std::array<int, 7>>& Tasks);
+    static std::array<int, 7>* findTaskAssignedToID(int TaskID, std::list<std::array<int, 7>>& Tasks);
+	static bool isMyTaskInQueue(std::list<std::array<int, 7>>& myTaskQueue, int taskOwner, int action);
+    static std::array<int, 2> resourceCost(std::array<int, 7> Task);
+    static bool mineralsAvailable(std::array<int, 7> task, int CurrentMinerals);
+    static bool gasAvailable(std::array<int, 7> task, int CurrentMinerals);
+    static bool tasksWaitingResources(std::list<std::array<int, 7>>& myTaskQueue);
+    static void taskStartedUpdate(std::list<std::array<int, 7>>& myTaskQueue, BWAPI::Unit Building);
+    static void taskCompleted(std::list<std::array<int, 7>>& myTaskQueue, BWAPI::Unit Building);
+    static bool taskStatusUpdate(int ID, std::list<std::array<int, 7>>& Tasks, int newID, int newStatus);   
 };
 
 enum class taskStatus {

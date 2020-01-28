@@ -49,7 +49,6 @@ void BuildManager::buildBuilding(Unit supplyBuilder, UnitType Building, Color co
     }
 }
 
-
 void BuildManager::antiSpammingBuilding(Unit commandCenter, UnitType Building, Color color, int offSet, std::list<int> Miners, std::list<int> Builders, UnitType supplyProviderType, std::list<Unit> workers)
 {
     static int lastChecked = 0;

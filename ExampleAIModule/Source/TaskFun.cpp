@@ -2,14 +2,39 @@
 using namespace BWAPI;
 
 
-std::array<int, 6>* TaskFun::findTaskAssignedToID(int ID, std::list<std::array<int, 6>> &Tasks)
+std::array<int, 7>* TaskFun::findTaskAssignedToUnit(int UnitID, std::list<std::array<int, 7>> &Tasks)
 {
-
-    std::array<int, 6>* mytask; //pass the address of the array//initialize first to something
+    bool found = false;
+    std::array<int, 7>* mytask; //pass the address of the array//initialize first to something
 
     for (auto& task : Tasks)
     {
-        if (task[3] == ID)
+        if (task[3] == UnitID) //
+        {
+            mytask = &task;
+            found = true;
+        }
+    }
+
+    if (found)
+    {
+        return mytask;
+    }
+    else
+    {
+        return nullptr;
+    }
+
+    
+}
+std::array<int, 7>* TaskFun::findTaskAssignedToID(int TaskID, std::list<std::array<int, 7>>& Tasks)
+{
+
+    std::array<int, 7>* mytask; //pass the address of the array//initialize first to something
+
+    for (auto& task : Tasks)
+    {
+        if (task[6] == TaskID) //
         {
             mytask = &task;
         }
@@ -17,7 +42,7 @@ std::array<int, 6>* TaskFun::findTaskAssignedToID(int ID, std::list<std::array<i
     return mytask;
 }
 
-bool TaskFun::isMyTaskInQueue(std::list<std::array<int, 6>> &myTaskQueue, int taskOwner, int action)
+bool TaskFun::isMyTaskInQueue(std::list<std::array<int, 7>> &myTaskQueue, int taskOwner, int action)
 {
     bool taskInQueue = false;
     for (auto& task : myTaskQueue)
@@ -40,7 +65,7 @@ bool TaskFun::isMyTaskInQueue(std::list<std::array<int, 6>> &myTaskQueue, int ta
     return taskInQueue;
 }
 
-std::array<int, 2> TaskFun::resourceCost(std::array<int, 6> Task)
+std::array<int, 2> TaskFun::resourceCost(std::array<int, 7> Task)
 {
     std::array<int, 2> price;
     switch (Task[2])
@@ -65,7 +90,7 @@ std::array<int, 2> TaskFun::resourceCost(std::array<int, 6> Task)
     return price;
 }
 
-bool TaskFun::mineralsAvailable(std::array<int, 6> task, int CurrentMinerals)
+bool TaskFun::mineralsAvailable(std::array<int, 7> task, int CurrentMinerals)
 {
     bool resourcesAvailabilty = false;
 
@@ -78,7 +103,7 @@ bool TaskFun::mineralsAvailable(std::array<int, 6> task, int CurrentMinerals)
     return resourcesAvailabilty;
 }
 
-bool TaskFun::gasAvailable(std::array<int, 6> task, int CurrentGas)
+bool TaskFun::gasAvailable(std::array<int, 7> task, int CurrentGas)
 {
     bool resourcesAvailabilty = false;
 
@@ -91,7 +116,7 @@ bool TaskFun::gasAvailable(std::array<int, 6> task, int CurrentGas)
     return resourcesAvailabilty;
 }
 
-bool TaskFun::tasksWaitingResources(std::list<std::array<int, 6>> &myTaskQueue)
+bool TaskFun::tasksWaitingResources(std::list<std::array<int, 7>> &myTaskQueue)
 {
     //dont keep pumping units until we can start the building of depots or etc...
     bool waiting = false;
@@ -108,10 +133,10 @@ bool TaskFun::tasksWaitingResources(std::list<std::array<int, 6>> &myTaskQueue)
     return waiting;
 }
 
-void TaskFun::taskStartedUpdate(std::list<std::array<int, 6>> &myTaskQueue, Unit Building)
+void TaskFun::taskStartedUpdate(std::list<std::array<int, 7>> &myTaskQueue, Unit Building)
 {
     Unit builder = Building->getBuildUnit();
-    //std::array<int, 6> currentTask = *TaskFun::findTaskAssignedToID(builder->getID(), myTaskQueue);//seems the addres is setup here
+    //std::array<int, 7> currentTask = *TaskFun::findTaskAssignedToID(builder->getID(), myTaskQueue);//seems the addres is setup here
 
     //int point = TaskFun::findTaskAssignedToID(builder->getID(), myTaskQueue);
 
@@ -134,7 +159,7 @@ void TaskFun::taskStartedUpdate(std::list<std::array<int, 6>> &myTaskQueue, Unit
     //}
 }
 
-void TaskFun::taskCompleted(std::list<std::array<int, 6>> &myTaskQueue, Unit Building)
+void TaskFun::taskCompleted(std::list<std::array<int, 7>> &myTaskQueue, Unit Building)
 {
     //Unit builder = Building->getBuildUnit();
     
@@ -150,7 +175,7 @@ void TaskFun::taskCompleted(std::list<std::array<int, 6>> &myTaskQueue, Unit Bui
     
 }
 
-bool TaskFun::taskStatusUpdate(int ID, std::list<std::array<int, 6>> &Tasks, int newID, int newStatus)
+bool TaskFun::taskStatusUpdate(int ID, std::list<std::array<int, 7>> &Tasks, int newID, int newStatus)
 {
     bool updatedTask = false;
     for (auto& task : Tasks)

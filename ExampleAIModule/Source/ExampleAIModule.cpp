@@ -14,7 +14,8 @@ int maxUnit[2] = {50,150}; //SCV,Marines, Medics, etc
 int BuildingCount[3]={0,0,0}; //CC, supplydepots, barracks
 int maxBuilding[3] = { 3,20,4 }; //CC, supplydepots, barracks
 int deadSCVs = 0;
-std::list<std::array<int,6>> taskQueue; //0=timeStamp,1=callbacktime,2=action,3=SCVID or build, 4=taskOwner,5=status
+int TaskCount = 0; //unique Task ID
+std::list<std::array<int,7>> taskQueue; // 0=timeStamp,1=callbacktime,2=action,3=SCVID or build, 4=taskOwner,5=status, 6=uniqueID
 
 
 #pragma region UnitLists
@@ -236,22 +237,24 @@ void unitHandler(Unitset units)
 #pragma endregion
 
 #pragma region TasksFunctions
-void assessTask(std::array<int, 6>& newTask)
+void assessTask(std::array<int, 7>& newTask)
 {
     //ok new task, what do you want?
     //do we have resources to complete your task?
     // what priority should I give you?
 }
 
-void CreateTask(std::list<std::array<int, 6>> &myTaskQueue, int timeStamp, int taskOwner, int action)
+void CreateTask(std::list<std::array<int, 7>> &myTaskQueue, int timeStamp, int taskOwner, int action)
 {
     //add the logic for adding a task to the queueu
     //task = timestamp / action / assign worker id / taskOwner / status /    
-    std::array<int, 6> newArray{ timeStamp,0,action,0,taskOwner,(int)taskStatus::Created };
+    std::array<int, 7> newArray{ timeStamp,0,action,0,taskOwner,(int)taskStatus::Created, TaskCount };
     myTaskQueue.push_back(newArray);
+
+    TaskCount = TaskCount + 1;
 }
 
-void startTask(std::array<int, 6> &Task)
+void startTask(std::array<int, 7> &Task)
 {
     Unit builder = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), Task[3]); //the task has an available worker assigned
     int builderID = builder->getID();
@@ -353,7 +356,7 @@ void productionManager()
     }
 }
 
-void taskManager(std::list<std::array<int, 6>> &myTaskQueue)
+void taskManager(std::list<std::array<int, 7>> &myTaskQueue)
 {
     //if my task status is 0, not started, check timestamp
     //0 created, 1 reviewed but no resources to assign, 2 assigned with resources, 3 started, 4 completed, 5 cancel
@@ -387,7 +390,9 @@ void taskManager(std::list<std::array<int, 6>> &myTaskQueue)
         else if (Broodwar->getFrameCount() > (task[0] + task[1]) && taskStatus == (int)taskStatus::Assigned)
         {
             task[5] = (int)taskStatus::Cancelled;
-            Broodwar->sendText("TaskMngr: Failed to start task id: %d : ", task[3]); //for some error
+            Broodwar->sendText("TaskMngr: Failed to start task id: %d : ", task[6]); //for some error
+            Unit builder = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), task[3]);
+            Broodwar->setScreenPosition(builder->getPosition());
         }
     }
 }
@@ -425,10 +430,20 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
             Unit builder = unit->getBuildUnit();
             int builderID = builder->getID();
             int BuildingID = unit->getID();
+
+
+            std::array<int, 7> mytask = {0,0,0,0,0,0,0};
+            std::array<int, 7>* pointer = TaskFun::findTaskAssignedToUnit(builderID, taskQueue);
+            if (pointer != nullptr)
+            {
+                mytask = *pointer;
+            }
+
+            
             //only for buildings
             if (TaskFun::taskStatusUpdate(builderID, taskQueue, BuildingID, (int)taskStatus::Started))
             {
-                Broodwar->sendText("Started task id: %d : %s", unit->getID(), unit->getType().c_str());
+                Broodwar->sendText("Started task id: %d : %s", mytask[6], unit->getType().c_str());
             }
             else
             {
@@ -458,9 +473,11 @@ void ExampleAIModule::onUnitComplete(BWAPI::Unit unit)
     {
         if (taskQueue.size() != 0 && !unit->canAttack()) //avoid running in buildings
         {
+            std::array<int, 7> mytask = *TaskFun::findTaskAssignedToUnit(unit->getID(),taskQueue);
+
             if (TaskFun::taskStatusUpdate(unit->getID(), taskQueue, unit->getID(), (int)taskStatus::Completed))
             {
-                Broodwar->sendText("Completed task id: %d : %s", unit->getID(), unit->getType().c_str());
+                Broodwar->sendText("Completed task id: %d : %s", mytask[6], unit->getType().c_str());
             }
             else
             {
