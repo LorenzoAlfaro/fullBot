@@ -29,7 +29,7 @@ std::array<int, 7>* TaskFun::findTaskAssignedToUnit(int UnitID, std::list<std::a
 }
 std::array<int, 7>* TaskFun::findTaskAssignedToID(int TaskID, std::list<std::array<int, 7>>& Tasks)
 {
-
+    bool found = false;
     std::array<int, 7>* mytask; //pass the address of the array//initialize first to something
 
     for (auto& task : Tasks)
@@ -39,7 +39,14 @@ std::array<int, 7>* TaskFun::findTaskAssignedToID(int TaskID, std::list<std::arr
             mytask = &task;
         }
     }
-    return mytask;
+    if (found)
+    {
+        return mytask;
+    }
+    else
+    {
+        return nullptr;
+    }
 }
 
 bool TaskFun::isMyTaskInQueue(std::list<std::array<int, 7>> &myTaskQueue, int taskOwner, int action)
@@ -124,7 +131,7 @@ bool TaskFun::tasksWaitingResources(std::list<std::array<int, 7>> &myTaskQueue)
     {
         int status = task[5];
         if (status == (int)taskStatus::waitingGas ||
-            status == (int)taskStatus::Assigned ||  //make sure production doesn't steal minerals while scv travelling
+            status == (int)taskStatus::PendingStart ||  //make sure production doesn't steal minerals while scv travelling
             status == (int)taskStatus::waitingMin)
         {
             waiting = true;

@@ -75,3 +75,10 @@ bool auxFun::isUnitDead(std::list<int> &deadUnits, int id)
     }
     return isDead;
 }
+
+BWAPI::Position auxFun::getMousePosition()
+{
+    BWAPI::Position myPos(BWAPI::Broodwar->getScreenPosition().x + BWAPI::Broodwar->getMousePosition().x,
+                            BWAPI::Broodwar->getScreenPosition().y + BWAPI::Broodwar->getMousePosition().y);
+    return myPos;
+}

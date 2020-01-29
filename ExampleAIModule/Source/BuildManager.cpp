@@ -42,8 +42,10 @@ void BuildManager::buildBuilding(Unit supplyBuilder, UnitType Building, Color co
         // Order the builder to construct the supply structure
         if (!supplyBuilder->build(Building, targetBuildLocation))
         {
-            Broodwar->sendText("Failed building %s :", Building.c_str());
-            Broodwar << Broodwar->getLastError() << std::endl;;
+            Broodwar->sendText("Failed building %s :", Building.c_str()); //might cause lag
+
+            Broodwar->sendText(Broodwar->getLastError().c_str());
+            //Broodwar << Broodwar->getLastError() << std::endl;;
         }
 
     }

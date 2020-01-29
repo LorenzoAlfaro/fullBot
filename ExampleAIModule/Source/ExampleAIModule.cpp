@@ -4,10 +4,12 @@
 #include "CommMngr.h"
 #include "auxFun.h"
 #include <iostream>
+#include <fstream>
 #include <array>
 #include "TaskFun.h"
 using namespace BWAPI;
 using namespace Filter;
+using namespace std;
 
 int UnitCount[2] = {0,0}; //SCV,Marines, Medics, etc
 int maxUnit[2] = {50,150}; //SCV,Marines, Medics, etc
@@ -15,23 +17,23 @@ int BuildingCount[3]={0,0,0}; //CC, supplydepots, barracks
 int maxBuilding[3] = { 3,20,4 }; //CC, supplydepots, barracks
 int deadSCVs = 0;
 int TaskCount = 0; //unique Task ID
-std::list<std::array<int,7>> taskQueue; // 0=timeStamp,1=callbacktime,2=action,3=SCVID or build, 4=taskOwner,5=status, 6=uniqueID
+list<array<int,7>> taskQueue; // 0=timeStamp,1=callbacktime,2=action,3=SCVID or build, 4=taskOwner,5=status, 6=uniqueID
 
 
 #pragma region UnitLists
-std::list<Unit> commandCenters;
-//std::list<Unit> workers; //dont try to maitain this
-//std::list<Unit> barracks;
-//std::list<Unit> marines;
-std::list<Unit> supplyDepots;
+list<Unit> commandCenters;
+//list<Unit> workers; //dont try to maitain this
+//list<Unit> barracks;
+//list<Unit> marines;
+list<Unit> supplyDepots;
 
-std::list<int> Miners; //could be replace byd an array
-std::list<int> Builders; //could be replaced by an array
-std::list<int> deadUnits;
+list<int> Miners; //could be replace byd an array
+list<int> Builders; //could be replaced by an array
+list<int> deadUnits;
 #pragma endregion
 
 #pragma region uniqueUnits
-UnitType supplyProviderType = BWAPI::UnitTypes::Terran_Supply_Depot;
+UnitType supplyProviderType = UnitTypes::Terran_Supply_Depot;
 #pragma endregion
 
 #pragma region MaxCount
@@ -48,9 +50,37 @@ bool displayStats = false;
 #pragma endregion
 
 //methods
+
+int readSettingsFile()
+{
+    ofstream myfile;
+    myfile.open("Pikachu.txt");
+    myfile << "Writing this to a file.\n";
+    myfile.close();
+    return 0;
+}
+
+int readSettings()
+{
+    string line;
+    ifstream myfile("Pikachu.txt");
+    if (myfile.is_open())
+    {
+        while (getline(myfile, line))
+        {
+            //cout << line << '\n';
+            Broodwar->sendText(line.c_str());
+        }
+        myfile.close();
+    }
+
+    else Broodwar->sendText("Unable to open file");//cout << "Unable to open file";
+    return 0;
+}
+
 #pragma region SupplyInfoMethods
 
-void updateUnitCount(bool created, BWAPI::Unit unit)
+void updateUnitCount(bool created, Unit unit)
 {   
     UnitType myType = unit->getType();
     char result[100];
@@ -63,29 +93,29 @@ void updateUnitCount(bool created, BWAPI::Unit unit)
             //Broodwar->sendText(result); //strcat crashing broodwar
             result[0] = '\0'; //clear
         }
-        if (myType == BWAPI::UnitTypes::Terran_Barracks)
+        if (myType == UnitTypes::Terran_Barracks)
         {
             BuildingCount[2] = BuildingCount[2] + 1;
             //barracks.push_back(unit);
         }
-        if (myType == BWAPI::UnitTypes::Terran_Marine)
+        if (myType == UnitTypes::Terran_Marine)
         {
             UnitCount[1] = UnitCount[1] + 1;
 
             //marines.push_back(unit); //how to remove the dead ones?
         }
-        if (myType == BWAPI::UnitTypes::Terran_SCV)
+        if (myType == UnitTypes::Terran_SCV)
         {
             UnitCount[0] = UnitCount[0] + 1;
             //workers.push_back(unit);
             Miners.push_back(unit->getID());//assign to mine
         }
-        if (myType == BWAPI::UnitTypes::Terran_Supply_Depot)
+        if (myType == UnitTypes::Terran_Supply_Depot)
         {
             BuildingCount[1] = BuildingCount[1] + 1;
             supplyDepots.push_back(unit);
         }
-        if (myType == BWAPI::UnitTypes::Terran_Command_Center)
+        if (myType == UnitTypes::Terran_Command_Center)
         {
             BuildingCount[0] = BuildingCount[0] + 1;
         }
@@ -101,23 +131,23 @@ void updateUnitCount(bool created, BWAPI::Unit unit)
             //Broodwar->sendText(result2);
         }
 
-        if (myType == BWAPI::UnitTypes::Terran_Barracks)
+        if (myType == UnitTypes::Terran_Barracks)
         {
             BuildingCount[2] = BuildingCount[2] - 1;
         }
-        if (myType == BWAPI::UnitTypes::Terran_Marine)
+        if (myType == UnitTypes::Terran_Marine)
         {
             UnitCount[1] = UnitCount[1] - 1;
         }
-        if (myType == BWAPI::UnitTypes::Terran_SCV)
+        if (myType == UnitTypes::Terran_SCV)
         {
             UnitCount[0] = UnitCount[0] - 1;
         }
-        if (myType == BWAPI::UnitTypes::Terran_Supply_Depot)
+        if (myType == UnitTypes::Terran_Supply_Depot)
         {
             BuildingCount[1] = BuildingCount[1] - 1;
         }
-        if (myType == BWAPI::UnitTypes::Terran_Command_Center)
+        if (myType == UnitTypes::Terran_Command_Center)
         {
             BuildingCount[0] = BuildingCount[0] - 1;
         }
@@ -130,19 +160,21 @@ void updateUnitCount(bool created, BWAPI::Unit unit)
 void displayInsights()
 {
     int supplyLeft2 = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();
-    Broodwar->drawTextScreen(100, 0, "FPS: %d", Broodwar->getFPS());
+    Broodwar->drawTextScreen(0, 0, "FPS: %d", Broodwar->getFPS());
     //Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
-    Broodwar->drawTextScreen(100, 40, "Barrack Count: %d", BuildingCount[2]);
-    Broodwar->drawTextScreen(100, 60, "Marine Count: %d", UnitCount[1]);
-    Broodwar->drawTextScreen(100, 80, "SCV Count: %d", UnitCount[0]);
-    Broodwar->drawTextScreen(100, 100, "Builders: %d", Builders.size());
+    Broodwar->drawTextScreen(45, 0, "Brks: %d", BuildingCount[2]);
+    Broodwar->drawTextScreen(90, 0, "Mrn: %d", UnitCount[1]);
+    Broodwar->drawTextScreen(135, 0, "SCV: %d", UnitCount[0]);
+    Broodwar->drawTextScreen(180, 0, "Bldrs: %d", Builders.size());
+    Broodwar->drawTextScreen(225, 0, "Dead: %d ", deadUnits.size());
     //Broodwar->drawTextScreen(200, 100, "Mouse Cursor: %d  %d", Broodwar->getMousePosition().x, Broodwar->getMousePosition().y);
     //Broodwar->drawTextScreen(200, 120, "Screen: %d  %d", Broodwar->getScreenPosition().x, Broodwar->getScreenPosition().y);
-    Broodwar->drawTextScreen(100, 140, "Tasks: %d ", taskQueue.size());
-    Broodwar->drawTextScreen(100, 110, "supply limit: %d ", supplyLeft);
-    Broodwar->drawTextScreen(100, 120, "supply limit2: %d ", supplyLeft2);
-    Broodwar->drawTextScreen(100, 130, "room for next round: %d ", auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]));    
-    Broodwar->drawTextScreen(100, 160, "Dead: %d ", deadUnits.size());
+    
+    Broodwar->drawTextScreen(0, 10, "supply limit: %d ", supplyLeft);
+    Broodwar->drawTextScreen(0, 20, "supply limit2: %d ", supplyLeft2);
+    Broodwar->drawTextScreen(0, 30, "room for next round: %d ", auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]));    
+    Broodwar->drawTextScreen(0, 40, "Tasks: %d ", taskQueue.size());
+    
 }
 
 
@@ -179,7 +211,7 @@ void unitHandler(Unitset units)
                     {
                         Unit supplyBuilder = u;
 
-                        TilePosition buildPosition = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Barracks, u->getTilePosition());
+                        TilePosition buildPosition = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, u->getTilePosition());
                         u->build(UnitTypes::Terran_Barracks, buildPosition);                    
                         continue; //skip this unit
                     }
@@ -195,7 +227,7 @@ void unitHandler(Unitset units)
                         if (!u->gather(u->getClosestUnit(IsMineralField || IsRefinery)))
                         {
                             // If the call fails, then print the last error message
-                            Broodwar << Broodwar->getLastError() << std::endl;
+                            Broodwar << Broodwar->getLastError() << endl;
                         }
 
                     } // closure: has no powerup
@@ -237,54 +269,82 @@ void unitHandler(Unitset units)
 #pragma endregion
 
 #pragma region TasksFunctions
-void assessTask(std::array<int, 7>& newTask)
+void assessTask(array<int, 7>& newTask)
 {
     //ok new task, what do you want?
     //do we have resources to complete your task?
     // what priority should I give you?
 }
 
-void CreateTask(std::list<std::array<int, 7>> &myTaskQueue, int timeStamp, int taskOwner, int action)
-{
-    //add the logic for adding a task to the queueu
-    //task = timestamp / action / assign worker id / taskOwner / status /    
-    std::array<int, 7> newArray{ timeStamp,0,action,0,taskOwner,(int)taskStatus::Created, TaskCount };
+void CreateTask(list<array<int, 7>> &myTaskQueue, int timeStamp, int taskOwner, int action)
+{       
+    array<int, 7> newArray{ timeStamp,0,action,0,taskOwner,(int)taskStatus::Created, TaskCount };
+
     myTaskQueue.push_back(newArray);
 
     TaskCount = TaskCount + 1;
 }
 
-void startTask(std::array<int, 7> &Task)
+void callMeLater(array<int, 7>& Task, int When, int Why)
 {
-    Unit builder = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), Task[3]); //the task has an available worker assigned
-    int builderID = builder->getID();
-    TilePosition targetBuildLocation; //TODO: improve space allocation
-    targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, builder->getTilePosition());
+    //do we have resources? assign, no? set callback time
+    Task[0] = Broodwar->getFrameCount(); //reset timer
+    Task[1] = When; //frames, should be determined by the income rate, (miners working)
+    Task[5] = Why;
+}
+
+void startTask(array<int, 7> &Task, Unit builder, TilePosition targetBuildLocation)
+{
+    //Unit builder = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), Task[3]); //the task has an available worker assigned
+    //int builderID = builder->getID();
+    //TilePosition targetBuildLocation; //TODO: improve space allocation
+    //targetBuildLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, builder->getTilePosition());
     //TODO: better target location method needed
     
     switch (Task[2])
     {
 
-    case (int)action::BuildSupplyDepot:
+        case (int)action::BuildSupplyDepot:
 
-        BuildManager::buildBuilding(builder, BWAPI::UnitTypes::Terran_Supply_Depot, Colors::Blue, targetBuildLocation);
-        Task[5] = (int)taskStatus::Assigned; //make sure nothings steals the minerals until it starts
-        Task[0] = Broodwar->getFrameCount(); //reset timer
-        Task[1] = 200; //check if an error happend
-        break; //optional
-    case (int)action::BuildBarrack:
+            BuildManager::buildBuilding(builder, UnitTypes::Terran_Supply_Depot, Colors::Blue, targetBuildLocation);
+        
+            break; //optional
+        case (int)action::BuildBarrack:
 
-        BuildManager::buildBuilding(builder, BWAPI::UnitTypes::Terran_Barracks, Colors::Green, targetBuildLocation);
-        Task[5] = (int)taskStatus::Assigned;
-        Task[0] = Broodwar->getFrameCount(); //reset timer
-        Task[1] = 200; //check if an error happend)
-        break; //optional
+            BuildManager::buildBuilding(builder, UnitTypes::Terran_Barracks, Colors::Green, targetBuildLocation);
+        
+            break; //optional
 
-     // you can have any number of case statements.
-    default: //Optional
-        //statement(s);
-        break;
+         // you can have any number of case statements.
+        default: //Optional
+            //statement(s);
+            break;
     }
+
+    callMeLater(Task, 200, (int)taskStatus::PendingStart); //things can happen during travel time
+}
+
+TilePosition returnBuildPosition(int action, Unit SCV)
+{
+    TilePosition myBuildingLocation;
+    switch (action)
+    {
+        case (int)action::BuildSupplyDepot:
+
+            myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, SCV->getTilePosition());
+            break; //optional
+        case (int)action::BuildBarrack:
+
+            myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition());
+            break; //optional
+
+         // you can have any number of case statements.
+        default: //Optional
+            myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition());
+            //statement(s);
+            break;
+    }
+    return myBuildingLocation;
 }
 
 #pragma endregion
@@ -332,7 +392,7 @@ void productionManager()
             CommMngr::buildSCVs(commandCenters);//train SCVs until 50
         }
         
-        CommMngr::trainMarines(UnitFun::getListofUnitType(BWAPI::UnitTypes::Terran_Barracks, Broodwar->self()->getUnits(),deadUnits));//pump marines
+        CommMngr::trainMarines(UnitFun::getListofUnitType(UnitTypes::Terran_Barracks, Broodwar->self()->getUnits(),deadUnits));//pump marines
 
         if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && BuildingCount[2] < maxBuilding[2] && UnitCount[0] > 10)
         {            
@@ -356,7 +416,7 @@ void productionManager()
     }
 }
 
-void taskManager(std::list<std::array<int, 7>> &myTaskQueue)
+void taskManager(list<array<int, 7>> &myTaskQueue)
 {
     //if my task status is 0, not started, check timestamp
     //0 created, 1 reviewed but no resources to assign, 2 assigned with resources, 3 started, 4 completed, 5 cancel
@@ -369,30 +429,40 @@ void taskManager(std::list<std::array<int, 7>> &myTaskQueue)
             && taskStatus != (int)taskStatus::Started
             && taskStatus != (int)taskStatus::Completed
             && taskStatus != (int)taskStatus::Cancelled
-            && taskStatus != (int)taskStatus::Assigned)
+            && taskStatus != (int)taskStatus::PendingStart)
         {
-            if (TaskFun::mineralsAvailable(task, Broodwar->self()->minerals()) && TaskFun::gasAvailable(task, Broodwar->self()->gas())) //and location available
+            if (TaskFun::mineralsAvailable(task, Broodwar->self()->minerals()) && 
+                TaskFun::gasAvailable(task, Broodwar->self()->gas())) //and location available
             {
                 //assign SCV
                 Unit SCV = UnitFun::getWorker(commandCenters.front(), Miners, Builders, supplyProviderType);
                 int id = SCV->getID();
-                task[3] = id; //assign the worker id to the task
-                startTask(task);
+
+                TilePosition targetBuildLocation = returnBuildPosition(task[2],SCV);
+                task[3] = id; //pass the worker id to the task
+
+                startTask(task, SCV, targetBuildLocation);
             }
             else
             {
                 //do we have resources? assign, no? set callback time
-                task[0] = Broodwar->getFrameCount(); //reset timer
-                task[1] = 200; //frames, should be determined by the income rate, (miners working)
-                task[5] = (int)taskStatus::waitingMin;
+                callMeLater(task, 200, (int)taskStatus::waitingMin);
+
+                //task[0] = Broodwar->getFrameCount(); //reset timer
+                //task[1] = 200; //frames, should be determined by the income rate, (miners working)
+                //task[5] = (int)taskStatus::waitingMin;
             }
         }
-        else if (Broodwar->getFrameCount() > (task[0] + task[1]) && taskStatus == (int)taskStatus::Assigned)
+        else if (Broodwar->getFrameCount() > (task[0] + task[1]) && taskStatus == (int)taskStatus::PendingStart)
         {
             task[5] = (int)taskStatus::Cancelled;
             Broodwar->sendText("TaskMngr: Failed to start task id: %d : ", task[6]); //for some error
             Unit builder = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), task[3]);
-            Broodwar->setScreenPosition(builder->getPosition());
+
+            Position myPos(Broodwar->getScreenPosition().x + builder->getPosition().x, 
+                Broodwar->getScreenPosition().y + builder->getPosition().y);
+
+            //Broodwar->setScreenPosition(myPos);
         }
     }
 }
@@ -416,7 +486,7 @@ void ExampleAIModule::onFrame()
     }
 }
 
-void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
+void ExampleAIModule::onUnitCreate(Unit unit)
 {
 
     if (IsOwned(unit))
@@ -432,8 +502,8 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
             int BuildingID = unit->getID();
 
 
-            std::array<int, 7> mytask = {0,0,0,0,0,0,0};
-            std::array<int, 7>* pointer = TaskFun::findTaskAssignedToUnit(builderID, taskQueue);
+            array<int, 7> mytask = {0,0,0,0,0,0,0};
+            array<int, 7>* pointer = TaskFun::findTaskAssignedToUnit(builderID, taskQueue);
             if (pointer != nullptr)
             {
                 mytask = *pointer;
@@ -467,13 +537,13 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
     }
 }
 
-void ExampleAIModule::onUnitComplete(BWAPI::Unit unit)
+void ExampleAIModule::onUnitComplete(Unit unit)
 {
     if (IsOwned(unit))
     {
         if (taskQueue.size() != 0 && !unit->canAttack()) //avoid running in buildings
         {
-            std::array<int, 7> mytask = *TaskFun::findTaskAssignedToUnit(unit->getID(),taskQueue);
+            array<int, 7> mytask = *TaskFun::findTaskAssignedToUnit(unit->getID(),taskQueue);
 
             if (TaskFun::taskStatusUpdate(unit->getID(), taskQueue, unit->getID(), (int)taskStatus::Completed))
             {
@@ -491,19 +561,20 @@ void ExampleAIModule::onUnitComplete(BWAPI::Unit unit)
     
 }
 
-void ExampleAIModule::onUnitDestroy(BWAPI::Unit unit)
+void ExampleAIModule::onUnitDestroy(Unit unit)
 {
-    updateUnitCount(false, unit);
+   
     if (IsOwned(unit))
     {
+        updateUnitCount(false, unit);
         deadUnits.push_back(unit->getID());
     }
 
 }
 
-void ExampleAIModule::onSendText(std::string text)
+void ExampleAIModule::onSendText(string text)
 { 
-    Position myPos(Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x, Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
+    Position myPos = auxFun::getMousePosition();
     if (text == "b")
     {
         Broodwar->sendText("power overwhelming");      
@@ -514,15 +585,15 @@ void ExampleAIModule::onSendText(std::string text)
     }
     if (text == "'")
     {
-        CommMngr::attackUnits(UnitFun::getListofUnitType(BWAPI::UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
+        CommMngr::attackUnits(UnitFun::getListofUnitType(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
     }
     if (text == ";")
     {
-        CommMngr::moveUnits(UnitFun::getListofUnitType(BWAPI::UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
+        CommMngr::moveUnits(UnitFun::getListofUnitType(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
     }
     if (text == "p")
     {       
-        CommMngr::setRallyPoint(UnitFun::getListofUnitType(BWAPI::UnitTypes::Terran_Barracks, Broodwar->self()->getUnits(), deadUnits), myPos);
+        CommMngr::setRallyPoint(UnitFun::getListofUnitType(UnitTypes::Terran_Barracks, Broodwar->self()->getUnits(), deadUnits), myPos);
     }
     if (text == "q")
     {
@@ -540,13 +611,17 @@ void ExampleAIModule::onSendText(std::string text)
     {
         Unit builder = UnitFun::returnFirstAvaibleBuilder(Builders);
         builder->move(myPos);
-        builder->build(BWAPI::UnitTypes::Terran_Command_Center, builder->getTilePosition());
+        builder->build(UnitTypes::Terran_Command_Center, builder->getTilePosition());
     }
     if (text == "e")
     {
         Unit builder = UnitFun::returnFirstAvaibleBuilder(Builders);
         builder->move(myPos);
-        builder->build(BWAPI::UnitTypes::Terran_Engineering_Bay, builder->getTilePosition());
+        builder->build(UnitTypes::Terran_Engineering_Bay, builder->getTilePosition());
+    }
+    if (text == "read")
+    {
+        readSettings();
     }
     // Send the text to the game if it is not being processed.
     Broodwar->sendText("%s", text.c_str());
@@ -561,9 +636,10 @@ void ExampleAIModule::onSendText(std::string text)
 
 void ExampleAIModule::onStart()
 {
+    readSettingsFile();
     // Print the map name.
-    // BWAPI returns std::string when retrieving a string, don't forget to add .c_str() when printing!
-    //Broodwar << "The map is  " << Broodwar->mapName() << "!" << std::endl;
+    // BWAPI returns string when retrieving a string, don't forget to add .c_str() when printing!
+    //Broodwar << "The map is  " << Broodwar->mapName() << "!" << endl;
 
     // Enable the UserInput flag, which allows us to control the bot and type messages.
     Broodwar->enableFlag(Flag::UserInput);
@@ -580,15 +656,15 @@ void ExampleAIModule::onStart()
     {
 
         // Announce the players in the replay
-        Broodwar << "The following players are in this replay:" << std::endl;
+        Broodwar << "The following players are in this replay:" << endl;
 
-        // Iterate all the players in the game using a std:: iterator
+        // Iterate all the players in the game using a  iterator
         Playerset players = Broodwar->getPlayers();
         for (auto p : players)
         {
             // Only print the player if they are not an observer
             if (!p->isObserver())
-                Broodwar << p->getName() << ", playing as " << p->getRace() << std::endl;
+                Broodwar << p->getName() << ", playing as " << p->getRace() << endl;
         }
 
     }
@@ -598,7 +674,7 @@ void ExampleAIModule::onStart()
         // Retrieve you and your enemy's races. enemy() will just return the first enemy.
         // If you wish to deal with multiple enemies then you must use enemies().
         if (Broodwar->enemy()) // First make sure there is an enemy
-            Broodwar << "The matchup is " << Broodwar->self()->getRace() << " vs " << Broodwar->enemy()->getRace() << std::endl;
+            Broodwar << "The matchup is " << Broodwar->self()->getRace() << " vs " << Broodwar->enemy()->getRace() << endl;
     }
 
 }
@@ -607,25 +683,25 @@ void ExampleAIModule::onStart()
 
 #pragma region OtherEvents
 
-void ExampleAIModule::onReceiveText(BWAPI::Player player, std::string text)
+void ExampleAIModule::onReceiveText(Player player, string text)
 {
     // Parse the received text
-    Broodwar << player->getName() << " said \"" << text << "\"" << std::endl;
+    Broodwar << player->getName() << " said \"" << text << "\"" << endl;
 }
 
-void ExampleAIModule::onUnitDiscover(BWAPI::Unit unit)
+void ExampleAIModule::onUnitDiscover(Unit unit)
 {
 }
 
-void ExampleAIModule::onUnitEvade(BWAPI::Unit unit)
+void ExampleAIModule::onUnitEvade(Unit unit)
 {
 }
 
-void ExampleAIModule::onUnitShow(BWAPI::Unit unit)
+void ExampleAIModule::onUnitShow(Unit unit)
 {
 }
 
-void ExampleAIModule::onUnitHide(BWAPI::Unit unit)
+void ExampleAIModule::onUnitHide(Unit unit)
 {
 }
 
@@ -643,16 +719,16 @@ void ExampleAIModule::onEnd(bool isWinner)
 #pragma region NotUsedEvents
 
 //not useful ... yet
-void ExampleAIModule::onSaveGame(std::string gameName)
+void ExampleAIModule::onSaveGame(string gameName)
 {
-    Broodwar << "The game was saved to \"" << gameName << "\"" << std::endl;
+    Broodwar << "The game was saved to \"" << gameName << "\"" << endl;
 }
 
-void ExampleAIModule::onUnitRenegade(BWAPI::Unit unit)
+void ExampleAIModule::onUnitRenegade(Unit unit)
 {
 }
 
-void ExampleAIModule::onUnitMorph(BWAPI::Unit unit)
+void ExampleAIModule::onUnitMorph(Unit unit)
 {
     if (Broodwar->isReplay())
     {
@@ -667,21 +743,21 @@ void ExampleAIModule::onUnitMorph(BWAPI::Unit unit)
     }
 }
 
-void ExampleAIModule::onPlayerLeft(BWAPI::Player player)
+void ExampleAIModule::onPlayerLeft(Player player)
 {
     // Interact verbally with the other players in the game by
     // announcing that the other player has left.
     Broodwar->sendText("Goodbye %s!", player->getName().c_str());
 }
 
-void ExampleAIModule::onNukeDetect(BWAPI::Position target)
+void ExampleAIModule::onNukeDetect(Position target)
 {
 
     // Check if the target is a valid position
     if (target)
     {
         // if so, print the location of the nuclear strike target
-        Broodwar << "Nuclear Launch Detected at " << target << std::endl;
+        Broodwar << "Nuclear Launch Detected at " << target << endl;
     }
     else
     {

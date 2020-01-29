@@ -20,7 +20,7 @@ public:
 enum class taskStatus {
     Created,
     Reviewed,
-    Assigned,  // has an SCV ID assign to build, or the building ID to research upgrade 
+    PendingStart,  // has an SCV ID assign to build, or the building ID to research upgrade 
     waitingMin,  //the task is waiting for minerals
     waitingGas, //the task is waiting for gas
     waitingClear, // the task is waiting for the building place to clear, or the building to stop to add-on

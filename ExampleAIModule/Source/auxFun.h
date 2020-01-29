@@ -9,5 +9,6 @@ public:
 	static bool validUnit(BWAPI::Unit u, std::list<int> deadUnits);
 	static bool validFrame();
 	static bool isUnitDead(std::list<int>& deadUnits, int id);
+	static BWAPI::Position getMousePosition();
 };
 
