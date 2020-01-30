@@ -7,9 +7,13 @@
 #include <fstream>
 #include <array>
 #include "TaskFun.h"
+#include <windows.h>
+
 using namespace BWAPI;
 using namespace Filter;
 using namespace std;
+
+//using namespace WinUser;
 
 int UnitCount[2] = {0,0}; //SCV,Marines, Medics, etc
 int maxUnit[2] = {50,150}; //SCV,Marines, Medics, etc
@@ -543,7 +547,12 @@ void ExampleAIModule::onUnitComplete(Unit unit)
     {
         if (taskQueue.size() != 0 && !unit->canAttack()) //avoid running in buildings
         {
-            array<int, 7> mytask = *TaskFun::findTaskAssignedToUnit(unit->getID(),taskQueue);
+            array<int, 7> mytask = { 0,0,0,0,0,0,0 };
+            array<int, 7>* pointer = TaskFun::findTaskAssignedToUnit(unit->getID(), taskQueue);
+            if (pointer != nullptr)
+            {
+                mytask = *pointer;
+            }
 
             if (TaskFun::taskStatusUpdate(unit->getID(), taskQueue, unit->getID(), (int)taskStatus::Completed))
             {
@@ -561,6 +570,34 @@ void ExampleAIModule::onUnitComplete(Unit unit)
     
 }
 
+void MouseMove(int x, int y)
+{
+    double fScreenWidth=GetSystemMetrics(SM_CXSCREEN) - 1;
+    double fScreenHeight=GetSystemMetrics(SM_CYSCREEN) - 1;
+    double fx = x * (65535.0f / fScreenWidth);
+    double fy = y * (65535.0f / fScreenHeight);
+    INPUT Input = { 0 };
+    Input.type = INPUT_MOUSE;
+    Input.mi.dwFlags = MOUSEEVENTF_MOVE;
+    //Input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
+    Input.mi.dx = fx;
+    Input.mi.dy = fy;
+    ::SendInput(1, &Input, sizeof(INPUT));
+}
+void LeftClick()
+{
+    INPUT    Input = { 0 };
+    // left down 
+    Input.type = INPUT_MOUSE;
+    Input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+    ::SendInput(1, &Input, sizeof(INPUT));
+
+    // left up
+    ::ZeroMemory(&Input, sizeof(INPUT));
+    Input.type = INPUT_MOUSE;
+    Input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
+    ::SendInput(1, &Input, sizeof(INPUT));
+}
 void ExampleAIModule::onUnitDestroy(Unit unit)
 {
    
@@ -622,6 +659,39 @@ void ExampleAIModule::onSendText(string text)
     if (text == "read")
     {
         readSettings();
+    }
+    if (text == "u")
+    {
+        //Broodwar->canBuildHere
+        //Broodwar->elapsedTime
+        //Broodwar->getAPM
+        //Broodwar->getSelectedUnits
+        //Broodwar->getUnit // need to implemet
+        //Broodwar->hasPath
+        //Broodwar->isExplored
+        //Broodwar->issueCommand
+        //Broodwar->mapWidth
+        //Broodwar->pingMinimap
+        //Broodwar->printf        
+
+        static bool setGui = false;
+        
+        Broodwar->setGUI(setGui);
+        setGui = !setGui;
+        Broodwar->printf("Map x: %d y: %d", Broodwar->mapWidth(), Broodwar->mapHeight());
+        Unitset myUnits = Broodwar->getSelectedUnits();
+        for (auto& u : myUnits)
+        {
+            int x = u->getTilePosition().x;
+            int y = u->getTilePosition().y;
+            Broodwar->printf("x: %d y: %d",x,y);
+
+            LeftClick();
+            //u->rightClick(auxFun::getMousePosition(), false);
+            
+        }
+
+        
     }
     // Send the text to the game if it is not being processed.
     Broodwar->sendText("%s", text.c_str());
