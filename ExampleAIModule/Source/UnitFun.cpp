@@ -21,18 +21,21 @@ using namespace Filter;
 //    return myUnit;
 //}
 
-Unit UnitFun::returnUnitByID(Unitset Units, int ID)
+Unit UnitFun::returnUnitByID( int ID)
 {
-    //TODO: TaskManager is not assigning the SCV to build, error
-    Unit myUnit=NULL;
 
-    for (auto& u : Units)
+    
+    //TODO: TaskManager is not assigning the SCV to build, error
+	
+    Unit myUnit= Broodwar->getUnit(ID);
+
+    /*for (auto& u : Units)
     {
         if (u->getID() == ID)
         {
             myUnit = u;
         }
-    }
+    }*/
 
     return myUnit;
 }
@@ -54,7 +57,7 @@ Unit UnitFun::returnFirstAvaibleBuilder(std::list<int> Builders)
     Unit builder = NULL;
     for (auto& u : Builders)
     {
-        Unit myBuilder = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), u);
+        Unit myBuilder = UnitFun::returnUnitByID( u);
         //Unit myBuilder = UnitFun::getUnitByID(workers, u);
 
         if (myBuilder != NULL)
@@ -75,7 +78,7 @@ Unit UnitFun::getWorker(Unit CommandCenter, std::list<int> &Miners, std::list<in
 {
     Unit worker;
 
-    if (Builders.size() != 0)
+    if (!Builders.empty())
     {
         worker = UnitFun::returnFirstAvaibleBuilder(Builders);
         //worker = getUnitByID(workers,Builders.front()); //needs improvement

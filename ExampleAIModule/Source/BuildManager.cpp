@@ -75,7 +75,7 @@ void BuildManager::antiSpammingDepots(Unit commandCenter, Color color, int offSe
         for (int i = 0; i < numberNeeded; i++)
         {
             TilePosition targetBuildLocation;
-            if (supplyDepots.size() != 0)
+            if (!supplyDepots.empty())
             {
                 targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, supplyDepots.front()->getTilePosition());
             }
@@ -103,7 +103,7 @@ void BuildManager::antiSpammingBarracks(Unit commandCenter, Color color, int off
         for (int i = 0; i < numberNeeded; i++)
         {
             TilePosition targetBuildLocation;
-            if (barracks.size() != 0)
+            if (!barracks.empty())
             {
                 targetBuildLocation = Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Supply_Depot, barracks.front()->getTilePosition());
             }

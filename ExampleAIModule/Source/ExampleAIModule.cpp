@@ -398,7 +398,9 @@ void productionManager()
         
         CommMngr::trainMarines(UnitFun::getListofUnitType(UnitTypes::Terran_Barracks, Broodwar->self()->getUnits(),deadUnits));//pump marines
 
-        if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && BuildingCount[2] < maxBuilding[2] && UnitCount[0] > 10)
+        if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && 
+            (BuildingCount[2] < maxBuilding[2]) 
+            && (UnitCount[0] > 10))
         {            
             //Test isMyTaskInQueue
             if (!TaskFun::isMyTaskInQueue(taskQueue,(int)taskOwner::ProductionManager, (int)action::BuildBarrack))
@@ -411,7 +413,7 @@ void productionManager()
     {
         if (!TaskFun::isMyTaskInQueue(taskQueue, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot) && Broodwar->self()->supplyTotal() != 400)
         {
-            for (size_t i = 0; i < roomNeeded; i+=7)
+            for (int i = 0; i < roomNeeded; i+=7)
             {
                 CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot);
             }
@@ -461,10 +463,10 @@ void taskManager(list<array<int, 7>> &myTaskQueue)
         {
             task[5] = (int)taskStatus::Cancelled;
             Broodwar->sendText("TaskMngr: Failed to start task id: %d : ", task[6]); //for some error
-            Unit builder = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), task[3]);
+            //Unit builder = UnitFun::returnUnitByID( task[3]);
 
-            Position myPos(Broodwar->getScreenPosition().x + builder->getPosition().x, 
-                Broodwar->getScreenPosition().y + builder->getPosition().y);
+            //Position myPos(Broodwar->getScreenPosition().x + builder->getPosition().x, 
+                //Broodwar->getScreenPosition().y + builder->getPosition().y);
 
             //Broodwar->setScreenPosition(myPos);
         }
@@ -497,7 +499,7 @@ void ExampleAIModule::onUnitCreate(Unit unit)
     {
         updateUnitCount(true, unit);
 
-        if (taskQueue.size() != 0 && !unit->canAttack()
+        if (!taskQueue.empty() && !unit->canAttack()
             && unit->getType() != UnitTypes::Terran_SCV
             && unit->getType() != UnitTypes::Terran_Marine)
         {
@@ -507,11 +509,11 @@ void ExampleAIModule::onUnitCreate(Unit unit)
 
 
             array<int, 7> mytask = {0,0,0,0,0,0,0};
-            array<int, 7>* pointer = TaskFun::findTaskAssignedToUnit(builderID, taskQueue);
+            /*array<int, 7>* pointer = TaskFun::findTaskAssignedToUnit(builderID, taskQueue);
             if (pointer != nullptr)
             {
                 mytask = *pointer;
-            }
+            }*/
 
             
             //only for buildings
@@ -545,14 +547,14 @@ void ExampleAIModule::onUnitComplete(Unit unit)
 {
     if (IsOwned(unit))
     {
-        if (taskQueue.size() != 0 && !unit->canAttack()) //avoid running in buildings
+        if (!taskQueue.empty() && !unit->canAttack()) //avoid running in buildings
         {
             array<int, 7> mytask = { 0,0,0,0,0,0,0 };
-            array<int, 7>* pointer = TaskFun::findTaskAssignedToUnit(unit->getID(), taskQueue);
+            /*array<int, 7>* pointer = TaskFun::findTaskAssignedToUnit(unit->getID(), taskQueue);
             if (pointer != nullptr)
             {
                 mytask = *pointer;
-            }
+            }*/
 
             if (TaskFun::taskStatusUpdate(unit->getID(), taskQueue, unit->getID(), (int)taskStatus::Completed))
             {
@@ -638,7 +640,7 @@ void ExampleAIModule::onSendText(string text)
         for (auto& u : Miners)
         {            
             //Unit miner = UnitFun::getUnitByID(workers, u);
-            Unit miner = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), u);
+            Unit miner = UnitFun::returnUnitByID( u);
             miner->move(myPos);
             miner->stop(true);
             miner->gather(miner->getClosestUnit(IsMineralField),true); //the everyframe logic messes up this
@@ -686,7 +688,7 @@ void ExampleAIModule::onSendText(string text)
             int y = u->getTilePosition().y;
             Broodwar->printf("x: %d y: %d",x,y);
 
-            LeftClick();
+            LeftClick();// I cant believe this works!
             //u->rightClick(auxFun::getMousePosition(), false);
             
         }

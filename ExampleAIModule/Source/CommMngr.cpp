@@ -30,7 +30,7 @@ void CommMngr::scvManager(std::list<int> Miners)
     for (auto& ID : Miners)
     {
         //Unit u = UnitFun::getUnitByID(workers, ID);
-        Unit u = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), ID);
+        Unit u = UnitFun::returnUnitByID( ID);
         if (u != NULL)
         {
             if (u->isIdle())

@@ -7,7 +7,7 @@ class UnitFun
 public:
 	
 	//static Unit getUnitByID(std::list<Unit> Units, int ID);
-	static Unit returnUnitByID(Unitset Units, int ID);//already discards destroyed units
+	static Unit returnUnitByID( int ID);//already discards destroyed units
 
 	static Unit getSCVfromCC(Unit CommandCenter, std::list<int> &Miners, std::list<int> &Builders, UnitType supplyProviderType);
 
