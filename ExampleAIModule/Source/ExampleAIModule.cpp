@@ -14,6 +14,14 @@ using namespace Filter;
 using namespace std;
 
 //using namespace WinUser;
+//TODO: fix bug, TASK ID is not being represented corectly
+//ADD building map file, where to build my buildings location
+//Fix bug, when using scan it crashes! recognize the spell unit
+//Implement error handling
+//Add logic to build turrets
+//Add one button commands
+//Able to create control groups with more than 12 units
+
 
 int UnitCount[2] = {0,0}; //SCV,Marines, Medics, etc
 int maxUnit[2] = {50,150}; //SCV,Marines, Medics, etc
@@ -164,7 +172,7 @@ void updateUnitCount(bool created, Unit unit)
 void displayInsights()
 {
     int supplyLeft2 = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();
-    Broodwar->drawTextScreen(0, 0, "FPS: %d", Broodwar->getFPS());
+    Broodwar->drawTextScreen(0, 0, "FPS!: %d", Broodwar->getFPS());
     //Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
     Broodwar->drawTextScreen(45, 0, "Brks: %d", BuildingCount[2]);
     Broodwar->drawTextScreen(90, 0, "Mrn: %d", UnitCount[1]);
