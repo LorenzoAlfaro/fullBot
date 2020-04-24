@@ -498,6 +498,13 @@ void ExampleAIModule::onFrame()
         taskManager(taskQueue);
         productionManager(); //eventually productionManager will be another task run by taskManager    
     }
+
+    if (GetKeyState('A') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
+    {
+        Position myPos = auxFun::getMousePosition();
+        CommMngr::attackUnits(UnitFun::getListofUnitType(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
+        // Do stuff
+    }
 }
 
 void ExampleAIModule::onUnitCreate(Unit unit)
