@@ -19,8 +19,9 @@ using namespace std;
 //Fix bug, when using scan it crashes! recognize the spell unit
 //Implement error handling
 //Add logic to build turrets
-//Add one button commands
 //Able to create control groups with more than 12 units
+
+//Add one button commands: DONE
 
 
 int UnitCount[2] = {0,0}; //SCV,Marines, Medics, etc
@@ -88,6 +89,48 @@ int readSettings()
 
     else Broodwar->sendText("Unable to open file");//cout << "Unable to open file";
     return 0;
+}
+void MouseMove(int x, int y)
+{
+    double fScreenWidth = GetSystemMetrics(SM_CXSCREEN) - 1;
+    double fScreenHeight = GetSystemMetrics(SM_CYSCREEN) - 1;
+    double fx = x * (65535.0f / fScreenWidth);
+    double fy = y * (65535.0f / fScreenHeight);
+    INPUT Input = { 0 };
+    Input.type = INPUT_MOUSE;
+    Input.mi.dwFlags = MOUSEEVENTF_MOVE;
+    //Input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
+    Input.mi.dx = fx;
+    Input.mi.dy = fy;
+    ::SendInput(1, &Input, sizeof(INPUT));
+}
+void LeftClick()
+{
+    INPUT    Input = { 0 };
+    // left down 
+    Input.type = INPUT_MOUSE;
+    Input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+    ::SendInput(1, &Input, sizeof(INPUT));
+
+    // left up
+    ::ZeroMemory(&Input, sizeof(INPUT));
+    Input.type = INPUT_MOUSE;
+    Input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
+    ::SendInput(1, &Input, sizeof(INPUT));
+}
+void RightClick()
+{
+    INPUT    Input = { 0 };
+    // left down 
+    Input.type = INPUT_MOUSE;
+    Input.mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
+    ::SendInput(1, &Input, sizeof(INPUT));
+
+    // left up
+    ::ZeroMemory(&Input, sizeof(INPUT));
+    Input.type = INPUT_MOUSE;
+    Input.mi.dwFlags = MOUSEEVENTF_RIGHTUP;
+    ::SendInput(1, &Input, sizeof(INPUT));
 }
 
 #pragma region SupplyInfoMethods
@@ -505,6 +548,43 @@ void ExampleAIModule::onFrame()
         CommMngr::attackUnits(UnitFun::getListofUnitType(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
         // Do stuff
     }
+    if (GetKeyState('Q') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
+    {
+        Position myPos = auxFun::getMousePosition();
+        //CommMngr::attackUnits(UnitFun::getListofUnitType(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
+
+        Unitset myUnits = Broodwar->getSelectedUnits();
+        for (auto& u : myUnits)
+        {
+            //int x = u->getTilePosition().x;
+            //int y = u->getTilePosition().y;
+            //Broodwar->printf("x: %d y: %d", x, y);
+
+            LeftClick();// I cant believe this works!
+            //u->rightClick(auxFun::getMousePosition(), false);
+
+        }
+        // Do stuff
+    }
+
+    if (GetKeyState('W') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
+    {
+        Position myPos = auxFun::getMousePosition();
+        //CommMngr::attackUnits(UnitFun::getListofUnitType(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
+
+        Unitset myUnits = Broodwar->getSelectedUnits();
+        for (auto& u : myUnits)
+        {
+            //int x = u->getTilePosition().x;
+            //int y = u->getTilePosition().y;
+            //Broodwar->printf("x: %d y: %d", x, y);
+
+            RightClick();// I cant believe this works!
+            //u->rightClick(auxFun::getMousePosition(), false);
+
+        }
+        // Do stuff
+    }
 }
 
 void ExampleAIModule::onUnitCreate(Unit unit)
@@ -587,34 +667,7 @@ void ExampleAIModule::onUnitComplete(Unit unit)
     
 }
 
-void MouseMove(int x, int y)
-{
-    double fScreenWidth=GetSystemMetrics(SM_CXSCREEN) - 1;
-    double fScreenHeight=GetSystemMetrics(SM_CYSCREEN) - 1;
-    double fx = x * (65535.0f / fScreenWidth);
-    double fy = y * (65535.0f / fScreenHeight);
-    INPUT Input = { 0 };
-    Input.type = INPUT_MOUSE;
-    Input.mi.dwFlags = MOUSEEVENTF_MOVE;
-    //Input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
-    Input.mi.dx = fx;
-    Input.mi.dy = fy;
-    ::SendInput(1, &Input, sizeof(INPUT));
-}
-void LeftClick()
-{
-    INPUT    Input = { 0 };
-    // left down 
-    Input.type = INPUT_MOUSE;
-    Input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-    ::SendInput(1, &Input, sizeof(INPUT));
 
-    // left up
-    ::ZeroMemory(&Input, sizeof(INPUT));
-    Input.type = INPUT_MOUSE;
-    Input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
-    ::SendInput(1, &Input, sizeof(INPUT));
-}
 void ExampleAIModule::onUnitDestroy(Unit unit)
 {
    
