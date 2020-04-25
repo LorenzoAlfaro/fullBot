@@ -24,9 +24,9 @@ std::array<int, 7>* TaskFun::findTaskAssignedToUnit(int UnitID, std::list<std::a
     {
         return nullptr;
     }
-
     
 }
+
 std::array<int, 7>* TaskFun::findTaskAssignedToID(int TaskID, std::list<std::array<int, 7>>& Tasks)
 {
     bool found = false;
@@ -39,6 +39,7 @@ std::array<int, 7>* TaskFun::findTaskAssignedToID(int TaskID, std::list<std::arr
             mytask = &task;
         }
     }
+
     if (found)
     {
         return mytask;
@@ -49,7 +50,7 @@ std::array<int, 7>* TaskFun::findTaskAssignedToID(int TaskID, std::list<std::arr
     }
 }
 
-bool TaskFun::isMyTaskInQueue(std::list<std::array<int, 7>> &myTaskQueue, int taskOwner, int action)
+bool TaskFun::TaskQueued(std::list<std::array<int, 7>> &myTaskQueue, int taskOwner, int action)
 {
     bool taskInQueue = false;
     for (auto& task : myTaskQueue)
@@ -91,36 +92,37 @@ std::array<int, 2> TaskFun::resourceCost(std::array<int, 7> Task)
         break;
 
     default:
-
+        price[0] = 0;
+        price[1] = 0;
         break;
     }
     return price;
 }
 
 bool TaskFun::mineralsAvailable(std::array<int, 7> task, int CurrentMinerals)
-{
-    bool resourcesAvailabilty = false;
-
+{    
     std::array<int, 2> price = resourceCost(task);
-
     if (CurrentMinerals >= price[0])
-    {
-        resourcesAvailabilty = true;
+    {        
+        return true;
     }
-    return resourcesAvailabilty;
+    else
+    {
+        return false;
+    }    
 }
 
 bool TaskFun::gasAvailable(std::array<int, 7> task, int CurrentGas)
-{
-    bool resourcesAvailabilty = false;
-
+{    
     std::array<int, 2> price = TaskFun::resourceCost(task);
-
     if (CurrentGas >= price[1])
     {
-        resourcesAvailabilty = true;
+        return true;
     }
-    return resourcesAvailabilty;
+    else
+    {
+        return false;
+    }    
 }
 
 bool TaskFun::tasksWaitingResources(std::list<std::array<int, 7>> &myTaskQueue)
@@ -142,13 +144,7 @@ bool TaskFun::tasksWaitingResources(std::list<std::array<int, 7>> &myTaskQueue)
 
 void TaskFun::taskStartedUpdate(std::list<std::array<int, 7>> &myTaskQueue, Unit Building)
 {
-    Unit builder = Building->getBuildUnit();
-    //std::array<int, 7> currentTask = *TaskFun::findTaskAssignedToID(builder->getID(), myTaskQueue);//seems the addres is setup here
-
-    //int point = TaskFun::findTaskAssignedToID(builder->getID(), myTaskQueue);
-
-    //currentTask = *TaskFun::findTaskAssignedToID(builder->getID(), myTaskQueue);
-
+    Unit builder = Building->getBuildUnit();    
     for (auto& task : myTaskQueue)
     {
         if (&task == TaskFun::findTaskAssignedToID(builder->getID(), myTaskQueue))
@@ -156,21 +152,11 @@ void TaskFun::taskStartedUpdate(std::list<std::array<int, 7>> &myTaskQueue, Unit
             task[5] = (int)taskStatus::Started;
             task[3] = Building->getID(); //updated the task scvID to the building currently in progress
         }
-    }
-
-    //in case there is no real task returned
-    //if (currentTask[0] != 0)
-    //{
-    //    currentTask[5] = (int)taskStatus::Started;
-    //    currentTask[3] = Building->getID(); //updated the task scvID to the building currently in progress
-    //}
+    }    
 }
 
 void TaskFun::taskCompleted(std::list<std::array<int, 7>> &myTaskQueue, Unit Building)
-{
-    //Unit builder = Building->getBuildUnit();
-    
-
+{    
     for (auto& task : myTaskQueue)
     {
         if (&task == TaskFun::findTaskAssignedToID(Building->getID(), myTaskQueue))
@@ -178,8 +164,7 @@ void TaskFun::taskCompleted(std::list<std::array<int, 7>> &myTaskQueue, Unit Bui
             task[5] = (int)taskStatus::Completed;
             task[3] = Building->getID(); //updated the task scvID to the building currently in progress
         }
-    }
-    
+    }    
 }
 
 bool TaskFun::taskStatusUpdate(int ID, std::list<std::array<int, 7>> &Tasks, int newID, int newStatus)
@@ -188,10 +173,8 @@ bool TaskFun::taskStatusUpdate(int ID, std::list<std::array<int, 7>> &Tasks, int
     for (auto& task : Tasks)
     {
         if (task[3] == ID)
-        {
-            //task[5] = (int)taskStatus::Started;
-            task[5] = newStatus;
-            //task[3] = Building->getID(); //updated the task scvID to the building currently in progress
+        {            
+            task[5] = newStatus;            
             task[3] = newID;
             updatedTask = true;
         }

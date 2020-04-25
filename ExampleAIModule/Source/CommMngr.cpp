@@ -1,23 +1,26 @@
 #include "CommMngr.h"
 #include "UnitFun.h"
 using namespace Filter;
+using namespace std;
 
 
-void CommMngr::attackUnits(std::list<Unit> units, Position myPos)
+void CommMngr::attackUnits(list<Unit> units, Position myPos)
 {
     for (auto& u : units)
     {        
         u->attack(myPos, false);
     }
 }
-void CommMngr::moveUnits(std::list<Unit> units, Position myPos)
+
+void CommMngr::moveUnits(list<Unit> units, Position myPos)
 {
     for (auto& u : units)
     {
         u->move(myPos, false);
     }
 }
-void CommMngr::setRallyPoint(std::list<Unit> buildings, Position myPos)
+
+void CommMngr::setRallyPoint(list<Unit> buildings, Position myPos)
 {
     for (auto& u : buildings)
     {
@@ -25,24 +28,22 @@ void CommMngr::setRallyPoint(std::list<Unit> buildings, Position myPos)
     }
 }
 
-void CommMngr::scvManager(std::list<int> Miners)
+void CommMngr::scvManager(list<int> Miners)
 {
     for (auto& ID : Miners)
-    {
-        //Unit u = UnitFun::getUnitByID(workers, ID);
-        Unit u = UnitFun::returnUnitByID( ID);
+    {        
+        Unit u = Broodwar->getUnit( ID);
         if (u != NULL)
         {
             if (u->isIdle())
             {
                 u->gather(u->getClosestUnit(IsMineralField || IsRefinery));
             }
-        }
-        
+        }        
     }
 }
 
-void CommMngr::buildSCVs(std::list<Unit> commandCenters)
+void CommMngr::buildSCVs(list<Unit> commandCenters)
 {
     for (auto& u : commandCenters)
     {
@@ -53,7 +54,7 @@ void CommMngr::buildSCVs(std::list<Unit> commandCenters)
     }
 }
 
-void CommMngr::trainMarines(std::list<Unit> barracks)
+void CommMngr::trainMarines(list<Unit> barracks)
 {
     for (auto& u : barracks)
     {

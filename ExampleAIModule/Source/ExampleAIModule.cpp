@@ -22,22 +22,24 @@ using namespace std;
 //Able to create control groups with more than 12 units
 
 //Add one button commands: DONE
+//Useful functions
+//Broodwar->self()->allUnitCount();
+//Broodwar->self()->completedUnitCount();
+//Broodwar->self()->supplyTotal();
+//Broodwar->self()->supplyUsed();
 
-
-int UnitCount[2] = {0,0}; //SCV,Marines, Medics, etc
-int maxUnit[2] = {50,150}; //SCV,Marines, Medics, etc
-int BuildingCount[3]={0,0,0}; //CC, supplydepots, barracks
+#pragma region GameState
+int UnitCount[2] = { 0,0 }; //SCV,Marines, Medics, etc
+int maxUnit[2] = { 50,150 }; //SCV,Marines, Medics, etc
+int BuildingCount[3] = { 0,0,0 }; //CC, supplydepots, barracks
 int maxBuilding[3] = { 3,20,4 }; //CC, supplydepots, barracks
 int deadSCVs = 0;
 int TaskCount = 0; //unique Task ID
-list<array<int,7>> taskQueue; // 0=timeStamp,1=callbacktime,2=action,3=SCVID or build, 4=taskOwner,5=status, 6=uniqueID
-
+list<array<int, 7>> taskQueue; // 0=timeStamp,1=callbacktime,2=action,3=SCVID or build, 4=taskOwner,5=status, 6=uniqueID
+#pragma endregion
 
 #pragma region UnitLists
 list<Unit> commandCenters;
-//list<Unit> workers; //dont try to maitain this
-//list<Unit> barracks;
-//list<Unit> marines;
 list<Unit> supplyDepots;
 
 list<int> Miners; //could be replace byd an array
@@ -57,13 +59,13 @@ int virtualBudget = 0;
 //add an array parallel to the unit array that should be a regulator array, the target array
 #pragma endregion
 
-#pragma region BoolVariable
+#pragma region Boolean Variables
 bool almostSupplyBlocked = false; //when true AI needs to build supplydepots pre emptively
 bool displayStats = false;
 #pragma endregion
 
 //methods
-
+#pragma region ExtraFunctions
 int readSettingsFile()
 {
     ofstream myfile;
@@ -90,6 +92,7 @@ int readSettings()
     else Broodwar->sendText("Unable to open file");//cout << "Unable to open file";
     return 0;
 }
+
 void MouseMove(int x, int y)
 {
     double fScreenWidth = GetSystemMetrics(SM_CXSCREEN) - 1;
@@ -104,6 +107,7 @@ void MouseMove(int x, int y)
     Input.mi.dy = fy;
     ::SendInput(1, &Input, sizeof(INPUT));
 }
+
 void LeftClick()
 {
     INPUT    Input = { 0 };
@@ -118,6 +122,7 @@ void LeftClick()
     Input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
     ::SendInput(1, &Input, sizeof(INPUT));
 }
+
 void RightClick()
 {
     INPUT    Input = { 0 };
@@ -132,6 +137,8 @@ void RightClick()
     Input.mi.dwFlags = MOUSEEVENTF_RIGHTUP;
     ::SendInput(1, &Input, sizeof(INPUT));
 }
+
+#pragma endregion
 
 #pragma region SupplyInfoMethods
 
@@ -232,95 +239,6 @@ void displayInsights()
     
 }
 
-
-#pragma endregion
-
-#pragma region UnitHandler
-
-void supplyBlock(Unit CommandCenter)
-{
-    Error lastErr = Broodwar->getLastError();   
-    BuildManager::createEventTag(CommandCenter, lastErr);            
-    // If we are supply blocked and haven't tried constructing more recently
-    if (lastErr == Errors::Insufficient_Supply )
-    {  
-        BuildManager::antiSpammingDepots(CommandCenter, Colors::Blue, 400, 2, Miners, Builders, supplyProviderType, supplyDepots);        
-        
-    } // closure: insufficient supply
-}
-
-void unitHandler(Unitset units)
-{
-    for (auto& u : units)
-    {
-        // Finally make the unit do some stuff!
-        if (auxFun::validUnit(u, deadUnits))
-        {
-            // If the unit is a worker unit
-            if (u->getType().isWorker())
-            {               
-                // if our worker is idle
-                if (u->isIdle())
-                {
-                    if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && BuildingCount[2] < 4)
-                    {
-                        Unit supplyBuilder = u;
-
-                        TilePosition buildPosition = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, u->getTilePosition());
-                        u->build(UnitTypes::Terran_Barracks, buildPosition);                    
-                        continue; //skip this unit
-                    }
-                    // Order workers carrying a resource to return them to the center,
-                    // otherwise find a mineral patch to harvest.
-                    if (u->isCarryingGas() || u->isCarryingMinerals())
-                    {
-                        u->returnCargo();
-                    }
-                    else if (!u->getPowerUp())  // The worker cannot harvest anything if it
-                    {                             // is carrying a powerup such as a flag
-                      // Harvest from the nearest mineral patch or gas refinery
-                        if (!u->gather(u->getClosestUnit(IsMineralField || IsRefinery)))
-                        {
-                            // If the call fails, then print the last error message
-                            Broodwar << Broodwar->getLastError() << endl;
-                        }
-
-                    } // closure: has no powerup
-                } // closure: if idle
-
-            }
-            else if (u->getType().isResourceDepot()) // A resource depot is a Command Center, Nexus, or Hatchery
-            {                
-                almostSupplyBlocked = false;
-
-                if (supplyLeft < 4) {
-
-                    almostSupplyBlocked = true;
-
-                    supplyBlock(u);
-
-                }
-                // Order the depot to construct more workers! But only when it is idle.
-
-                if (UnitCount[0] < maxUnit[0])
-                {
-                    if (u->isIdle())
-                    {
-                        if (!almostSupplyBlocked)
-                        {
-                            bool failedTrainingSCV = u->train(u->getType().getRace().getWorker());
-
-                            if (!failedTrainingSCV)
-                            {
-                                supplyBlock(u);
-                            }
-                        }
-                    } // closure: failed to train idle unit
-                }
-            }
-        }
-    } // closure: unit iteratore
-}
 #pragma endregion
 
 #pragma region TasksFunctions
@@ -340,7 +258,7 @@ void CreateTask(list<array<int, 7>> &myTaskQueue, int timeStamp, int taskOwner, 
     TaskCount = TaskCount + 1;
 }
 
-void callMeLater(array<int, 7>& Task, int When, int Why)
+void callBack(array<int, 7>& Task, int When, int Why)
 {
     //do we have resources? assign, no? set callback time
     Task[0] = Broodwar->getFrameCount(); //reset timer
@@ -376,7 +294,7 @@ void startTask(array<int, 7> &Task, Unit builder, TilePosition targetBuildLocati
             break;
     }
 
-    callMeLater(Task, 200, (int)taskStatus::PendingStart); //things can happen during travel time
+    callBack(Task, 200, (int)taskStatus::PendingStart); //things can happen during travel time
 }
 
 TilePosition returnBuildPosition(int action, Unit SCV)
@@ -429,16 +347,12 @@ void productionManager()
 {    
     almostSupplyBlocked = false;
     int roomNeeded = auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]);
-
-    //Broodwar->self()->allUnitCount();
-    //Broodwar->self()->completedUnitCount();
-    //Broodwar->self()->supplyTotal();
-    //Broodwar->self()->supplyUsed();
-
+    
     if (supplyLeft < roomNeeded) { //instead of 4,should be the max output of production at a given time
 
         almostSupplyBlocked = true;
     }
+
     CommMngr::scvManager(Miners);//go mine for me minions!
     if (!almostSupplyBlocked && !TaskFun::tasksWaitingResources(taskQueue))
     {
@@ -447,14 +361,14 @@ void productionManager()
             CommMngr::buildSCVs(commandCenters);//train SCVs until 50
         }
         
-        CommMngr::trainMarines(UnitFun::getListofUnitType(UnitTypes::Terran_Barracks, Broodwar->self()->getUnits(),deadUnits));//pump marines
+        CommMngr::trainMarines(UnitFun::getUnitList(UnitTypes::Terran_Barracks, Broodwar->self()->getUnits(),deadUnits));//pump marines
 
         if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && 
             (BuildingCount[2] < maxBuilding[2]) 
             && (UnitCount[0] > 10))
         {            
             //Test isMyTaskInQueue
-            if (!TaskFun::isMyTaskInQueue(taskQueue,(int)taskOwner::ProductionManager, (int)action::BuildBarrack))
+            if (!TaskFun::TaskQueued(taskQueue,(int)taskOwner::ProductionManager, (int)action::BuildBarrack))
             {
                 CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager,(int)action::BuildBarrack);
             }            
@@ -462,13 +376,12 @@ void productionManager()
     }
     else
     {
-        if (!TaskFun::isMyTaskInQueue(taskQueue, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot) && Broodwar->self()->supplyTotal() != 400)
+        if (!TaskFun::TaskQueued(taskQueue, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot) && Broodwar->self()->supplyTotal() != 400)
         {
             for (int i = 0; i < roomNeeded; i+=7)
             {
                 CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot);
-            }
-            
+            }            
         }                
     }
 }
@@ -496,30 +409,21 @@ void taskManager(list<array<int, 7>> &myTaskQueue)
                 int id = SCV->getID();
 
                 TilePosition targetBuildLocation = returnBuildPosition(task[2],SCV);
-                task[3] = id; //pass the worker id to the task
+                //pass the worker id to the task
+                task[3] = id; 
 
                 startTask(task, SCV, targetBuildLocation);
             }
             else
             {
                 //do we have resources? assign, no? set callback time
-                callMeLater(task, 200, (int)taskStatus::waitingMin);
-
-                //task[0] = Broodwar->getFrameCount(); //reset timer
-                //task[1] = 200; //frames, should be determined by the income rate, (miners working)
-                //task[5] = (int)taskStatus::waitingMin;
+                callBack(task, 200, (int)taskStatus::waitingMin);                
             }
         }
         else if (Broodwar->getFrameCount() > (task[0] + task[1]) && taskStatus == (int)taskStatus::PendingStart)
         {
             task[5] = (int)taskStatus::Cancelled;
-            Broodwar->sendText("TaskMngr: Failed to start task id: %d : ", task[6]); //for some error
-            //Unit builder = UnitFun::returnUnitByID( task[3]);
-
-            //Position myPos(Broodwar->getScreenPosition().x + builder->getPosition().x, 
-                //Broodwar->getScreenPosition().y + builder->getPosition().y);
-
-            //Broodwar->setScreenPosition(myPos);
+            Broodwar->sendText("TaskMngr: Failed to start task id: %d : ", task[6]); //for some error            
         }
     }
 }
@@ -545,7 +449,7 @@ void ExampleAIModule::onFrame()
     if (GetKeyState('A') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
     {
         Position myPos = auxFun::getMousePosition();
-        CommMngr::attackUnits(UnitFun::getListofUnitType(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
+        CommMngr::attackUnits(UnitFun::getUnitList(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
         // Do stuff
     }
     if (GetKeyState('Q') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
@@ -573,13 +477,16 @@ void ExampleAIModule::onFrame()
         //CommMngr::attackUnits(UnitFun::getListofUnitType(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
 
         Unitset myUnits = Broodwar->getSelectedUnits();
+
+        RightClick();// I cant believe this works!
+        
         for (auto& u : myUnits)
         {
             //int x = u->getTilePosition().x;
             //int y = u->getTilePosition().y;
             //Broodwar->printf("x: %d y: %d", x, y);
 
-            RightClick();// I cant believe this works!
+            
             //u->rightClick(auxFun::getMousePosition(), false);
 
         }
@@ -667,7 +574,6 @@ void ExampleAIModule::onUnitComplete(Unit unit)
     
 }
 
-
 void ExampleAIModule::onUnitDestroy(Unit unit)
 {
    
@@ -692,15 +598,15 @@ void ExampleAIModule::onSendText(string text)
     }
     if (text == "'")
     {
-        CommMngr::attackUnits(UnitFun::getListofUnitType(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
+        CommMngr::attackUnits(UnitFun::getUnitList(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
     }
     if (text == ";")
     {
-        CommMngr::moveUnits(UnitFun::getListofUnitType(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
+        CommMngr::moveUnits(UnitFun::getUnitList(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
     }
     if (text == "p")
     {       
-        CommMngr::setRallyPoint(UnitFun::getListofUnitType(UnitTypes::Terran_Barracks, Broodwar->self()->getUnits(), deadUnits), myPos);
+        CommMngr::setRallyPoint(UnitFun::getUnitList(UnitTypes::Terran_Barracks, Broodwar->self()->getUnits(), deadUnits), myPos);
     }
     if (text == "q")
     {
@@ -708,7 +614,7 @@ void ExampleAIModule::onSendText(string text)
         for (auto& u : Miners)
         {            
             //Unit miner = UnitFun::getUnitByID(workers, u);
-            Unit miner = UnitFun::returnUnitByID( u);
+            Unit miner = Broodwar->getUnit( u);
             miner->move(myPos);
             miner->stop(true);
             miner->gather(miner->getClosestUnit(IsMineralField),true); //the everyframe logic messes up this
@@ -716,13 +622,13 @@ void ExampleAIModule::onSendText(string text)
     }
     if (text == "w")
     {
-        Unit builder = UnitFun::returnFirstAvaibleBuilder(Builders);
+        Unit builder = UnitFun::getBuilder(Builders);
         builder->move(myPos);
         builder->build(UnitTypes::Terran_Command_Center, builder->getTilePosition());
     }
     if (text == "e")
     {
-        Unit builder = UnitFun::returnFirstAvaibleBuilder(Builders);
+        Unit builder = UnitFun::getBuilder(Builders);
         builder->move(myPos);
         builder->build(UnitTypes::Terran_Engineering_Bay, builder->getTilePosition());
     }

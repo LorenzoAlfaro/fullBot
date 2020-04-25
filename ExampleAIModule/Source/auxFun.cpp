@@ -3,15 +3,12 @@
 
 int auxFun::SupplyTotal(int commandCenterCount, int supplyDepotCount)
 {
-    int total = (commandCenterCount * 10) + (supplyDepotCount * 8);
-    return total;
+    return (commandCenterCount * 10) + (supplyDepotCount * 8);    
 }
-
 
 int auxFun::usedSupplyTotal(int marineCount, int scvCount)
 {
-    int total = (marineCount * 1) + (scvCount * 1);
-    return total;
+    return (marineCount * 1) + (scvCount * 1);    
 }
 
 int auxFun::roomNeeded(int commandCenterCount, int barrackCount)
@@ -37,13 +34,12 @@ bool auxFun::validUnit(BWAPI::Unit u, std::list<int> deadUnits)
                 {
                     if (u->isCompleted() && !u->isConstructing())
                     {
-                        valid = true;
+                        return true;
                     }
                 }
             }
         }
-    }
-    
+    }    
     return valid;
 }
 
@@ -70,7 +66,7 @@ bool auxFun::isUnitDead(std::list<int> &deadUnits, int id)
     {
         if (unit == id) 
         {
-            isDead = true;
+            return true;
         }
     }
     return isDead;
