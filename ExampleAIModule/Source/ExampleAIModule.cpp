@@ -1,13 +1,15 @@
 #include "ExampleAIModule.h"
+
 #include "UnitFun.h"
 #include "BuildManager.h"
 #include "CommMngr.h"
 #include "auxFun.h"
+#include "TaskFun.h"
+
 #include <iostream>
 #include <fstream>
 #include <array>
-#include "TaskFun.h"
-#include <windows.h>
+#include <windows.h> // simulate mouse clicks
 
 using namespace BWAPI;
 using namespace Filter;
