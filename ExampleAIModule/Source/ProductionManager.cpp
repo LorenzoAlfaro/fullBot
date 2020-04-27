@@ -5,7 +5,7 @@
 #include "auxFun.h"
 #include "CommMngr.h"
 
-void ProductionManager::productionManager(int minerals, int gas, int frameCount, list<array<int, 7>>& myTaskQueue, int myTaskCount, list<int> myDeadUnits, int myBuildingCount[], int myUnitCount[], int mySupplyLeft, int myMaxBuilding[],int myMaxUnit[])
+void ProductionManager::productionManager(int minerals, int gas, int frameCount, list<array<int, 12>>& myTaskQueue, int myTaskCount, list<int> myDeadUnits, int myBuildingCount[], int myUnitCount[], int mySupplyLeft, int myMaxBuilding[],int myMaxUnit[])
 {
     bool almostSupplyBlocked = false;
     int roomNeeded = auxFun::roomNeeded(myBuildingCount[0], myBuildingCount[2]);
@@ -29,7 +29,7 @@ void ProductionManager::productionManager(int minerals, int gas, int frameCount,
             //Test isMyTaskInQueue
             if (!TaskFun::TaskQueued(myTaskQueue, (int)taskOwner::ProductionManager, (int)action::BuildBarrack))
             {
-                TaskFun::CreateTask(myTaskQueue, frameCount, (int)taskOwner::ProductionManager, (int)action::BuildBarrack, myTaskCount);
+                TaskFun::CreateTask2(myTaskQueue, frameCount,0, (int)taskOwner::ProductionManager, (int)action::BuildBarrack, myTaskCount);
             }
         }
     }
@@ -39,7 +39,7 @@ void ProductionManager::productionManager(int minerals, int gas, int frameCount,
         {
             for (int i = 0; i < roomNeeded; i += 7)
             {
-                TaskFun::CreateTask(myTaskQueue, frameCount, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot, myTaskCount);
+                TaskFun::CreateTask2(myTaskQueue, frameCount,0, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot, myTaskCount);
             }
         }
     }

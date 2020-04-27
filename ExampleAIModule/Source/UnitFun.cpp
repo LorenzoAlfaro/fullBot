@@ -65,3 +65,19 @@ std::list<Unit> UnitFun::getUnitList(UnitType Type, Unitset allUnits, std::list<
     }
     return myUnits;
 }
+
+int UnitFun::getUnitCount(UnitType myType, const Unitset& allUnits)
+{
+    int unitCount = 0;
+
+    for (auto& u : allUnits)
+    {
+        int type = u->getType();
+        if (u->getType() == myType)
+        {
+            unitCount += 1;
+        }
+    }
+
+    return unitCount;
+}

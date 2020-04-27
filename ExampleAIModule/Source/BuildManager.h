@@ -6,13 +6,13 @@ using namespace BWAPI;
 class BuildManager
 {
 public:
-	static void createEventTag(Unit Building, Error lastErr);
+	static void createEventTag(const Unit& Building, Error lastErr);
 
-	static void createSupplyBox(TilePosition targetBuildLocation, UnitType Building, Color color);
+	static void createSupplyBox(const TilePosition targetBuildLocation, const UnitType Building, const  Color color);
 
-	static void buildBuilding(Unit supplyBuilder, UnitType Building, Color color, TilePosition targetBuildLocation);
+	static void buildBuilding(const Unit& supplyBuilder, const UnitType Building, const Color color, const TilePosition targetBuildLocation);
 
-	static TilePosition returnBuildPosition(int action, Unit SCV);
+	static TilePosition returnBuildPosition(int action, Unit SCV, int maxRange);
 		
 };
 

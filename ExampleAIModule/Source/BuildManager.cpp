@@ -5,12 +5,12 @@
 using namespace BWAPI;
 using namespace Filter;
 
-void BuildManager::createEventTag(Unit Building, Error lastErr)
+void BuildManager::createEventTag(const Unit &Building, Error lastErr)
 {
     // If building scv fails, draw the error at the location so that you can visibly see what went wrong!
     // However, drawing the error once will only appear for a single frame
     // so create an event that keeps it on the screen for some frames
-    Position pos = Building->getPosition();
+    const Position pos = Building->getPosition();
     //
     Broodwar->registerEvent([pos, lastErr](Game*) { Broodwar->drawTextMap(pos, "%c%s", Text::White, lastErr.c_str()); },   // action
         nullptr,    // condition
@@ -18,7 +18,7 @@ void BuildManager::createEventTag(Unit Building, Error lastErr)
 
 }
 
-void BuildManager::createSupplyBox(TilePosition targetBuildLocation, UnitType Building, Color color)
+void BuildManager::createSupplyBox(const TilePosition targetBuildLocation, const UnitType Building, const  Color color)
 {
     // Register an event that draws the target build location
     Broodwar->registerEvent([targetBuildLocation, Building, color](Game*)
@@ -32,7 +32,7 @@ void BuildManager::createSupplyBox(TilePosition targetBuildLocation, UnitType Bu
 
 }
 
-void BuildManager::buildBuilding(Unit supplyBuilder, UnitType Building, Color color, TilePosition targetBuildLocation)
+void BuildManager::buildBuilding(const Unit &supplyBuilder, const UnitType Building, const Color color, const TilePosition targetBuildLocation)
 {    
     if (targetBuildLocation)
     {
@@ -47,23 +47,23 @@ void BuildManager::buildBuilding(Unit supplyBuilder, UnitType Building, Color co
     }
 }
 
-TilePosition BuildManager::returnBuildPosition(int action, Unit SCV)
+TilePosition BuildManager::returnBuildPosition(int action, Unit SCV, int maxRange)
 {
     TilePosition myBuildingLocation;
     switch (action)
     {
     case (int)action::BuildSupplyDepot:
 
-        myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, SCV->getTilePosition());
+        myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, SCV->getTilePosition(), maxRange);
         break; //optional
     case (int)action::BuildBarrack:
 
-        myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition());
+        myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition(), maxRange);
         break; //optional
 
      // you can have any number of case statements.
     default: //Optional
-        myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition());
+        myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition(), maxRange);
         //statement(s);
         break;
     }

@@ -15,6 +15,7 @@
 using namespace BWAPI;
 using namespace Filter;
 using namespace std;
+using namespace UnitTypes;
 
 //using namespace WinUser;
 //TODO: fix bug, TASK ID is not being represented corectly
@@ -34,13 +35,14 @@ using namespace std;
 
 
 #pragma region GameState
+int StatsCoordinates[14][2];//used to set the display metrics
 int UnitCount[2] = { 0,0 }; //SCV,Marines, Medics, etc
 int maxUnit[2] = { 50,150 }; //SCV,Marines, Medics, etc
 int BuildingCount[3] = { 0,0,0 }; //CC, supplydepots, barracks
 int maxBuilding[3] = { 3,20,4 }; //CC, supplydepots, barracks
 int deadSCVs = 0;
 int TaskCount = 0; //unique Task ID
-list<array<int, 7>> taskQueue; // 0=timeStamp,1=callbacktime,2=action,3=SCVID or build, 4=taskOwner,5=status, 6=uniqueID
+list<array<int, 12>> taskQueue; // 0=timeStamp,1=callbacktime,2=action,3=SCVID or build, 4=taskOwner,5=status, 6=uniqueID
 #pragma endregion
 
 #pragma region UnitLists
@@ -71,6 +73,31 @@ bool displayStats = false;
 
 //methods
 #pragma region ExtraFunctions
+void readStatsCoordinates()
+{   //simple functions useful for readings the settings for displaying the stats
+    string line;
+    ifstream myfile("StatsCoordinates.txt");
+    if (myfile.is_open())
+    {
+        int index = 0;
+        while (getline(myfile, line))
+        {
+            istringstream iss(line);
+            vector<string> results(istream_iterator<string>{iss},
+                istream_iterator<string>());
+
+            for (int i = 0; i < results.size() - 1; i++)
+            {
+                StatsCoordinates[index][i] = stoi(results[i]);
+            }
+            index += 1;
+            //cout << line << '\n';
+            //Broodwar->sendText(line.c_str());
+        }
+        myfile.close();
+    }
+    else Broodwar->sendText("Unable to open file");//cout << "Unable to open file";    
+}
 int readSettingsFile()
 {
     ofstream myfile;
@@ -224,24 +251,27 @@ void updateUnitCount(bool created, Unit unit)
     supplyLeft = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed(); //x2
     
 }
-void displayInsights()
+
+void displayInsights2(int roomNeeded, int supplyLeft2, int SCVcount, int barracksCount, int marineCount)
 {
-    int supplyLeft2 = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();
-    Broodwar->drawTextScreen(0, 0, "FPS!: %d", Broodwar->getFPS());
+    //int supplyLeft2 = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();
+    Broodwar->drawTextScreen(StatsCoordinates[0][0], StatsCoordinates[0][1], "FPS: %d", Broodwar->getFPS());
     //Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
-    Broodwar->drawTextScreen(45, 0, "Brks: %d", BuildingCount[2]);
-    Broodwar->drawTextScreen(90, 0, "Mrn: %d", UnitCount[1]);
-    Broodwar->drawTextScreen(135, 0, "SCV: %d", UnitCount[0]);
-    Broodwar->drawTextScreen(180, 0, "Bldrs: %d", Builders.size());
-    Broodwar->drawTextScreen(225, 0, "Dead: %d ", deadUnits.size());
-    //Broodwar->drawTextScreen(200, 100, "Mouse Cursor: %d  %d", Broodwar->getMousePosition().x, Broodwar->getMousePosition().y);
-    //Broodwar->drawTextScreen(200, 120, "Screen: %d  %d", Broodwar->getScreenPosition().x, Broodwar->getScreenPosition().y);
-    
-    Broodwar->drawTextScreen(0, 10, "supply limit: %d ", supplyLeft);
-    Broodwar->drawTextScreen(0, 20, "supply limit2: %d ", supplyLeft2);
-    Broodwar->drawTextScreen(0, 30, "room for next round: %d ", auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]));    
-    Broodwar->drawTextScreen(0, 40, "Tasks: %d ", taskQueue.size());
-    
+    Broodwar->drawTextScreen(StatsCoordinates[1][0], StatsCoordinates[1][1], "Brks: %d", barracksCount);
+    Broodwar->drawTextScreen(StatsCoordinates[2][0], StatsCoordinates[2][1], "Mrn: %d", marineCount);
+    Broodwar->drawTextScreen(StatsCoordinates[3][0], StatsCoordinates[3][1], "SCV: %d", SCVcount);
+    Broodwar->drawTextScreen(StatsCoordinates[4][0], StatsCoordinates[4][1], "Bldrs: %d", Builders.size());
+    Broodwar->drawTextScreen(StatsCoordinates[5][0], StatsCoordinates[5][1], "Dead: %d ", deadUnits.size());
+    //Broodwar->drawTextScreen(StatsCoordinates[6][0], StatsCoordinates[6][1], "Mouse Cursor: %d  %d", Broodwar->getMousePosition().x, Broodwar->getMousePosition().y);
+    //Broodwar->drawTextScreen(StatsCoordinates[7][0], StatsCoordinates[7][1], "Screen: %d  %d", Broodwar->getScreenPosition().x, Broodwar->getScreenPosition().y);
+
+    //Broodwar->drawTextScreen(StatsCoordinates[8][0], StatsCoordinates[8][1], "supply limit: %d ", supplyLeft);
+    Broodwar->drawTextScreen(StatsCoordinates[9][0], StatsCoordinates[9][1], "supply limit2: %d ", supplyLeft2 / 2);
+    Broodwar->drawTextScreen(StatsCoordinates[10][0], StatsCoordinates[10][1], "room for next round: %d ", roomNeeded / 2);
+    Broodwar->drawTextScreen(StatsCoordinates[11][0], StatsCoordinates[11][1], "Tasks: %d ", taskQueue.size());
+    Broodwar->drawTextScreen(StatsCoordinates[12][0], StatsCoordinates[12][1], "APM: %d ", Broodwar->getAPM());
+    Broodwar->drawTextScreen(StatsCoordinates[13][0], StatsCoordinates[13][1], "FrameCount: %d ", Broodwar->getFrameCount());
+
 }
 
 #pragma endregion
@@ -275,13 +305,20 @@ void ExampleAIModule::onFrame()
 {
     // Called once every game frame
     // Display the game frame rate as text in the upper left area of the screen
+    const Unitset myUnits = Broodwar->self()->getUnits();
+    const int supplyLeft2 = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();
+    const int roomNeeded = auxFun::roomNeeded(
+        UnitFun::getUnitCount(Terran_Command_Center, myUnits),
+        UnitFun::getUnitCount(Terran_Barracks, myUnits));
     int frameCount = Broodwar->getFrameCount();
     int gas = Broodwar->self()->gas();
     int minerals = Broodwar->self()->minerals();
-
+    const int SCVcount = UnitFun::getUnitCount(Terran_SCV, myUnits);
+    const int barracksCount = UnitFun::getUnitCount(Terran_Barracks, myUnits);
+    const int marineCount = UnitFun::getUnitCount(Terran_Marine, myUnits);
     if (displayStats)
     {
-        displayInsights();
+        displayInsights2(roomNeeded, supplyLeft2,SCVcount,barracksCount,marineCount);
     }
     if (auxFun::validFrame())
     {
@@ -353,8 +390,8 @@ void ExampleAIModule::onUnitCreate(Unit unit)
             int BuildingID = unit->getID();
 
 
-            array<int, 7> mytask = {0,0,0,0,0,0,0};
-            /*array<int, 7>* pointer = TaskFun::findTaskAssignedToUnit(builderID, taskQueue);
+            array<int, 12> mytask = {0,0,0,0,0,0,0};
+            /*array<int, 12>* pointer = TaskFun::findTaskAssignedToUnit(builderID, taskQueue);
             if (pointer != nullptr)
             {
                 mytask = *pointer;
@@ -394,8 +431,8 @@ void ExampleAIModule::onUnitComplete(Unit unit)
     {
         if (!taskQueue.empty() && !unit->canAttack()) //avoid running in buildings
         {
-            array<int, 7> mytask = { 0,0,0,0,0,0,0 };
-            /*array<int, 7>* pointer = TaskFun::findTaskAssignedToUnit(unit->getID(), taskQueue);
+            array<int, 12> mytask = { 0,0,0,0,0,0,0 };
+            /*array<int, 12>* pointer = TaskFun::findTaskAssignedToUnit(unit->getID(), taskQueue);
             if (pointer != nullptr)
             {
                 mytask = *pointer;
@@ -525,7 +562,25 @@ void ExampleAIModule::onSendText(string text)
 
 void ExampleAIModule::onStart()
 {
-    readSettingsFile();
+    readStatsCoordinates();
+
+    ofstream myfile;
+    myfile.open("TaskRecord.txt");
+    myfile << "TS: "
+        << " Offset: "
+        << " Action: "
+        << " ID: "
+        << " Owner: "
+        << " Status: "
+        << " TaskID: "
+        << " X: "
+        << " Y: "
+        << " Mineral: "
+        << " GAS: "
+        << " Time: "
+        << '\n';
+    myfile.close();
+    //readSettingsFile();
     // Print the map name.
     // BWAPI returns string when retrieving a string, don't forget to add .c_str() when printing!
     //Broodwar << "The map is  " << Broodwar->mapName() << "!" << endl;
