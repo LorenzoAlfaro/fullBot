@@ -1,10 +1,11 @@
 #include "ExampleAIModule.h"
 
 #include "UnitFun.h"
-#include "BuildManager.h"
 #include "CommMngr.h"
 #include "auxFun.h"
 #include "TaskFun.h"
+#include "TaskEngine.h"
+#include "ProductionManager.h"
 
 #include <iostream>
 #include <fstream>
@@ -23,12 +24,14 @@ using namespace std;
 //Add logic to build turrets
 //Able to create control groups with more than 12 units
 
+//Extracted TaskEngine;
 //Add one button commands: DONE
 //Useful functions
 //Broodwar->self()->allUnitCount();
 //Broodwar->self()->completedUnitCount();
 //Broodwar->self()->supplyTotal();
 //Broodwar->self()->supplyUsed();
+
 
 #pragma region GameState
 int UnitCount[2] = { 0,0 }; //SCV,Marines, Medics, etc
@@ -243,87 +246,6 @@ void displayInsights()
 
 #pragma endregion
 
-#pragma region TasksFunctions
-void assessTask(array<int, 7>& newTask)
-{
-    //ok new task, what do you want?
-    //do we have resources to complete your task?
-    // what priority should I give you?
-}
-
-void CreateTask(list<array<int, 7>> &myTaskQueue, int timeStamp, int taskOwner, int action)
-{       
-    array<int, 7> newArray{ timeStamp,0,action,0,taskOwner,(int)taskStatus::Created, TaskCount };
-
-    myTaskQueue.push_back(newArray);
-
-    TaskCount = TaskCount + 1;
-}
-
-void callBack(array<int, 7>& Task, int When, int Why)
-{
-    //do we have resources? assign, no? set callback time
-    Task[0] = Broodwar->getFrameCount(); //reset timer
-    Task[1] = When; //frames, should be determined by the income rate, (miners working)
-    Task[5] = Why;
-}
-
-void startTask(array<int, 7> &Task, Unit builder, TilePosition targetBuildLocation)
-{
-    //Unit builder = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), Task[3]); //the task has an available worker assigned
-    //int builderID = builder->getID();
-    //TilePosition targetBuildLocation; //TODO: improve space allocation
-    //targetBuildLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, builder->getTilePosition());
-    //TODO: better target location method needed
-    
-    switch (Task[2])
-    {
-
-        case (int)action::BuildSupplyDepot:
-
-            BuildManager::buildBuilding(builder, UnitTypes::Terran_Supply_Depot, Colors::Blue, targetBuildLocation);
-        
-            break; //optional
-        case (int)action::BuildBarrack:
-
-            BuildManager::buildBuilding(builder, UnitTypes::Terran_Barracks, Colors::Green, targetBuildLocation);
-        
-            break; //optional
-
-         // you can have any number of case statements.
-        default: //Optional
-            //statement(s);
-            break;
-    }
-
-    callBack(Task, 200, (int)taskStatus::PendingStart); //things can happen during travel time
-}
-
-TilePosition returnBuildPosition(int action, Unit SCV)
-{
-    TilePosition myBuildingLocation;
-    switch (action)
-    {
-        case (int)action::BuildSupplyDepot:
-
-            myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, SCV->getTilePosition());
-            break; //optional
-        case (int)action::BuildBarrack:
-
-            myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition());
-            break; //optional
-
-         // you can have any number of case statements.
-        default: //Optional
-            myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition());
-            //statement(s);
-            break;
-    }
-    return myBuildingLocation;
-}
-
-#pragma endregion
-
 #pragma region MainMethods
 
 void initialAssigment(Unitset units)
@@ -345,91 +267,6 @@ void initialAssigment(Unitset units)
     }
 }
 
-void productionManager()
-{    
-    almostSupplyBlocked = false;
-    int roomNeeded = auxFun::roomNeeded(BuildingCount[0], BuildingCount[2]);
-    
-    if (supplyLeft < roomNeeded) { //instead of 4,should be the max output of production at a given time
-
-        almostSupplyBlocked = true;
-    }
-
-    CommMngr::scvManager(Miners);//go mine for me minions!
-    if (!almostSupplyBlocked && !TaskFun::tasksWaitingResources(taskQueue))
-    {
-        if (UnitCount[0] < maxUnit[0])
-        {
-            CommMngr::buildSCVs(commandCenters);//train SCVs until 50
-        }
-        
-        CommMngr::trainMarines(UnitFun::getUnitList(UnitTypes::Terran_Barracks, Broodwar->self()->getUnits(),deadUnits));//pump marines
-
-        if (Broodwar->self()->minerals() >= UnitTypes::Terran_Barracks.mineralPrice() && 
-            (BuildingCount[2] < maxBuilding[2]) 
-            && (UnitCount[0] > 10))
-        {            
-            //Test isMyTaskInQueue
-            if (!TaskFun::TaskQueued(taskQueue,(int)taskOwner::ProductionManager, (int)action::BuildBarrack))
-            {
-                CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager,(int)action::BuildBarrack);
-            }            
-        }
-    }
-    else
-    {
-        if (!TaskFun::TaskQueued(taskQueue, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot) && Broodwar->self()->supplyTotal() != 400)
-        {
-            for (int i = 0; i < roomNeeded; i+=7)
-            {
-                CreateTask(taskQueue, Broodwar->getFrameCount(), (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot);
-            }            
-        }                
-    }
-}
-
-void taskManager(list<array<int, 7>> &myTaskQueue)
-{
-    //if my task status is 0, not started, check timestamp
-    //0 created, 1 reviewed but no resources to assign, 2 assigned with resources, 3 started, 4 completed, 5 cancel
-    //production manager checks if there are tasks waiting for minerals before pumping units
-    //assessTask(task) will determine wich task has high priority, for now if resources available just start them
-    for (auto& task : myTaskQueue)
-    {
-        int taskStatus = task[5];
-        if (Broodwar->getFrameCount() > (task[0] + task[1])
-            && taskStatus != (int)taskStatus::Started
-            && taskStatus != (int)taskStatus::Completed
-            && taskStatus != (int)taskStatus::Cancelled
-            && taskStatus != (int)taskStatus::PendingStart)
-        {
-            if (TaskFun::mineralsAvailable(task, Broodwar->self()->minerals()) && 
-                TaskFun::gasAvailable(task, Broodwar->self()->gas())) //and location available
-            {
-                //assign SCV
-                Unit SCV = UnitFun::getWorker(commandCenters.front(), Miners, Builders, supplyProviderType);
-                int id = SCV->getID();
-
-                TilePosition targetBuildLocation = returnBuildPosition(task[2],SCV);
-                //pass the worker id to the task
-                task[3] = id; 
-
-                startTask(task, SCV, targetBuildLocation);
-            }
-            else
-            {
-                //do we have resources? assign, no? set callback time
-                callBack(task, 200, (int)taskStatus::waitingMin);                
-            }
-        }
-        else if (Broodwar->getFrameCount() > (task[0] + task[1]) && taskStatus == (int)taskStatus::PendingStart)
-        {
-            task[5] = (int)taskStatus::Cancelled;
-            Broodwar->sendText("TaskMngr: Failed to start task id: %d : ", task[6]); //for some error            
-        }
-    }
-}
-
 #pragma endregion
 
 #pragma region MainEvents
@@ -438,14 +275,19 @@ void ExampleAIModule::onFrame()
 {
     // Called once every game frame
     // Display the game frame rate as text in the upper left area of the screen
+    int frameCount = Broodwar->getFrameCount();
+    int gas = Broodwar->self()->gas();
+    int minerals = Broodwar->self()->minerals();
+
     if (displayStats)
     {
         displayInsights();
     }
     if (auxFun::validFrame())
     {
-        taskManager(taskQueue);
-        productionManager(); //eventually productionManager will be another task run by taskManager    
+        TaskEngine::taskManager(taskQueue, frameCount, minerals, gas,commandCenters.front(),Miners,Builders,supplyProviderType);
+        CommMngr::scvManager(Miners);//go mine for me minions!
+        ProductionManager::productionManager(minerals, gas, frameCount,taskQueue,TaskCount, deadUnits, BuildingCount,UnitCount, supplyLeft,maxBuilding,maxUnit); //eventually productionManager will be another task run by taskManager    
     }
 
     if (GetKeyState('A') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
@@ -472,7 +314,6 @@ void ExampleAIModule::onFrame()
         }
         // Do stuff
     }
-
     if (GetKeyState('W') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
     {
         Position myPos = auxFun::getMousePosition();

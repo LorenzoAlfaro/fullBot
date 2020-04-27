@@ -1,6 +1,8 @@
 #include "TaskFun.h"
+#include "BuildManager.h"
+#include <BWAPI.h>
 using namespace BWAPI;
-
+using namespace std;
 
 std::array<int, 7>* TaskFun::findTaskAssignedToUnit(int UnitID, std::list<std::array<int, 7>> &Tasks)
 {
@@ -180,4 +182,59 @@ bool TaskFun::taskStatusUpdate(int ID, std::list<std::array<int, 7>> &Tasks, int
         }
     }
     return updatedTask;
+}
+
+void TaskFun::assessTask(array<int, 7>& newTask)
+{
+    //ok new task, what do you want?
+    //do we have resources to complete your task?
+    // what priority should I give you?
+}
+
+void TaskFun::CreateTask(list<array<int, 7>>& myTaskQueue, int timeStamp, int taskOwner, int action, int TaskCount)
+{
+    array<int, 7> newArray{ timeStamp,0,action,0,taskOwner,(int)taskStatus::Created, TaskCount };
+
+    myTaskQueue.push_back(newArray);
+
+    TaskCount = TaskCount + 1;
+}
+
+void TaskFun::callBack(array<int, 7>& Task, int When, int Why)
+{
+    //do we have resources? assign, no? set callback time
+    Task[0] = Broodwar->getFrameCount(); //reset timer
+    Task[1] = When; //frames, should be determined by the income rate, (miners working)
+    Task[5] = Why;
+}
+
+void TaskFun::startTask(array<int, 7>& Task, Unit builder, TilePosition targetBuildLocation)
+{
+    //Unit builder = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), Task[3]); //the task has an available worker assigned
+    //int builderID = builder->getID();
+    //TilePosition targetBuildLocation; //TODO: improve space allocation
+    //targetBuildLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, builder->getTilePosition());
+    //TODO: better target location method needed
+
+    switch (Task[2])
+    {
+
+    case (int)action::BuildSupplyDepot:
+
+        BuildManager::buildBuilding(builder, UnitTypes::Terran_Supply_Depot, Colors::Blue, targetBuildLocation);
+
+        break; //optional
+    case (int)action::BuildBarrack:
+
+        BuildManager::buildBuilding(builder, UnitTypes::Terran_Barracks, Colors::Green, targetBuildLocation);
+
+        break; //optional
+
+     // you can have any number of case statements.
+    default: //Optional
+        //statement(s);
+        break;
+    }
+
+    callBack(Task, 200, (int)taskStatus::PendingStart); //things can happen during travel time
 }

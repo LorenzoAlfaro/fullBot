@@ -1,4 +1,5 @@
 #include "BuildManager.h"
+#include "TaskFun.h";
 #include <iostream>
 
 using namespace BWAPI;
@@ -44,4 +45,27 @@ void BuildManager::buildBuilding(Unit supplyBuilder, UnitType Building, Color co
             //Broodwar << Broodwar->getLastError() << std::endl;;
         }
     }
+}
+
+TilePosition BuildManager::returnBuildPosition(int action, Unit SCV)
+{
+    TilePosition myBuildingLocation;
+    switch (action)
+    {
+    case (int)action::BuildSupplyDepot:
+
+        myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, SCV->getTilePosition());
+        break; //optional
+    case (int)action::BuildBarrack:
+
+        myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition());
+        break; //optional
+
+     // you can have any number of case statements.
+    default: //Optional
+        myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition());
+        //statement(s);
+        break;
+    }
+    return myBuildingLocation;
 }

@@ -18,6 +18,12 @@
     <ClCompile Include="Source\TaskFun.cpp">
       <Filter>TaskFun</Filter>
     </ClCompile>
+    <ClCompile Include="Source\TaskEngine.cpp">
+      <Filter>TaskEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ProductionManager.cpp">
+      <Filter>ProductionManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -36,6 +42,12 @@
     </ClInclude>
     <ClInclude Include="Source\TaskFun.h">
       <Filter>TaskFun</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\TaskEngine.h">
+      <Filter>TaskEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ProductionManager.h">
+      <Filter>ProductionManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -56,6 +68,12 @@
     </Filter>
     <Filter Include="TaskFun">
       <UniqueIdentifier>{6ba0dd50-2c4e-4821-953c-8bb22b708a3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TaskEngine">
+      <UniqueIdentifier>{22506c3e-c2a2-49da-b953-367d68cebeda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ProductionManager">
+      <UniqueIdentifier>{023a210a-d442-4563-bac0-30424473e62e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

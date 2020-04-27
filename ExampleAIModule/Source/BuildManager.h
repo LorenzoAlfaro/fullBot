@@ -11,6 +11,8 @@ public:
 	static void createSupplyBox(TilePosition targetBuildLocation, UnitType Building, Color color);
 
 	static void buildBuilding(Unit supplyBuilder, UnitType Building, Color color, TilePosition targetBuildLocation);
+
+	static TilePosition returnBuildPosition(int action, Unit SCV);
 		
 };
 
