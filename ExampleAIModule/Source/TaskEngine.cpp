@@ -12,8 +12,8 @@ void TaskEngine::taskManager(list<array<int, 12>>& myTaskQueue, int frameCount, 
     //assessTask(task) will determine wich task has high priority, for now if resources available just start them
     for (auto& task : myTaskQueue)
     {
-        int taskStatus = task[5];
-        if (frameCount > (task[0] + task[1])
+        int taskStatus = task[(int)tsk::Status];
+        if (frameCount > (task[(int)tsk::TimeStamp] + task[(int)tsk::Delay])
             && taskStatus != (int)taskStatus::Started
             && taskStatus != (int)taskStatus::Completed
             && taskStatus != (int)taskStatus::Cancelled
@@ -28,7 +28,7 @@ void TaskEngine::taskManager(list<array<int, 12>>& myTaskQueue, int frameCount, 
 
                 TilePosition targetBuildLocation = BuildManager::returnBuildPosition(task[2], SCV,10);
                 //pass the worker id to the task
-                task[3] = id;
+                task[(int)tsk::UID] = id;
 
                 TaskFun::startTask(task, SCV, targetBuildLocation);
             }
@@ -38,10 +38,10 @@ void TaskEngine::taskManager(list<array<int, 12>>& myTaskQueue, int frameCount, 
                 TaskFun::callBack(task, 200, (int)taskStatus::waitingMin);
             }
         }
-        else if (frameCount > (task[0] + task[1]) && taskStatus == (int)taskStatus::PendingStart)
+        else if (frameCount > (task[(int)tsk::TimeStamp] + task[(int)tsk::Delay]) && taskStatus == (int)taskStatus::PendingStart)
         {
-            task[5] = (int)taskStatus::Cancelled;
-            Broodwar->sendText("TaskMngr: Failed to start task id: %d : ", task[6]); //for some error            
+            task[(int)tsk::Status] = (int)taskStatus::Cancelled;
+            Broodwar->sendText("TaskMngr: Failed to start task id: %d : ", task[(int)tsk::ID]); //for some error            
         }
     }
     

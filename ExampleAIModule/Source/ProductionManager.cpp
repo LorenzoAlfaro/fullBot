@@ -5,7 +5,7 @@
 #include "auxFun.h"
 #include "CommMngr.h"
 
-void ProductionManager::productionManager(int minerals, int gas, int frameCount, list<array<int, 12>>& myTaskQueue, int myTaskCount, list<int> myDeadUnits, int myBuildingCount[], int myUnitCount[], int mySupplyLeft, int myMaxBuilding[],int myMaxUnit[])
+void ProductionManager::productionManager(int minerals, int gas, int frameCount, list<array<int, 12>>& myTaskQueue, int& myTaskCount, list<int> myDeadUnits, int myBuildingCount[], int myUnitCount[], int mySupplyLeft, int myMaxBuilding[],int myMaxUnit[])
 {
     bool almostSupplyBlocked = false;
     int roomNeeded = auxFun::roomNeeded(myBuildingCount[0], myBuildingCount[2]);

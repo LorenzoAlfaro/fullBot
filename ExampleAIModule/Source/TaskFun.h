@@ -19,7 +19,7 @@ public:
     static bool taskStatusUpdate(int ID, std::list<std::array<int, 12>>& Tasks, int newID, int newStatus);  
     static void assessTask(array<int, 12>& newTask);
     static void CreateTask(list<array<int, 12>>& myTaskQueue, int timeStamp, int taskOwner, int action, int TaskCount);
-    static void CreateTask2(list<array<int, 12>>& myTaskQueue,int timeStamp,int delay,int taskOwner,int action, int TaskCount);
+    static void CreateTask2(list<array<int, 12>>& myTaskQueue,int timeStamp,int delay,int taskOwner,int action, int& TaskCount);
     static void callBack(array<int, 12>& Task, int When, int Why);
     static void startTask(array<int, 12>& Task, Unit builder, TilePosition targetBuildLocation);
     static void logTaskUpdate(array<int, 12>& task);
@@ -50,6 +50,22 @@ enum class taskOwner {
     ProductionManager,
     StratManager,
     Commander
+};
+
+enum class tsk
+{
+    TimeStamp,
+    Delay,
+    Action,
+    UID,
+    Owner,
+    Status,
+    ID,
+    X,
+    Y,
+    Minerals,
+    Gas,
+    Duration
 };
 
 

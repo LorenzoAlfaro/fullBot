@@ -18,7 +18,9 @@ using namespace std;
 using namespace UnitTypes;
 
 //using namespace WinUser;
+
 //TODO: fix bug, TASK ID is not being represented corectly
+//Change Task Array to use Task Enum instead of indexes
 //ADD building map file, where to build my buildings location
 //Fix bug, when using scan it crashes! recognize the spell unit
 //Implement error handling
@@ -42,7 +44,10 @@ int BuildingCount[3] = { 0,0,0 }; //CC, supplydepots, barracks
 int maxBuilding[3] = { 3,20,4 }; //CC, supplydepots, barracks
 int deadSCVs = 0;
 int TaskCount = 0; //unique Task ID
-list<array<int, 12>> taskQueue; // 0=timeStamp,1=callbacktime,2=action,3=SCVID or build, 4=taskOwner,5=status, 6=uniqueID
+list<array<int, 12>> taskQueue;
+// 0=timeStamp,1=callbacktime,2=action,3=SCVID or build, 4=taskOwner,5=status, 6=uniqueID
+//0=TS,1=Delay,2=Action,3=ID,4=Owner,5=Status,6=ID,7=X,8=Y,9=Mineral,10=Gas,11=Time
+//
 #pragma endregion
 
 #pragma region UnitLists
@@ -391,17 +396,17 @@ void ExampleAIModule::onUnitCreate(Unit unit)
 
 
             array<int, 12> mytask = {0,0,0,0,0,0,0};
-            /*array<int, 12>* pointer = TaskFun::findTaskAssignedToUnit(builderID, taskQueue);
+            array<int, 12>* pointer = TaskFun::findTaskAssignedToUnit(builderID, taskQueue);
             if (pointer != nullptr)
             {
                 mytask = *pointer;
-            }*/
+            }
 
             
             //only for buildings
             if (TaskFun::taskStatusUpdate(builderID, taskQueue, BuildingID, (int)taskStatus::Started))
             {
-                Broodwar->sendText("Started task id: %d : %s", mytask[6], unit->getType().c_str());
+                Broodwar->sendText("Started task id: %d : %s", mytask[(int)tsk::ID], unit->getType().c_str());
             }
             else
             {
@@ -432,15 +437,15 @@ void ExampleAIModule::onUnitComplete(Unit unit)
         if (!taskQueue.empty() && !unit->canAttack()) //avoid running in buildings
         {
             array<int, 12> mytask = { 0,0,0,0,0,0,0 };
-            /*array<int, 12>* pointer = TaskFun::findTaskAssignedToUnit(unit->getID(), taskQueue);
+            array<int, 12>* pointer = TaskFun::findTaskAssignedToUnit(unit->getID(), taskQueue);
             if (pointer != nullptr)
             {
                 mytask = *pointer;
-            }*/
+            }
 
             if (TaskFun::taskStatusUpdate(unit->getID(), taskQueue, unit->getID(), (int)taskStatus::Completed))
             {
-                Broodwar->sendText("Completed task id: %d : %s", mytask[6], unit->getType().c_str());
+                Broodwar->sendText("Completed task id: %d : %s", mytask[(int)tsk::ID], unit->getType().c_str());
             }
             else
             {
