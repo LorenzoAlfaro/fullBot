@@ -329,7 +329,13 @@ void ExampleAIModule::onFrame()
     {
         TaskEngine::taskManager(taskQueue, frameCount, minerals, gas,commandCenters.front(),Miners,Builders,supplyProviderType);
         CommMngr::scvManager(Miners);//go mine for me minions!
-        ProductionManager::productionManager(minerals, gas, frameCount,taskQueue,TaskCount, deadUnits, BuildingCount,UnitCount, supplyLeft,maxBuilding,maxUnit); //eventually productionManager will be another task run by taskManager    
+
+        bool  almostSupplyBlocked = false;
+        if (roomNeeded > supplyLeft2) { //instead of 4,should be the max output of production at a given time
+
+            almostSupplyBlocked = true;
+        }
+        ProductionManager::productionManager(minerals, gas, frameCount,taskQueue,TaskCount, deadUnits, barracksCount, SCVcount,maxBuilding,maxUnit, almostSupplyBlocked, roomNeeded); //eventually productionManager will be another task run by taskManager    
     }
 
     if (GetKeyState('A') & 0x8000/*Check if high-order bit is set (1 << 15)*/)

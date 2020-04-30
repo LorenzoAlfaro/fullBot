@@ -17,11 +17,11 @@ Unit UnitFun::getSCV(Unit CommandCenter, std::list<int> &Miners, std::list<int> 
 
 Unit UnitFun::getBuilder(std::list<int> Builders)
 {
-    Unit builder = NULL;
+    Unit builder = nullptr;
     for (auto& u : Builders)
     {
         Unit myBuilder = Broodwar->getUnit( u);        
-        if (myBuilder != NULL)
+        if (myBuilder != nullptr)
         {
             if (!myBuilder->isConstructing() && myBuilder->getHitPoints() != 0)
             {
@@ -39,7 +39,7 @@ Unit UnitFun::getWorker(Unit CommandCenter, std::list<int> &Miners, std::list<in
     if (!Builders.empty())
     {
         worker = UnitFun::getBuilder(Builders);        
-        if (worker == NULL)
+        if (worker == nullptr)
         {
             worker = UnitFun::getSCV(CommandCenter, Miners, Builders, supplyProviderType);
         }

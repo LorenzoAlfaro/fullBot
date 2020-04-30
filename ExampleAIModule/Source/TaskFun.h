@@ -21,7 +21,7 @@ public:
     static void CreateTask(list<array<int, 12>>& myTaskQueue, int timeStamp, int taskOwner, int action, int TaskCount);
     static void CreateTask2(list<array<int, 12>>& myTaskQueue,int timeStamp,int delay,int taskOwner,int action, int& TaskCount);
     static void callBack(array<int, 12>& Task, int When, int Why);
-    static void startTask(array<int, 12>& Task, Unit builder, TilePosition targetBuildLocation);
+    static void startTask(array<int, 12>& Task, Unit builder);
     static void logTaskUpdate(array<int, 12>& task);
 };
 

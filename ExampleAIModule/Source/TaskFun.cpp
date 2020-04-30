@@ -33,7 +33,7 @@ std::array<int, 12>* TaskFun::findTaskAssignedToUnit(int UnitID, std::list<std::
 std::array<int, 12>* TaskFun::findTaskAssignedToID(int TaskID, std::list<std::array<int, 12>>& Tasks)
 {
     bool found = false;
-    std::array<int, 12>* mytask; //pass the address of the array//initialize first to something
+    array<int, 12>* mytask; //pass the address of the array//initialize first to something
 
     for (auto& task : Tasks)
     {
@@ -53,7 +53,7 @@ std::array<int, 12>* TaskFun::findTaskAssignedToID(int TaskID, std::list<std::ar
     }
 }
 
-bool TaskFun::TaskQueued(std::list<std::array<int, 12>> &myTaskQueue, int taskOwner, int action)
+bool TaskFun::TaskQueued(list<array<int, 12>> &myTaskQueue, int taskOwner, int action)
 {
     bool taskInQueue = false;
     for (auto& task : myTaskQueue)
@@ -257,13 +257,15 @@ void TaskFun::callBack(array<int, 12>& Task, int When, int Why)
     Task[(int)tsk::Status] = Why;
 }
 
-void TaskFun::startTask(array<int, 12>& Task, Unit builder, TilePosition targetBuildLocation)
+void TaskFun::startTask(array<int, 12>& Task, Unit builder)
 {
     //Unit builder = UnitFun::returnUnitByID(Broodwar->self()->getUnits(), Task[3]); //the task has an available worker assigned
     //int builderID = builder->getID();
     //TilePosition targetBuildLocation; //TODO: improve space allocation
     //targetBuildLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, builder->getTilePosition());
     //TODO: better target location method needed
+
+    const TilePosition targetBuildLocation(Task[(int)tsk::X], Task[(int)tsk::Y]);
 
     switch (Task[(int)tsk::Action])
     {
