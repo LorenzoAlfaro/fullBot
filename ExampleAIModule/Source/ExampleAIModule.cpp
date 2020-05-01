@@ -11,15 +11,10 @@
 #include <iostream>
 #include <fstream>
 #include <array>
-#include <windows.h> // simulate mouse clicks
-
 using namespace BWAPI;
 using namespace Filter;
 using namespace std;
 using namespace UnitTypes;
-
-//using namespace WinUser;
-
 //TODO: instead of defining an amount of marines, define the porcentage from the total food supply quota i.e 50% marines = 100 marines or 50 vultures
 //TODO: fix bug, TASK ID is not being represented corectly
 //Change Task Array to use Task Enum instead of indexes
@@ -27,81 +22,16 @@ using namespace UnitTypes;
 //Fix bug, when using scan it crashes! recognize the spell unit
 //Implement error handling
 //Add logic to build turrets
-//Able to create control groups with more than 12 units
-
-//Extracted TaskEngine;
-//Add one button commands: DONE
-//Useful functions
-//Broodwar->self()->allUnitCount();
-//Broodwar->self()->completedUnitCount();
-//Broodwar->self()->supplyTotal();
-//Broodwar->self()->supplyUsed();
-
-int StatsCoordinates[14][2];//used to set the display metrics
-int maxUnit[2] = { 50,150 }; //SCV,Marines, Medics, etc
-int maxBuilding[3] = { 3,20,4 }; //CC, supplydepots, barracks
-
-int TaskCount = 0; //unique Task ID
-list<array<int, 12>> taskQueue;
-// 0=timeStamp,1=callbacktime,2=action,3=SCVID or build, 4=taskOwner,5=status, 6=uniqueID
-//0=TS,1=Delay,2=Action,3=ID,4=Owner,5=Status,6=ID,7=X,8=Y,9=Mineral,10=Gas,11=Time
-//
-
-list<int> Miners; //could be replace byd an array
-list<int> Builders; //could be replaced by an array
+//Able to create control groups with more than 12 units 
+int StatsCoordinates[14][2];                    //used to set the display metrics
+int maxUnit[2] = { 50,150 };                    //SCV,Marines, Medics, etc
+int maxBuilding[3] = { 3,20,4 };                //CC, supplydepots, barracks
+int TaskCount = 0;                              //unique Task ID
+list<array<int, 12>> taskQueue;                 //0=TS,1=Delay,2=Action,3=UID,4=Owner,5=Status,6=ID,7=X,8=Y,9=Mineral,10=Gas,11=Time
+list<int> Miners;                               //could be replace byd an array
+list<int> Builders;                             //could be replaced by an array
 list<int> deadUnits;
-//add an array parallel to the unit array that should be a regulator array, the target array
 bool displayStats = false;
-
-#pragma region ExtraFunctions
-
-void MouseMove(int x, int y)
-{
-    double fScreenWidth = GetSystemMetrics(SM_CXSCREEN) - 1;
-    double fScreenHeight = GetSystemMetrics(SM_CYSCREEN) - 1;
-    double fx = x * (65535.0f / fScreenWidth);
-    double fy = y * (65535.0f / fScreenHeight);
-    INPUT Input = { 0 };
-    Input.type = INPUT_MOUSE;
-    Input.mi.dwFlags = MOUSEEVENTF_MOVE;
-    //Input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
-    Input.mi.dx = fx;
-    Input.mi.dy = fy;
-    ::SendInput(1, &Input, sizeof(INPUT));
-}
-
-void LeftClick()
-{
-    INPUT    Input = { 0 };
-    // left down 
-    Input.type = INPUT_MOUSE;
-    Input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-    ::SendInput(1, &Input, sizeof(INPUT));
-
-    // left up
-    ::ZeroMemory(&Input, sizeof(INPUT));
-    Input.type = INPUT_MOUSE;
-    Input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
-    ::SendInput(1, &Input, sizeof(INPUT));
-}
-
-void RightClick()
-{
-    INPUT    Input = { 0 };
-    // left down 
-    Input.type = INPUT_MOUSE;
-    Input.mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
-    ::SendInput(1, &Input, sizeof(INPUT));
-
-    // left up
-    ::ZeroMemory(&Input, sizeof(INPUT));
-    Input.type = INPUT_MOUSE;
-    Input.mi.dwFlags = MOUSEEVENTF_RIGHTUP;
-    ::SendInput(1, &Input, sizeof(INPUT));
-}
-
-#pragma endregion
-
 
 #pragma region MainEvents
 
@@ -141,44 +71,13 @@ void ExampleAIModule::onFrame()
         CommMngr::attackUnits(UnitFun::getUnitList(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
         // Do stuff
     }
-    if (GetKeyState('Q') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
+    if (GetKeyState('Q') & 0x8000/*Check if high-order bit is set (1 << 15) LEFT CLICK*/)
     {
-        Position myPos = auxFun::getMousePosition();
-        //CommMngr::attackUnits(UnitFun::getListofUnitType(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
-
-        Unitset myUnits = Broodwar->getSelectedUnits();
-        for (auto& u : myUnits)
-        {
-            //int x = u->getTilePosition().x;
-            //int y = u->getTilePosition().y;
-            //Broodwar->printf("x: %d y: %d", x, y);
-
-            LeftClick();// I cant believe this works!
-            //u->rightClick(auxFun::getMousePosition(), false);
-
-        }
-        // Do stuff
+        auxFun::LeftClick();// I cant believe this works!              
     }
     if (GetKeyState('W') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
-    {
-        Position myPos = auxFun::getMousePosition();
-        //CommMngr::attackUnits(UnitFun::getListofUnitType(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
-
-        Unitset myUnits = Broodwar->getSelectedUnits();
-
-        RightClick();// I cant believe this works!
-        
-        for (auto& u : myUnits)
-        {
-            //int x = u->getTilePosition().x;
-            //int y = u->getTilePosition().y;
-            //Broodwar->printf("x: %d y: %d", x, y);
-
-            
-            //u->rightClick(auxFun::getMousePosition(), false);
-
-        }
-        // Do stuff
+    {       
+        auxFun::RightClick();              
     }
 }
 
@@ -299,12 +198,10 @@ void ExampleAIModule::onSendText(string text)
         CommMngr::setRallyPoint(UnitFun::getUnitList(UnitTypes::Terran_Barracks, Broodwar->self()->getUnits(), deadUnits), myPos);
     }
     if (text == "q")
-    {
-        //Position myPos(Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x, Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
+    {        
         for (auto& u : Miners)
-        {            
-            //Unit miner = UnitFun::getUnitByID(workers, u);
-            Unit miner = Broodwar->getUnit( u);
+        {                        
+            Unit miner = Broodwar->getUnit(u);
             miner->move(myPos);
             miner->stop(true);
             miner->gather(miner->getClosestUnit(IsMineralField),true); //the everyframe logic messes up this
@@ -324,21 +221,8 @@ void ExampleAIModule::onSendText(string text)
     }
     
     if (text == "u")
-    {
-        //Broodwar->canBuildHere
-        //Broodwar->elapsedTime
-        //Broodwar->getAPM
-        //Broodwar->getSelectedUnits
-        //Broodwar->getUnit // need to implemet
-        //Broodwar->hasPath
-        //Broodwar->isExplored
-        //Broodwar->issueCommand
-        //Broodwar->mapWidth
-        //Broodwar->pingMinimap
-        //Broodwar->printf        
-
-        static bool setGui = false;
-        
+    {              
+        static bool setGui = false;        
         Broodwar->setGUI(setGui);
         setGui = !setGui;
         Broodwar->printf("Map x: %d y: %d", Broodwar->mapWidth(), Broodwar->mapHeight());
@@ -347,24 +231,13 @@ void ExampleAIModule::onSendText(string text)
         {
             int x = u->getTilePosition().x;
             int y = u->getTilePosition().y;
-            Broodwar->printf("x: %d y: %d",x,y);
-
-            LeftClick();// I cant believe this works!
-            //u->rightClick(auxFun::getMousePosition(), false);
-            
-        }
-
-        
+            Broodwar->printf("x: %d y: %d",x,y);                                   
+        }        
     }
     // Send the text to the game if it is not being processed.
-    Broodwar->sendText("%s", text.c_str());
-
-    
-
-
+    Broodwar->sendText("%s", text.c_str());    
     // Make sure to use %s and pass the text as a parameter,
     // otherwise you may run into problems when you use the %(percent) character!
-
 }
 
 void ExampleAIModule::onStart()
@@ -506,7 +379,6 @@ void ExampleAIModule::onPlayerLeft(Player player)
 
 void ExampleAIModule::onNukeDetect(Position target)
 {
-
     // Check if the target is a valid position
     if (target)
     {
@@ -518,10 +390,7 @@ void ExampleAIModule::onNukeDetect(Position target)
         // Otherwise, ask other players where the nuke is!
         Broodwar->sendText("Where's the nuke?");
     }
-
     // You can also retrieve all the nuclear missile targets using Broodwar->getNukeDots()!
 }
 
 #pragma endregion
-
-

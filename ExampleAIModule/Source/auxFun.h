@@ -1,5 +1,6 @@
 #pragma once
 #include <BWAPI.h>
+#include <windows.h> // simulate mouse clicks
 using namespace std;
 class auxFun
 {
@@ -12,5 +13,23 @@ public:
 	static bool isUnitDead(std::list<int>& deadUnits, int id);
 	static BWAPI::Position getMousePosition();
 	static void displayInsights2(int roomNeeded, int supplyLeft2, int SCVcount, int barracksCount, int marineCount, int StatsCoordinates[][2], int Builders, int deadUnits, int taskQueueCount);
+	static void LeftClick();
+	static void RightClick();
 };
 
+//Useful functions
+//Broodwar->self()->allUnitCount();
+//Broodwar->self()->completedUnitCount();
+//Broodwar->self()->supplyTotal();
+//Broodwar->self()->supplyUsed();
+//Broodwar->canBuildHere
+//Broodwar->elapsedTime
+//Broodwar->getAPM
+//Broodwar->getSelectedUnits
+//Broodwar->getUnit // need to implemet
+//Broodwar->hasPath
+//Broodwar->isExplored
+//Broodwar->issueCommand
+//Broodwar->mapWidth
+//Broodwar->pingMinimap
+//Broodwar->printf 

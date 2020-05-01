@@ -1,4 +1,5 @@
 #include "auxFun.h"
+
 using namespace BWAPI;
 using namespace std;
 
@@ -100,5 +101,50 @@ void auxFun::displayInsights2(int roomNeeded, int supplyLeft2, int SCVcount, int
     Broodwar->drawTextScreen(StatsCoordinates[12][0], StatsCoordinates[12][1], "APM: %d ", Broodwar->getAPM());
     Broodwar->drawTextScreen(StatsCoordinates[13][0], StatsCoordinates[13][1], "FrameCount: %d ", Broodwar->getFrameCount());
 
+}
+
+void auxFun::LeftClick()
+{
+    INPUT    Input = { 0 };
+    // left down 
+    Input.type = INPUT_MOUSE;
+    Input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+    ::SendInput(1, &Input, sizeof(INPUT));
+
+    // left up
+    ::ZeroMemory(&Input, sizeof(INPUT));
+    Input.type = INPUT_MOUSE;
+    Input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
+    ::SendInput(1, &Input, sizeof(INPUT));
+}
+
+void auxFun::RightClick()
+{
+    INPUT    Input = { 0 };
+    // left down 
+    Input.type = INPUT_MOUSE;
+    Input.mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
+    ::SendInput(1, &Input, sizeof(INPUT));
+
+    // left up
+    ::ZeroMemory(&Input, sizeof(INPUT));
+    Input.type = INPUT_MOUSE;
+    Input.mi.dwFlags = MOUSEEVENTF_RIGHTUP;
+    ::SendInput(1, &Input, sizeof(INPUT));
+}
+
+void MouseMove(int x, int y)
+{
+    double fScreenWidth = GetSystemMetrics(SM_CXSCREEN) - 1;
+    double fScreenHeight = GetSystemMetrics(SM_CYSCREEN) - 1;
+    double fx = x * (65535.0f / fScreenWidth);
+    double fy = y * (65535.0f / fScreenHeight);
+    INPUT Input = { 0 };
+    Input.type = INPUT_MOUSE;
+    Input.mi.dwFlags = MOUSEEVENTF_MOVE;
+    //Input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
+    Input.mi.dx = fx;
+    Input.mi.dy = fy;
+    ::SendInput(1, &Input, sizeof(INPUT));
 }
 
