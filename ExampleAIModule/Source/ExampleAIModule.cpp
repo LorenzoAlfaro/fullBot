@@ -36,24 +36,24 @@ bool displayStats = false;
 #pragma region MainEvents
 
 void ExampleAIModule::onFrame()
-{
-    // Called once every game frame
-    // Display the game frame rate as text in the upper left area of the screen
-    const Unitset myUnits = Broodwar->self()->getUnits();
-    const int supplyLeft2 = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();
-    const int roomNeeded = auxFun::roomNeeded(UnitFun::getUnitCount(Terran_Command_Center, myUnits),UnitFun::getUnitCount(Terran_Barracks, myUnits));
-    int frameCount = Broodwar->getFrameCount();
-    int gas = Broodwar->self()->gas();
-    int minerals = Broodwar->self()->minerals();
-    const int SCVcount = UnitFun::getUnitCount(Terran_SCV, myUnits);
-    const int barracksCount = UnitFun::getUnitCount(Terran_Barracks, myUnits);
-    const int marineCount = UnitFun::getUnitCount(Terran_Marine, myUnits);
-    if (displayStats)
-    {
-        auxFun::displayInsights2(roomNeeded, supplyLeft2,SCVcount,barracksCount,marineCount, StatsCoordinates,Builders.size(),deadUnits.size(), taskQueue.size());
-    }
+{    
     if (auxFun::validFrame())
     {
+        // Called once every game frame
+        // Display the game frame rate as text in the upper left area of the screen
+        const Unitset myUnits = Broodwar->self()->getUnits();
+        const int supplyLeft2 = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();
+        const int roomNeeded = auxFun::roomNeeded(UnitFun::getUnitCount(Terran_Command_Center, myUnits), UnitFun::getUnitCount(Terran_Barracks, myUnits));
+        int frameCount = Broodwar->getFrameCount();
+        int gas = Broodwar->self()->gas();
+        int minerals = Broodwar->self()->minerals();
+        const int SCVcount = UnitFun::getUnitCount(Terran_SCV, myUnits);
+        const int barracksCount = UnitFun::getUnitCount(Terran_Barracks, myUnits);
+        const int marineCount = UnitFun::getUnitCount(Terran_Marine, myUnits);
+        if (displayStats)
+        {
+            auxFun::displayInsights2(roomNeeded, supplyLeft2, SCVcount, barracksCount, marineCount, StatsCoordinates, Builders.size(), deadUnits.size(), taskQueue.size());
+        }
         TaskEngine::taskManager(taskQueue, frameCount, minerals, gas, UnitFun::getUnitList(UnitTypes::Terran_Command_Center, Broodwar->self()->getUnits(), deadUnits).front(),Miners,Builders);
         CommMngr::scvManager(Miners);//go mine for me minions!
 
@@ -63,22 +63,22 @@ void ExampleAIModule::onFrame()
             almostSupplyBlocked = true;
         }
         ProductionManager::productionManager(minerals, gas, frameCount,taskQueue,TaskCount, deadUnits, barracksCount, SCVcount,maxBuilding,maxUnit, almostSupplyBlocked, roomNeeded); //eventually productionManager will be another task run by taskManager    
-    }
 
-    if (GetKeyState('A') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
-    {
-        Position myPos = auxFun::getMousePosition();
-        CommMngr::attackUnits(UnitFun::getUnitList(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
-        // Do stuff
-    }
-    if (GetKeyState('Q') & 0x8000/*Check if high-order bit is set (1 << 15) LEFT CLICK*/)
-    {
-        auxFun::LeftClick();// I cant believe this works!              
-    }
-    if (GetKeyState('W') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
-    {       
-        auxFun::RightClick();              
-    }
+        if (GetKeyState('A') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
+        {
+            Position myPos = auxFun::getMousePosition();
+            CommMngr::attackUnits(UnitFun::getUnitList(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
+            // Do stuff
+        }
+        if (GetKeyState('Q') & 0x8000/*Check if high-order bit is set (1 << 15) LEFT CLICK*/)
+        {
+            auxFun::LeftClick();// I cant believe this works!              
+        }
+        if (GetKeyState('W') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
+        {
+            auxFun::RightClick();
+        }
+    }    
 }
 
 void ExampleAIModule::onUnitCreate(Unit unit)

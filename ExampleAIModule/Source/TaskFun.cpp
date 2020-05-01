@@ -193,27 +193,12 @@ void TaskFun::assessTask(array<int, 12>& newTask)
     // what priority should I give you?
 }
 
-void TaskFun::CreateTask(list<array<int, 12>>& myTaskQueue, int timeStamp, int taskOwner, int action, int TaskCount)
+
+
+void TaskFun::CreateTask(list<array<int, 12>>& myTaskQueue,int timeStamp,int delay,int taskOwner,int action,int& TaskCount)
 {
-    array<int, 12> newArray{ timeStamp,0,action,0,taskOwner,(int)taskStatus::Created, TaskCount };
-
-    myTaskQueue.push_back(newArray);
-
-    TaskCount = TaskCount + 1;
-}
-
-void TaskFun::CreateTask2(
-    list<array<int, 12>>& myTaskQueue,
-    int timeStamp,
-    int delay,
-    int taskOwner,
-    int action,
-    int& TaskCount)
-{
-
     array<int, 3> price = TaskFun::resourceCost(action);
     array<int, 12> mytask;
-
     mytask[(int)tsk::TimeStamp] = timeStamp;
     mytask[(int)tsk::Delay] = delay;
     mytask[(int)tsk::Action] = action;
@@ -226,26 +211,9 @@ void TaskFun::CreateTask2(
     mytask[(int)tsk::Minerals] = price[0];
     mytask[(int)tsk::Gas] = price[1];
     mytask[(int)tsk::Duration] = price[2];
-
-
-    //array<int, 12> newArray{
-    //    timeStamp,
-    //    delay,
-    //    action,
-    //    0,//not assigned to SCV yet, or building
-    //    taskOwner,
-    //    (int)taskStatus::Created,
-    //    TaskCount,
-    //    0,//X tile
-    //    0,//y tile
-    //    price[0],//mineral
-    //    price[1],//gas
-    //    price[2] };//time
-
+    
     myTaskQueue.push_back(mytask);
-
     TaskCount += 1;
-
     TaskFun::logTaskUpdate(mytask);
 }
 
