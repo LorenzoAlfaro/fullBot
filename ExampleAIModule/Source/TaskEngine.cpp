@@ -4,7 +4,7 @@
 #include "Buildmanager.h"
 
 
-void TaskEngine::taskManager(list<array<int, 12>>& myTaskQueue, int frameCount, int minerals, int gas, Unit CommandCenter, list<int>& Miners, list<int>& Builders, UnitType supplyProviderType)
+void TaskEngine::taskManager(list<array<int, 12>>& myTaskQueue, int frameCount, int minerals, int gas, Unit CommandCenter, list<int>& Miners, list<int>& Builders)
 {
     //if my task status is 0, not started, check timestamp
     //0 created, 1 reviewed but no resources to assign, 2 assigned with resources, 3 started, 4 completed, 5 cancel
@@ -23,7 +23,7 @@ void TaskEngine::taskManager(list<array<int, 12>>& myTaskQueue, int frameCount, 
                 TaskFun::gasAvailable(task, gas)) //and location available
             {
                 //assign SCV
-                Unit SCV = UnitFun::getWorker(CommandCenter, Miners, Builders, supplyProviderType);
+                Unit SCV = UnitFun::getWorker(CommandCenter, Miners, Builders);
                 int id = SCV->getID();
 
                 

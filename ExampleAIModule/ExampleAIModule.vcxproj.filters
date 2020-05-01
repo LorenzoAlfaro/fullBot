@@ -24,6 +24,9 @@
     <ClCompile Include="Source\ProductionManager.cpp">
       <Filter>ProductionManager</Filter>
     </ClCompile>
+    <ClCompile Include="Source\FileIO.cpp">
+      <Filter>FileIO</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -48,6 +51,9 @@
     </ClInclude>
     <ClInclude Include="Source\ProductionManager.h">
       <Filter>ProductionManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FileIO.h">
+      <Filter>FileIO</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -74,6 +80,9 @@
     </Filter>
     <Filter Include="ProductionManager">
       <UniqueIdentifier>{023a210a-d442-4563-bac0-30424473e62e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FileIO">
+      <UniqueIdentifier>{7e92348d-d296-4529-a214-b3046669c627}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

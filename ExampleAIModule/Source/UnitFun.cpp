@@ -6,9 +6,9 @@ using namespace BWAPI;
 using namespace Filter;
 
 
-Unit UnitFun::getSCV(Unit CommandCenter, std::list<int> &Miners, std::list<int> &Builders, UnitType supplyProviderType)
+Unit UnitFun::getSCV(Unit CommandCenter, std::list<int> &Miners, std::list<int> &Builders)
 {
-    Unit worker = CommandCenter->getClosestUnit(GetType == supplyProviderType.whatBuilds().first &&
+    Unit worker = CommandCenter->getClosestUnit(GetType == UnitTypes::Terran_Supply_Depot.whatBuilds().first &&
         (IsIdle || IsGatheringMinerals) && IsOwned);
     Miners.remove(worker->getID());//change duty to builder
     Builders.push_back(worker->getID());
@@ -32,7 +32,7 @@ Unit UnitFun::getBuilder(std::list<int> Builders)
     return builder;
 }
 
-Unit UnitFun::getWorker(Unit CommandCenter, std::list<int> &Miners, std::list<int> &Builders, UnitType supplyProviderType)
+Unit UnitFun::getWorker(Unit CommandCenter, std::list<int> &Miners, std::list<int> &Builders)
 {
     Unit worker;
 
@@ -41,12 +41,12 @@ Unit UnitFun::getWorker(Unit CommandCenter, std::list<int> &Miners, std::list<in
         worker = UnitFun::getBuilder(Builders);        
         if (worker == nullptr)
         {
-            worker = UnitFun::getSCV(CommandCenter, Miners, Builders, supplyProviderType);
+            worker = UnitFun::getSCV(CommandCenter, Miners, Builders);
         }
     }
     else
     {
-        worker = UnitFun::getSCV(CommandCenter, Miners, Builders, supplyProviderType);
+        worker = UnitFun::getSCV(CommandCenter, Miners, Builders);
     }
     return worker;
 }

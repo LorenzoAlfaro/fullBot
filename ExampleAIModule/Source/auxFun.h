@@ -1,5 +1,6 @@
 #pragma once
 #include <BWAPI.h>
+using namespace std;
 class auxFun
 {
 public:
@@ -10,5 +11,6 @@ public:
 	static bool validFrame();
 	static bool isUnitDead(std::list<int>& deadUnits, int id);
 	static BWAPI::Position getMousePosition();
+	static void displayInsights2(int roomNeeded, int supplyLeft2, int SCVcount, int barracksCount, int marineCount, int StatsCoordinates[][2], int Builders, int deadUnits, int taskQueueCount);
 };
 

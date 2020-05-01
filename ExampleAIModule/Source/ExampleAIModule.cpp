@@ -6,6 +6,7 @@
 #include "TaskFun.h"
 #include "TaskEngine.h"
 #include "ProductionManager.h"
+#include "FileIO.h"
 
 #include <iostream>
 #include <fstream>
@@ -19,6 +20,7 @@ using namespace UnitTypes;
 
 //using namespace WinUser;
 
+//TODO: instead of defining an amount of marines, define the porcentage from the total food supply quota i.e 50% marines = 100 marines or 50 vultures
 //TODO: fix bug, TASK ID is not being represented corectly
 //Change Task Array to use Task Enum instead of indexes
 //ADD building map file, where to build my buildings location
@@ -35,100 +37,23 @@ using namespace UnitTypes;
 //Broodwar->self()->supplyTotal();
 //Broodwar->self()->supplyUsed();
 
-
-#pragma region GameState
 int StatsCoordinates[14][2];//used to set the display metrics
-int UnitCount[2] = { 0,0 }; //SCV,Marines, Medics, etc
 int maxUnit[2] = { 50,150 }; //SCV,Marines, Medics, etc
-int BuildingCount[3] = { 0,0,0 }; //CC, supplydepots, barracks
 int maxBuilding[3] = { 3,20,4 }; //CC, supplydepots, barracks
-int deadSCVs = 0;
+
 int TaskCount = 0; //unique Task ID
 list<array<int, 12>> taskQueue;
 // 0=timeStamp,1=callbacktime,2=action,3=SCVID or build, 4=taskOwner,5=status, 6=uniqueID
 //0=TS,1=Delay,2=Action,3=ID,4=Owner,5=Status,6=ID,7=X,8=Y,9=Mineral,10=Gas,11=Time
 //
-#pragma endregion
-
-#pragma region UnitLists
-list<Unit> commandCenters;
-list<Unit> supplyDepots;
 
 list<int> Miners; //could be replace byd an array
 list<int> Builders; //could be replaced by an array
 list<int> deadUnits;
-#pragma endregion
-
-#pragma region uniqueUnits
-UnitType supplyProviderType = UnitTypes::Terran_Supply_Depot;
-#pragma endregion
-
-#pragma region MaxCount
-int supplyLimit = 0; // max supply 200
-int supplyLeft = 0; //how many units can I support yet
-int roomForProduction = 0; //how much before I need to build supply depots
-int virtualBudget = 0;
 //add an array parallel to the unit array that should be a regulator array, the target array
-#pragma endregion
-
-#pragma region Boolean Variables
-bool almostSupplyBlocked = false; //when true AI needs to build supplydepots pre emptively
 bool displayStats = false;
-#pragma endregion
 
-//methods
 #pragma region ExtraFunctions
-void readStatsCoordinates()
-{   //simple functions useful for readings the settings for displaying the stats
-    string line;
-    ifstream myfile("StatsCoordinates.txt");
-    if (myfile.is_open())
-    {
-        int index = 0;
-        while (getline(myfile, line))
-        {
-            istringstream iss(line);
-            vector<string> results(istream_iterator<string>{iss},
-                istream_iterator<string>());
-
-            for (int i = 0; i < results.size() - 1; i++)
-            {
-                StatsCoordinates[index][i] = stoi(results[i]);
-            }
-            index += 1;
-            //cout << line << '\n';
-            //Broodwar->sendText(line.c_str());
-        }
-        myfile.close();
-    }
-    else Broodwar->sendText("Unable to open file");//cout << "Unable to open file";    
-}
-int readSettingsFile()
-{
-    ofstream myfile;
-    myfile.open("Pikachu.txt");
-    myfile << "Writing this to a file.\n";
-    myfile.close();
-    return 0;
-}
-
-int readSettings()
-{
-    string line;
-    ifstream myfile("Pikachu.txt");
-    if (myfile.is_open())
-    {
-        while (getline(myfile, line))
-        {
-            //cout << line << '\n';
-            Broodwar->sendText(line.c_str());
-        }
-        myfile.close();
-    }
-
-    else Broodwar->sendText("Unable to open file");//cout << "Unable to open file";
-    return 0;
-}
 
 void MouseMove(int x, int y)
 {
@@ -177,132 +102,6 @@ void RightClick()
 
 #pragma endregion
 
-#pragma region SupplyInfoMethods
-
-void updateUnitCount(bool created, Unit unit)
-{   
-    UnitType myType = unit->getType();
-    char result[100];
-    strcpy(result, "new: ");
-    strcat(result, myType.c_str());
-    if (created)
-    {
-        if (displayStats)
-        {
-            //Broodwar->sendText(result); //strcat crashing broodwar
-            result[0] = '\0'; //clear
-        }
-        if (myType == UnitTypes::Terran_Barracks)
-        {
-            BuildingCount[2] = BuildingCount[2] + 1;
-            //barracks.push_back(unit);
-        }
-        if (myType == UnitTypes::Terran_Marine)
-        {
-            UnitCount[1] = UnitCount[1] + 1;
-
-            //marines.push_back(unit); //how to remove the dead ones?
-        }
-        if (myType == UnitTypes::Terran_SCV)
-        {
-            UnitCount[0] = UnitCount[0] + 1;
-            //workers.push_back(unit);
-            Miners.push_back(unit->getID());//assign to mine
-        }
-        if (myType == UnitTypes::Terran_Supply_Depot)
-        {
-            BuildingCount[1] = BuildingCount[1] + 1;
-            supplyDepots.push_back(unit);
-        }
-        if (myType == UnitTypes::Terran_Command_Center)
-        {
-            BuildingCount[0] = BuildingCount[0] + 1;
-        }
-        
-    }
-    else
-    {
-        char result2[100];
-        strcpy(result2, "dead: ");
-        strcat(result2, myType.c_str());
-        if (displayStats)
-        {
-            //Broodwar->sendText(result2);
-        }
-
-        if (myType == UnitTypes::Terran_Barracks)
-        {
-            BuildingCount[2] = BuildingCount[2] - 1;
-        }
-        if (myType == UnitTypes::Terran_Marine)
-        {
-            UnitCount[1] = UnitCount[1] - 1;
-        }
-        if (myType == UnitTypes::Terran_SCV)
-        {
-            UnitCount[0] = UnitCount[0] - 1;
-        }
-        if (myType == UnitTypes::Terran_Supply_Depot)
-        {
-            BuildingCount[1] = BuildingCount[1] - 1;
-        }
-        if (myType == UnitTypes::Terran_Command_Center)
-        {
-            BuildingCount[0] = BuildingCount[0] - 1;
-        }
-        
-    }
-
-    supplyLeft = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed(); //x2
-    
-}
-
-void displayInsights2(int roomNeeded, int supplyLeft2, int SCVcount, int barracksCount, int marineCount)
-{
-    //int supplyLeft2 = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();
-    Broodwar->drawTextScreen(StatsCoordinates[0][0], StatsCoordinates[0][1], "FPS: %d", Broodwar->getFPS());
-    //Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
-    Broodwar->drawTextScreen(StatsCoordinates[1][0], StatsCoordinates[1][1], "Brks: %d", barracksCount);
-    Broodwar->drawTextScreen(StatsCoordinates[2][0], StatsCoordinates[2][1], "Mrn: %d", marineCount);
-    Broodwar->drawTextScreen(StatsCoordinates[3][0], StatsCoordinates[3][1], "SCV: %d", SCVcount);
-    Broodwar->drawTextScreen(StatsCoordinates[4][0], StatsCoordinates[4][1], "Bldrs: %d", Builders.size());
-    Broodwar->drawTextScreen(StatsCoordinates[5][0], StatsCoordinates[5][1], "Dead: %d ", deadUnits.size());
-    //Broodwar->drawTextScreen(StatsCoordinates[6][0], StatsCoordinates[6][1], "Mouse Cursor: %d  %d", Broodwar->getMousePosition().x, Broodwar->getMousePosition().y);
-    //Broodwar->drawTextScreen(StatsCoordinates[7][0], StatsCoordinates[7][1], "Screen: %d  %d", Broodwar->getScreenPosition().x, Broodwar->getScreenPosition().y);
-
-    //Broodwar->drawTextScreen(StatsCoordinates[8][0], StatsCoordinates[8][1], "supply limit: %d ", supplyLeft);
-    Broodwar->drawTextScreen(StatsCoordinates[9][0], StatsCoordinates[9][1], "supply limit2: %d ", supplyLeft2 / 2);
-    Broodwar->drawTextScreen(StatsCoordinates[10][0], StatsCoordinates[10][1], "room for next round: %d ", roomNeeded / 2);
-    Broodwar->drawTextScreen(StatsCoordinates[11][0], StatsCoordinates[11][1], "Tasks: %d ", taskQueue.size());
-    Broodwar->drawTextScreen(StatsCoordinates[12][0], StatsCoordinates[12][1], "APM: %d ", Broodwar->getAPM());
-    Broodwar->drawTextScreen(StatsCoordinates[13][0], StatsCoordinates[13][1], "FrameCount: %d ", Broodwar->getFrameCount());
-
-}
-
-#pragma endregion
-
-#pragma region MainMethods
-
-void initialAssigment(Unitset units)
-{
-    for (auto& u : units)
-    {
-        if (auxFun::validUnit(u, deadUnits))
-        {
-            if (u->getType().isWorker())
-            {
-                //workers.push_back(u);
-                //Miners.push_back(u->getID());
-            }
-            if (u->getType().isResourceDepot())
-            {
-                commandCenters.push_back(u);
-            }
-        }
-    }
-}
-
-#pragma endregion
 
 #pragma region MainEvents
 
@@ -312,9 +111,7 @@ void ExampleAIModule::onFrame()
     // Display the game frame rate as text in the upper left area of the screen
     const Unitset myUnits = Broodwar->self()->getUnits();
     const int supplyLeft2 = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();
-    const int roomNeeded = auxFun::roomNeeded(
-        UnitFun::getUnitCount(Terran_Command_Center, myUnits),
-        UnitFun::getUnitCount(Terran_Barracks, myUnits));
+    const int roomNeeded = auxFun::roomNeeded(UnitFun::getUnitCount(Terran_Command_Center, myUnits),UnitFun::getUnitCount(Terran_Barracks, myUnits));
     int frameCount = Broodwar->getFrameCount();
     int gas = Broodwar->self()->gas();
     int minerals = Broodwar->self()->minerals();
@@ -323,11 +120,11 @@ void ExampleAIModule::onFrame()
     const int marineCount = UnitFun::getUnitCount(Terran_Marine, myUnits);
     if (displayStats)
     {
-        displayInsights2(roomNeeded, supplyLeft2,SCVcount,barracksCount,marineCount);
+        auxFun::displayInsights2(roomNeeded, supplyLeft2,SCVcount,barracksCount,marineCount, StatsCoordinates,Builders.size(),deadUnits.size(), taskQueue.size());
     }
     if (auxFun::validFrame())
     {
-        TaskEngine::taskManager(taskQueue, frameCount, minerals, gas,commandCenters.front(),Miners,Builders,supplyProviderType);
+        TaskEngine::taskManager(taskQueue, frameCount, minerals, gas, UnitFun::getUnitList(UnitTypes::Terran_Command_Center, Broodwar->self()->getUnits(), deadUnits).front(),Miners,Builders);
         CommMngr::scvManager(Miners);//go mine for me minions!
 
         bool  almostSupplyBlocked = false;
@@ -389,9 +186,12 @@ void ExampleAIModule::onUnitCreate(Unit unit)
 {
 
     if (IsOwned(unit))
-    {
-        updateUnitCount(true, unit);
-
+    {        
+        if (unit->getType() == UnitTypes::Terran_SCV)
+        {
+            Miners.push_back(unit->getID());//assign to mine
+        }
+        
         if (!taskQueue.empty() && !unit->canAttack()
             && unit->getType() != UnitTypes::Terran_SCV
             && unit->getType() != UnitTypes::Terran_Marine)
@@ -469,8 +269,7 @@ void ExampleAIModule::onUnitDestroy(Unit unit)
 {
    
     if (IsOwned(unit))
-    {
-        updateUnitCount(false, unit);
+    {        
         deadUnits.push_back(unit->getID());
     }
 
@@ -523,10 +322,7 @@ void ExampleAIModule::onSendText(string text)
         builder->move(myPos);
         builder->build(UnitTypes::Terran_Engineering_Bay, builder->getTilePosition());
     }
-    if (text == "read")
-    {
-        readSettings();
-    }
+    
     if (text == "u")
     {
         //Broodwar->canBuildHere
@@ -573,7 +369,11 @@ void ExampleAIModule::onSendText(string text)
 
 void ExampleAIModule::onStart()
 {
-    readStatsCoordinates();
+    if (!FileIO::readStatsCoordinates(StatsCoordinates))
+    {
+        Broodwar->sendText("Unable to open file");//cout << "Unable to open file"
+    }
+    
 
     ofstream myfile;
     myfile.open("TaskRecord.txt");
@@ -624,12 +424,11 @@ void ExampleAIModule::onStart()
 
     }
     else // if this is not a replay
-    {
-        initialAssigment(Broodwar->self()->getUnits()); //assign my firt units, 4 workers, CC
+    {        
         // Retrieve you and your enemy's races. enemy() will just return the first enemy.
         // If you wish to deal with multiple enemies then you must use enemies().
         if (Broodwar->enemy()) // First make sure there is an enemy
-            Broodwar << "The matchup is " << Broodwar->self()->getRace() << " vs " << Broodwar->enemy()->getRace() << endl;
+            Broodwar << "Welcome to the Jungle v1.0 " << Broodwar->self()->getRace() << " vs " << Broodwar->enemy()->getRace() << endl;
     }
 
 }
@@ -722,7 +521,6 @@ void ExampleAIModule::onNukeDetect(Position target)
 
     // You can also retrieve all the nuclear missile targets using Broodwar->getNukeDots()!
 }
-
 
 #pragma endregion
 
