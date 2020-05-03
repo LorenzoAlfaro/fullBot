@@ -30,3 +30,23 @@ bool FileIO::readStatsCoordinates(int StatsCoordinates[][2])
     }
     else return false;        
 }
+
+void FileIO::WriteHeaders()
+{
+    ofstream myfile;
+    myfile.open("TaskRecord.txt");
+    myfile << "TS: "
+        << " Offset: "
+        << " Action: "
+        << " ID: "
+        << " Owner: "
+        << " Status: "
+        << " TaskID: "
+        << " X: "
+        << " Y: "
+        << " Mineral: "
+        << " GAS: "
+        << " Time: "
+        << '\n';
+    myfile.close();
+}

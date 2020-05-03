@@ -1,5 +1,4 @@
 #include "ExampleAIModule.h"
-
 #include "UnitFun.h"
 #include "CommMngr.h"
 #include "auxFun.h"
@@ -8,9 +7,6 @@
 #include "ProductionManager.h"
 #include "FileIO.h"
 
-#include <iostream>
-#include <fstream>
-#include <array>
 using namespace BWAPI;
 using namespace Filter;
 using namespace std;
@@ -34,41 +30,44 @@ list<int> deadUnits;
 bool displayStats = false;
 
 #pragma region MainEvents
-
 void ExampleAIModule::onFrame()
 {    
     if (auxFun::validFrame())
     {
         // Called once every game frame
         // Display the game frame rate as text in the upper left area of the screen
-        const Unitset myUnits = Broodwar->self()->getUnits();
-        const int supplyLeft2 = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();
-        const int roomNeeded = auxFun::roomNeeded(UnitFun::getUnitCount(Terran_Command_Center, myUnits), UnitFun::getUnitCount(Terran_Barracks, myUnits));
         int frameCount = Broodwar->getFrameCount();
         int gas = Broodwar->self()->gas();
         int minerals = Broodwar->self()->minerals();
-        const int SCVcount = UnitFun::getUnitCount(Terran_SCV, myUnits);
+        
+        const int emptySupply = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();        
+        const Unitset myUnits = Broodwar->self()->getUnits();
         const int barracksCount = UnitFun::getUnitCount(Terran_Barracks, myUnits);
+        const int CommandCenterCount = UnitFun::getUnitCount(Terran_Command_Center, myUnits);
+        const int roomNeeded = auxFun::roomNeeded(CommandCenterCount, barracksCount);
+        const int SCVcount = UnitFun::getUnitCount(Terran_SCV, myUnits);
+        
         const int marineCount = UnitFun::getUnitCount(Terran_Marine, myUnits);
         if (displayStats)
         {
-            auxFun::displayInsights2(roomNeeded, supplyLeft2, SCVcount, barracksCount, marineCount, StatsCoordinates, Builders.size(), deadUnits.size(), taskQueue.size());
+            auxFun::displayInsights2(roomNeeded, emptySupply, SCVcount, barracksCount, marineCount, StatsCoordinates, Builders.size(), deadUnits.size(), taskQueue.size());
         }
-        TaskEngine::taskManager(taskQueue, frameCount, minerals, gas, UnitFun::getUnitList(UnitTypes::Terran_Command_Center, Broodwar->self()->getUnits(), deadUnits).front(),Miners,Builders);
-        CommMngr::scvManager(Miners);//go mine for me minions!
+        TaskEngine::taskManager(taskQueue, frameCount, minerals, gas, UnitFun::getUnitList(Terran_Command_Center, Broodwar->self()->getUnits(), deadUnits).front(),Miners,Builders);
+        
 
         bool  almostSupplyBlocked = false;
-        if (roomNeeded > supplyLeft2) { //instead of 4,should be the max output of production at a given time
+        if (roomNeeded > emptySupply) { //instead of 4,should be the max output of production at a given time
 
             almostSupplyBlocked = true;
         }
         ProductionManager::productionManager(minerals, gas, frameCount,taskQueue,TaskCount, deadUnits, barracksCount, SCVcount,maxBuilding,maxUnit, almostSupplyBlocked, roomNeeded); //eventually productionManager will be another task run by taskManager    
-
+        
+        CommMngr::scvManager(Miners);//go mine for me minions!
+        
         if (GetKeyState('A') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
         {
             Position myPos = auxFun::getMousePosition();
-            CommMngr::attackUnits(UnitFun::getUnitList(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
-            // Do stuff
+            CommMngr::attackUnits(UnitFun::getUnitList(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);            
         }
         if (GetKeyState('Q') & 0x8000/*Check if high-order bit is set (1 << 15) LEFT CLICK*/)
         {
@@ -211,13 +210,13 @@ void ExampleAIModule::onSendText(string text)
     {
         Unit builder = UnitFun::getBuilder(Builders);
         builder->move(myPos);
-        builder->build(UnitTypes::Terran_Command_Center, builder->getTilePosition());
+        builder->build(Terran_Command_Center, builder->getTilePosition());
     }
     if (text == "e")
     {
         Unit builder = UnitFun::getBuilder(Builders);
         builder->move(myPos);
-        builder->build(UnitTypes::Terran_Engineering_Bay, builder->getTilePosition());
+        builder->build(Terran_Engineering_Bay, builder->getTilePosition());
     }
     
     if (text == "u")
@@ -246,25 +245,7 @@ void ExampleAIModule::onStart()
     {
         Broodwar->sendText("Unable to open file");//cout << "Unable to open file"
     }
-    
-
-    ofstream myfile;
-    myfile.open("TaskRecord.txt");
-    myfile << "TS: "
-        << " Offset: "
-        << " Action: "
-        << " ID: "
-        << " Owner: "
-        << " Status: "
-        << " TaskID: "
-        << " X: "
-        << " Y: "
-        << " Mineral: "
-        << " GAS: "
-        << " Time: "
-        << '\n';
-    myfile.close();
-    //readSettingsFile();
+    FileIO::WriteHeaders();//for task record      
     // Print the map name.
     // BWAPI returns string when retrieving a string, don't forget to add .c_str() when printing!
     //Broodwar << "The map is  " << Broodwar->mapName() << "!" << endl;
@@ -280,30 +261,14 @@ void ExampleAIModule::onStart()
     Broodwar->setCommandOptimizationLevel(2);
 
     // Check if this is a replay
-    if (Broodwar->isReplay())
+    if (!Broodwar->isReplay())
     {
-
-        // Announce the players in the replay
-        Broodwar << "The following players are in this replay:" << endl;
-
-        // Iterate all the players in the game using a  iterator
-        Playerset players = Broodwar->getPlayers();
-        for (auto p : players)
-        {
-            // Only print the player if they are not an observer
-            if (!p->isObserver())
-                Broodwar << p->getName() << ", playing as " << p->getRace() << endl;
-        }
-
-    }
-    else // if this is not a replay
-    {        
         // Retrieve you and your enemy's races. enemy() will just return the first enemy.
         // If you wish to deal with multiple enemies then you must use enemies().
         if (Broodwar->enemy()) // First make sure there is an enemy
             Broodwar << "Welcome to the Jungle v1.0 " << Broodwar->self()->getRace() << " vs " << Broodwar->enemy()->getRace() << endl;
-    }
-
+        
+    }   
 }
 
 #pragma endregion
@@ -344,8 +309,6 @@ void ExampleAIModule::onEnd(bool isWinner)
 #pragma endregion
 
 #pragma region NotUsedEvents
-
-//not useful ... yet
 void ExampleAIModule::onSaveGame(string gameName)
 {
     Broodwar << "The game was saved to \"" << gameName << "\"" << endl;
