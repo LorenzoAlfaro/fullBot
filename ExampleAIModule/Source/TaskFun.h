@@ -26,15 +26,16 @@ public:
 
 enum class taskStatus {
     Created,        //try to assign
-    Reviewed,       //-Not being used
-    PendingStart,   //* has an SCV ID assign to build, or the building ID to research upgrade 
+    //Reviewed,       //-Not being used    
     waitingMin,     //* the task is waiting for minerals, set callback time, try to assign after callbacktime
     waitingGas,     //-Not being used the task is waiting for gas
-    waitingClear,   //-Not being used the task is waiting for the building place to clear, or the building to stop to add-on
+    //waitingClear,   //-Not being used the task is waiting for the building place to clear, or the building to stop to add-on
+    PendingStart,   //* has an SCV ID assign to build, or the building ID to research upgrade 
     Started,        //* unit started building,  OnUnitCreate()
-    Completed,      //* onUnitComplete()
-    Paused,         //-Not being used
-    Cancelled       //-Something interrupted the building
+    Completed,      //* onUnitComplete(), this task could be removed from queue
+    Cancelled       //-Something interrupted the building, this task could be removed from queue
+    //Paused,         //-Not being used
+    
 };
 
 //Created ->PendingStart or ->waitingMin

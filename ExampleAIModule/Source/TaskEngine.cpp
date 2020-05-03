@@ -28,7 +28,7 @@ void TaskEngine::taskManager(list<array<int, 12>>& myTaskQueue, int frameCount, 
                         task[(int)tsk::X] = targetBuildLocation.x;
                         task[(int)tsk::Y] = targetBuildLocation.y;
                     }
-                    TaskFun::startTask(task, SCV);//set to PendingStart
+                    TaskFun::startTask(task, SCV);//set to PendingStart, onUnitCreate set to Start, onUnitComplete set to Complete
                 }
                 else
                 {
