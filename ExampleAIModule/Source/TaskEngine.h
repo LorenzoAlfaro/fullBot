@@ -1,6 +1,9 @@
 #pragma once
 #include <array>
 #include <BWAPI.h>
+#include "TaskFun.h"
+#include "UnitFun.h"
+#include "Buildmanager.h"
 
 using namespace std;
 using namespace BWAPI;

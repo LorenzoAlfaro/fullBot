@@ -1,8 +1,4 @@
 #include "TaskEngine.h"
-#include "TaskFun.h"
-#include "UnitFun.h"
-#include "Buildmanager.h"
-
 
 void TaskEngine::taskManager(list<array<int, 12>>& myTaskQueue, int frameCount, int minerals, int gas, Unit CommandCenter, list<int>& Miners, list<int>& Builders)
 {
@@ -13,47 +9,44 @@ void TaskEngine::taskManager(list<array<int, 12>>& myTaskQueue, int frameCount, 
     for (auto& task : myTaskQueue)
     {
         int taskStatus = task[(int)tsk::Status];
-        if (frameCount > (task[(int)tsk::TimeStamp] + task[(int)tsk::Delay])
-            && taskStatus != (int)taskStatus::Started
-            && taskStatus != (int)taskStatus::Completed
-            && taskStatus != (int)taskStatus::Cancelled
-            && taskStatus != (int)taskStatus::PendingStart)
+        int callBackTime = task[(int)tsk::TimeStamp] + task[(int)tsk::Delay];
+        if (frameCount > callBackTime)
         {
-            if (TaskFun::mineralsAvailable(task, minerals) &&
-                TaskFun::gasAvailable(task, gas)) //and location available
+            //taskStatus != (int)taskStatus::Started && taskStatus != (int)taskStatus::Completed && taskStatus != (int)taskStatus::Cancelled && taskStatus != (int)taskStatus::PendingStart
+            if (taskStatus == (int)taskStatus::Created || taskStatus == (int)taskStatus::waitingMin)
             {
-                //assign SCV
-                Unit SCV = UnitFun::getWorker(CommandCenter, Miners, Builders);
-                int id = SCV->getID();
-
-                
-                //pass the worker id to the task
-                task[(int)tsk::UID] = id;
-
-                if (task[(int)tsk::X] == 0 && task[(int)tsk::Y] == 0)
+                if (TaskFun::mineralsAvailable(task, minerals) && TaskFun::gasAvailable(task, gas)) //and location available
                 {
-                    const TilePosition targetBuildLocation = BuildManager::returnBuildPosition(task[(int)tsk::Action], SCV, 20);
+                    //assign SCV
+                    Unit SCV = UnitFun::getWorker(CommandCenter, Miners, Builders);
+                    //pass the worker id to the task
+                    task[(int)tsk::UID] = SCV->getID();
 
-                    task[(int)tsk::X] = targetBuildLocation.x;
-                    task[(int)tsk::Y] = targetBuildLocation.y;
-
+                    if (task[(int)tsk::X] == 0 && task[(int)tsk::Y] == 0)
+                    {
+                        const TilePosition targetBuildLocation = BuildManager::returnBuildPosition(task[(int)tsk::Action], SCV, 20);
+                        task[(int)tsk::X] = targetBuildLocation.x;
+                        task[(int)tsk::Y] = targetBuildLocation.y;
+                    }
+                    TaskFun::startTask(task, SCV);//set to PendingStart
                 }
-
-                TaskFun::startTask(task, SCV);
+                else
+                {
+                    //do we have resources? assign, no? set callback time
+                    TaskFun::callBack(task, 200, (int)taskStatus::waitingMin);
+                }
+            }
+            else if (taskStatus == (int)taskStatus::PendingStart)
+            {
+                task[(int)tsk::Status] = (int)taskStatus::Cancelled;
+                Broodwar->sendText("TaskMngr: Failed to start task id: %d : ", task[(int)tsk::ID]); //for some error            
             }
             else
             {
-                //do we have resources? assign, no? set callback time
-                TaskFun::callBack(task, 200, (int)taskStatus::waitingMin);
+                //nothing to do...
             }
-        }
-        else if (frameCount > (task[(int)tsk::TimeStamp] + task[(int)tsk::Delay]) && taskStatus == (int)taskStatus::PendingStart)
-        {
-            task[(int)tsk::Status] = (int)taskStatus::Cancelled;
-            Broodwar->sendText("TaskMngr: Failed to start task id: %d : ", task[(int)tsk::ID]); //for some error            
-        }
-    }
-    
+        }        
+    }   
 }
 
 

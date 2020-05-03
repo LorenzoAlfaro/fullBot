@@ -25,17 +25,22 @@ public:
 };
 
 enum class taskStatus {
-    Created,
-    Reviewed,
-    PendingStart,  // has an SCV ID assign to build, or the building ID to research upgrade 
-    waitingMin,  //the task is waiting for minerals
-    waitingGas, //the task is waiting for gas
-    waitingClear, // the task is waiting for the building place to clear, or the building to stop to add-on
-    Started,
-    Completed,
-    Paused,
-    Cancelled
+    Created,        //try to assign
+    Reviewed,       //-Not being used
+    PendingStart,   //* has an SCV ID assign to build, or the building ID to research upgrade 
+    waitingMin,     //* the task is waiting for minerals, set callback time, try to assign after callbacktime
+    waitingGas,     //-Not being used the task is waiting for gas
+    waitingClear,   //-Not being used the task is waiting for the building place to clear, or the building to stop to add-on
+    Started,        //* unit started building,  OnUnitCreate()
+    Completed,      //* onUnitComplete()
+    Paused,         //-Not being used
+    Cancelled       //-Something interrupted the building
 };
+
+//Created ->PendingStart or ->waitingMin
+//PendingStart -> Started //if nothing interrupts the SCV
+//PendingStart -> Cancelled //if SCV got blocked
+//Started -> Completed //if building completes
 
 enum class action {
     BuildSupplyDepot,

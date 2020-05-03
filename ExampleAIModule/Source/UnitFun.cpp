@@ -1,12 +1,12 @@
 #include "UnitFun.h"
-#include <iostream>
-#include "auxFun.h"
+
 
 using namespace BWAPI;
 using namespace Filter;
+using namespace std;
 
 
-Unit UnitFun::getSCV(Unit CommandCenter, std::list<int> &Miners, std::list<int> &Builders)
+Unit UnitFun::getSCV(Unit CommandCenter, list<int> &Miners, list<int> &Builders)
 {
     Unit worker = CommandCenter->getClosestUnit(GetType == UnitTypes::Terran_Supply_Depot.whatBuilds().first &&
         (IsIdle || IsGatheringMinerals) && IsOwned);
@@ -15,12 +15,12 @@ Unit UnitFun::getSCV(Unit CommandCenter, std::list<int> &Miners, std::list<int> 
     return worker;
 }
 
-Unit UnitFun::getBuilder(std::list<int> Builders)
+Unit UnitFun::getBuilder(list<int> Builders)
 {
     Unit builder = nullptr;
     for (auto& u : Builders)
     {
-        Unit myBuilder = Broodwar->getUnit( u);        
+        Unit myBuilder = Broodwar->getUnit(u);        
         if (myBuilder != nullptr)
         {
             if (!myBuilder->isConstructing() && myBuilder->getHitPoints() != 0)
@@ -32,7 +32,7 @@ Unit UnitFun::getBuilder(std::list<int> Builders)
     return builder;
 }
 
-Unit UnitFun::getWorker(Unit CommandCenter, std::list<int> &Miners, std::list<int> &Builders)
+Unit UnitFun::getWorker(Unit CommandCenter, list<int> &Miners, list<int> &Builders)
 {
     Unit worker;
 
@@ -51,10 +51,10 @@ Unit UnitFun::getWorker(Unit CommandCenter, std::list<int> &Miners, std::list<in
     return worker;
 }
 
-std::list<Unit> UnitFun::getUnitList(UnitType Type, Unitset allUnits, std::list<int>& deadUnits)
+list<Unit> UnitFun::getUnitList(UnitType Type, Unitset allUnits, list<int>& deadUnits)
 {
     //TODO: TaskManager is not assigning the SCV to build, error
-    std::list<Unit> myUnits;
+    list<Unit> myUnits;
     for (auto& u : allUnits)
     {
         int type = u->getType();
@@ -66,7 +66,7 @@ std::list<Unit> UnitFun::getUnitList(UnitType Type, Unitset allUnits, std::list<
     return myUnits;
 }
 
-int UnitFun::getUnitCount(UnitType myType, const Unitset& allUnits)
+int UnitFun::getUnitCount(const Unitset& allUnits, UnitType myType)
 {
     int unitCount = 0;
 

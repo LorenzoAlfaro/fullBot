@@ -1,11 +1,4 @@
 #include "ExampleAIModule.h"
-#include "UnitFun.h"
-#include "CommMngr.h"
-#include "auxFun.h"
-#include "TaskFun.h"
-#include "TaskEngine.h"
-#include "ProductionManager.h"
-#include "FileIO.h"
 
 using namespace BWAPI;
 using namespace Filter;
@@ -19,52 +12,35 @@ using namespace UnitTypes;
 //Implement error handling
 //Add logic to build turrets
 //Able to create control groups with more than 12 units 
-int StatsCoordinates[14][2];                    //used to set the display metrics
-int maxUnit[2] = { 50,150 };                    //SCV,Marines, Medics, etc
-int maxBuilding[3] = { 3,20,4 };                //CC, supplydepots, barracks
-int TaskCount = 0;                              //unique Task ID
-list<array<int, 12>> taskQueue;                 //0=TS,1=Delay,2=Action,3=UID,4=Owner,5=Status,6=ID,7=X,8=Y,9=Mineral,10=Gas,11=Time
-list<int> Miners;                               //could be replace byd an array
-list<int> Builders;                             //could be replaced by an array
-list<int> deadUnits;
-bool displayStats = false;
 
 #pragma region MainEvents
 void ExampleAIModule::onFrame()
-{    
-    if (auxFun::validFrame())
+{          
+    Player BW = Broodwar->self();
+    const int frameCount = Broodwar->getFrameCount();
+    const int minerals =                    BW->minerals();
+    const int gas =                         BW->gas();
+    const Unitset myUnits =                 BW->getUnits();
+    const int emptySupply =                 BW->supplyTotal() - BW->supplyUsed();
+    const int barracksCount =               UnitFun::getUnitCount(myUnits,Terran_Barracks);
+    const int CommandCenterCount =          UnitFun::getUnitCount(myUnits,Terran_Command_Center);
+    const int SCVcount =                    UnitFun::getUnitCount(myUnits,Terran_SCV);
+    const int marineCount =                 UnitFun::getUnitCount(myUnits,Terran_Marine);
+    const int roomNeeded =                  auxFun::roomNeeded(CommandCenterCount, barracksCount);
+    if (displayStats)
     {
-        // Called once every game frame
-        // Display the game frame rate as text in the upper left area of the screen
-        int frameCount = Broodwar->getFrameCount();
-        int gas = Broodwar->self()->gas();
-        int minerals = Broodwar->self()->minerals();
-        
-        const int emptySupply = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();        
-        const Unitset myUnits = Broodwar->self()->getUnits();
-        const int barracksCount = UnitFun::getUnitCount(Terran_Barracks, myUnits);
-        const int CommandCenterCount = UnitFun::getUnitCount(Terran_Command_Center, myUnits);
-        const int roomNeeded = auxFun::roomNeeded(CommandCenterCount, barracksCount);
-        const int SCVcount = UnitFun::getUnitCount(Terran_SCV, myUnits);
-        
-        const int marineCount = UnitFun::getUnitCount(Terran_Marine, myUnits);
-        if (displayStats)
-        {
-            auxFun::displayInsights2(roomNeeded, emptySupply, SCVcount, barracksCount, marineCount, StatsCoordinates, Builders.size(), deadUnits.size(), taskQueue.size());
-        }
-        TaskEngine::taskManager(taskQueue, frameCount, minerals, gas, UnitFun::getUnitList(Terran_Command_Center, Broodwar->self()->getUnits(), deadUnits).front(),Miners,Builders);
-        
+        auxFun::displayInsights2(roomNeeded,emptySupply,SCVcount,barracksCount,marineCount,StatsCoordinates,Builders.size(),deadUnits.size(),taskQueue.size());
+    }
 
-        bool  almostSupplyBlocked = false;
-        if (roomNeeded > emptySupply) { //instead of 4,should be the max output of production at a given time
-
-            almostSupplyBlocked = true;
-        }
-        ProductionManager::productionManager(minerals, gas, frameCount,taskQueue,TaskCount, deadUnits, barracksCount, SCVcount,maxBuilding,maxUnit, almostSupplyBlocked, roomNeeded); //eventually productionManager will be another task run by taskManager    
-        
+    if (auxFun::validFrame())
+    {                             
+        TaskEngine::taskManager(taskQueue,frameCount,minerals,gas,UnitFun::getUnitList(Terran_Command_Center,myUnits,deadUnits).front(),Miners,Builders);
+       
+        ProductionManager::Manage(minerals,gas,frameCount,taskQueue,TaskCount,deadUnits,barracksCount,SCVcount,maxBuilding,maxUnit,roomNeeded>emptySupply,roomNeeded);
+        //eventually productionManager will be another task run by taskManager            
         CommMngr::scvManager(Miners);//go mine for me minions!
         
-        if (GetKeyState('A') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
+        if (GetKeyState('I') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
         {
             Position myPos = auxFun::getMousePosition();
             CommMngr::attackUnits(UnitFun::getUnitList(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);            
@@ -85,14 +61,14 @@ void ExampleAIModule::onUnitCreate(Unit unit)
 
     if (IsOwned(unit))
     {        
-        if (unit->getType() == UnitTypes::Terran_SCV)
+        if (unit->getType() == Terran_SCV)
         {
             Miners.push_back(unit->getID());//assign to mine
         }
         
         if (!taskQueue.empty() && !unit->canAttack()
-            && unit->getType() != UnitTypes::Terran_SCV
-            && unit->getType() != UnitTypes::Terran_Marine)
+            && unit->getType() != Terran_SCV
+            && unit->getType() != Terran_Marine)
         {
             Unit builder = unit->getBuildUnit();
             int builderID = builder->getID();
@@ -104,9 +80,7 @@ void ExampleAIModule::onUnitCreate(Unit unit)
             if (pointer != nullptr)
             {
                 mytask = *pointer;
-            }
-
-            
+            }            
             //only for buildings
             if (TaskFun::taskStatusUpdate(builderID, taskQueue, BuildingID, (int)taskStatus::Started))
             {
@@ -117,23 +91,8 @@ void ExampleAIModule::onUnitCreate(Unit unit)
                 Broodwar->sendText("Failed update to started task id: %d : %s", unit->getID(), unit->getType().c_str());
             }
         }
-    }
-
-
-        
-    if (Broodwar->isReplay())
-    {
-        // if we are in a replay, then we will print out the build order of the structures
-        if (unit->getType().isBuilding() && !unit->getPlayer()->isNeutral())
-        {
-            int seconds = Broodwar->getFrameCount() / 24;
-            int minutes = seconds / 60;
-            seconds %= 60;
-           // Broodwar->sendText("%.2d:%.2d: %s creates a %s", minutes, seconds, unit->getPlayer()->getName().c_str(), unit->getType().c_str());
-        }
-    }
+    }       
 }
-
 void ExampleAIModule::onUnitComplete(Unit unit)
 {
     if (IsOwned(unit))

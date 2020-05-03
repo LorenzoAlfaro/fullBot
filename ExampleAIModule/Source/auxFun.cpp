@@ -95,8 +95,8 @@ void auxFun::displayInsights2(int roomNeeded, int supplyLeft2, int SCVcount, int
     //Broodwar->drawTextScreen(StatsCoordinates[7][0], StatsCoordinates[7][1], "Screen: %d  %d", Broodwar->getScreenPosition().x, Broodwar->getScreenPosition().y);
 
     //Broodwar->drawTextScreen(StatsCoordinates[8][0], StatsCoordinates[8][1], "supply limit: %d ", supplyLeft);
-    Broodwar->drawTextScreen(StatsCoordinates[9][0], StatsCoordinates[9][1], "supply limit2: %d ", supplyLeft2 / 2);
-    Broodwar->drawTextScreen(StatsCoordinates[10][0], StatsCoordinates[10][1], "room for next round: %d ", roomNeeded / 2);
+    Broodwar->drawTextScreen(StatsCoordinates[9][0], StatsCoordinates[9][1], "Empty Supply: %d ", supplyLeft2 / 2);
+    Broodwar->drawTextScreen(StatsCoordinates[10][0], StatsCoordinates[10][1], "Room Needed: %d ", roomNeeded / 2);
     Broodwar->drawTextScreen(StatsCoordinates[11][0], StatsCoordinates[11][1], "Tasks: %d ", taskQueueCount);
     Broodwar->drawTextScreen(StatsCoordinates[12][0], StatsCoordinates[12][1], "APM: %d ", Broodwar->getAPM());
     Broodwar->drawTextScreen(StatsCoordinates[13][0], StatsCoordinates[13][1], "FrameCount: %d ", Broodwar->getFrameCount());

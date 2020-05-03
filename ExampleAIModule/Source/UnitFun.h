@@ -1,6 +1,7 @@
 #pragma once
 #include <BWAPI.h>
-
+#include <iostream>
+#include "auxFun.h"
 using namespace BWAPI;
 class UnitFun
 {
@@ -14,6 +15,6 @@ public:
 
 	static std::list<Unit> getUnitList(UnitType Type, Unitset allUnits, std::list<int>& deadUnits);
 
-	static int getUnitCount(UnitType myType, const Unitset& allUnits);
+	static int getUnitCount(const Unitset& allUnits, UnitType myType);
 };
 

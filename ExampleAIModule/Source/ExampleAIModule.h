@@ -1,6 +1,14 @@
 #pragma once
 #include <BWAPI.h>
 
+#include "UnitFun.h"
+#include "CommMngr.h"
+#include "auxFun.h"
+#include "TaskFun.h"
+#include "TaskEngine.h"
+#include "ProductionManager.h"
+#include "FileIO.h"
+
 
 // Remember not to use "Broodwar" in any global class constructor!
 
@@ -26,7 +34,14 @@ public:
   virtual void onSaveGame(std::string gameName);
   virtual void onUnitComplete(BWAPI::Unit unit);
   // Everything below this line is safe to modify.
+  list<array<int, 12>>  taskQueue;                 //0=TS,1=Delay,2=Action,3=UID,4=Owner,5=Status,6=ID,7=X,8=Y,9=Mineral,10=Gas,11=Time
+  list<int>             Miners;
+  list<int>             Builders;
+  list<int>             deadUnits;
+  int                   StatsCoordinates[14][2];                      //used to set the display metrics
+  int                   maxUnit[2] = { 50, 150 };                 //SCV,Marines, Medics, etc
+  int                   maxBuilding[3] = { 3, 20, 4 };                //CC, supplydepots, barracks
+  int                   TaskCount = 0;                                //unique Task ID
+  bool                  displayStats = true;
 
-
-  
 };
