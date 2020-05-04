@@ -1,7 +1,5 @@
 #include "TaskFun.h"
-#include "BuildManager.h"
-#include <BWAPI.h>
-#include <fstream>
+
 using namespace BWAPI;
 using namespace std;
 

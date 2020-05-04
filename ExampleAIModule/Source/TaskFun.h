@@ -1,6 +1,8 @@
 #pragma once
 #include <array>
 #include <BWAPI.h>
+#include "BuildManager.h"
+#include <fstream>
 using namespace std;
 using namespace BWAPI;
 

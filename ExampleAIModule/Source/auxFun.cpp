@@ -21,7 +21,7 @@ int auxFun::roomNeeded(int commandCenterCount, int barrackCount)
     return supply*2;
 }
 
-bool auxFun::validUnit(BWAPI::Unit u, std::list<int> deadUnits)
+bool auxFun::validUnit(Unit u, list<int> deadUnits)
 {
     bool valid = false;
     // Ignore the unit if it no longer exists
@@ -49,11 +49,11 @@ bool auxFun::validFrame()
 {
     bool valid = false;
     // Return if the game is a replay or is paused
-    if (!BWAPI::Broodwar->isReplay() && !BWAPI::Broodwar->isPaused() && BWAPI::Broodwar->self())
+    if (!Broodwar->isReplay() && !Broodwar->isPaused() && Broodwar->self())
     {
         // Prevent spamming by only running our onFrame once every number of latency frames.
         // Latency frames are the number of frames before commands are processed.
-        if (BWAPI::Broodwar->getFrameCount() % BWAPI::Broodwar->getLatencyFrames() == 0)
+        if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() == 0)
         {
             valid = true;
         }
@@ -61,7 +61,7 @@ bool auxFun::validFrame()
     return valid;
 }
 
-bool auxFun::isUnitDead(std::list<int> &deadUnits, int id)
+bool auxFun::isUnitDead(list<int> &deadUnits, int id)
 {
     bool isDead = false;
     for (auto& unit : deadUnits)
@@ -74,10 +74,10 @@ bool auxFun::isUnitDead(std::list<int> &deadUnits, int id)
     return isDead;
 }
 
-BWAPI::Position auxFun::getMousePosition()
+Position auxFun::getMousePosition()
 {
-    BWAPI::Position myPos(BWAPI::Broodwar->getScreenPosition().x + BWAPI::Broodwar->getMousePosition().x,
-                            BWAPI::Broodwar->getScreenPosition().y + BWAPI::Broodwar->getMousePosition().y);
+    Position myPos(Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x,
+                            Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
     return myPos;
 }
 
