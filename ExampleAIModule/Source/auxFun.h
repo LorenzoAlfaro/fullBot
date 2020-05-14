@@ -1,6 +1,6 @@
 #pragma once
 #include <BWAPI.h>
-#include <windows.h> // simulate mouse clicks
+#include <windows.h> // simulate mouse clicks, getKeyState
 using namespace std;
 using namespace BWAPI;
 class auxFun

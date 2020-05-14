@@ -26,7 +26,7 @@ void ProductionManager::Manage(int minerals, int gas, int frameCount, list<array
                     {
                         if (!TaskFun::TaskQueued(myTaskQueue, (int)taskOwner::ProductionManager, (int)action::BuildBarrack))//Don't create tasks if we already have a task in queue
                         {
-                            TaskFun::CreateTask(myTaskQueue, frameCount, 0, (int)taskOwner::ProductionManager, (int)action::BuildBarrack, myTaskCount);
+                            TaskFun::CreateTask(myTaskQueue, frameCount, 0, (int)taskOwner::ProductionManager, (int)action::BuildBarrack);
                         }
                     }
                 }                                
@@ -41,7 +41,7 @@ void ProductionManager::Manage(int minerals, int gas, int frameCount, list<array
             {
                 for (int i = 0; i < roomNeeded; i += 7)//create more than one task as the production ramps up
                 {
-                    TaskFun::CreateTask(myTaskQueue, frameCount, 0, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot, myTaskCount);
+                    TaskFun::CreateTask(myTaskQueue, frameCount, 0, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot);
                 }
             }            
         }

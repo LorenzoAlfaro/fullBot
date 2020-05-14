@@ -8,7 +8,11 @@
 #include "TaskEngine.h"
 #include "ProductionManager.h"
 #include "FileIO.h"
-
+#include "UserInterface.h"
+using namespace BWAPI;
+using namespace Filter;
+using namespace std;
+using namespace UnitTypes;
 
 // Remember not to use "Broodwar" in any global class constructor!
 

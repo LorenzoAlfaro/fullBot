@@ -1,4 +1,7 @@
 #pragma once
+#include "FileIO.h"
+#include <iostream>
+#include <fstream>
 #include <BWAPI.h>
 class FileIO
 {

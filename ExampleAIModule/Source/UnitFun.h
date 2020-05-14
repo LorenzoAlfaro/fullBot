@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream>
+//#include <iostream>
 #include "auxFun.h"
 using namespace BWAPI; //can't remove this without errors
 using namespace std;

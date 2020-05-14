@@ -104,11 +104,7 @@ array<int, 3> TaskFun::resourceCost(const int action)
 array<int, 3> TaskFun::resourceCost2(const int action)
 {
     UnitType myUnit = action;
-
-    myUnit.gasPrice();
-    myUnit.mineralPrice();
-    myUnit.buildTime();
-
+    
     array<int, 3> price = { 0,0,0 };
     price[0] = myUnit.mineralPrice();
     price[1] = myUnit.gasPrice();    
@@ -208,7 +204,7 @@ void TaskFun::assessTask(array<int, 12>& newTask)
 
 
 
-void TaskFun::CreateTask(list<array<int, 12>>& myTaskQueue,int timeStamp,int delay,int taskOwner,int action,int& TaskCount)
+void TaskFun::CreateTask(list<array<int, 12>>& myTaskQueue,int timeStamp,int delay,int taskOwner,int action)
 {
     array<int, 3> price = TaskFun::resourceCost2(action);
     array<int, 12> mytask;
@@ -218,7 +214,8 @@ void TaskFun::CreateTask(list<array<int, 12>>& myTaskQueue,int timeStamp,int del
     mytask[(int)tsk::UID] = 0;
     mytask[(int)tsk::Owner] = taskOwner;
     mytask[(int)tsk::Status] = (int)taskStatus::Created;
-    mytask[(int)tsk::ID] = TaskCount;
+    //mytask[(int)tsk::ID] = TaskCount;
+    mytask[(int)tsk::ID] = myTaskQueue.size();
     mytask[(int)tsk::X] = 0;
     mytask[(int)tsk::Y] = 0;
     mytask[(int)tsk::Minerals] = price[0];
@@ -226,7 +223,7 @@ void TaskFun::CreateTask(list<array<int, 12>>& myTaskQueue,int timeStamp,int del
     mytask[(int)tsk::Duration] = price[2];
     
     myTaskQueue.push_back(mytask);
-    TaskCount += 1;
+    //TaskCount += 1;
     TaskFun::logTaskUpdate(mytask);
 }
 

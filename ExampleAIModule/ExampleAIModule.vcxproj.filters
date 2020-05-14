@@ -27,6 +27,9 @@
     <ClCompile Include="Source\FileIO.cpp">
       <Filter>FileIO</Filter>
     </ClCompile>
+    <ClCompile Include="Source\UserInterface.cpp">
+      <Filter>UserInterface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -54,6 +57,9 @@
     </ClInclude>
     <ClInclude Include="Source\FileIO.h">
       <Filter>FileIO</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\UserInterface.h">
+      <Filter>UserInterface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -83,6 +89,9 @@
     </Filter>
     <Filter Include="FileIO">
       <UniqueIdentifier>{7e92348d-d296-4529-a214-b3046669c627}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UserInterface">
+      <UniqueIdentifier>{aeea4e39-780b-4a0d-a462-acf42074d9ef}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

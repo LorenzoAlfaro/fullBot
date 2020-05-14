@@ -1,8 +1,5 @@
 #include "auxFun.h"
 
-using namespace BWAPI;
-using namespace std;
-
 int auxFun::SupplyTotal(int commandCenterCount, int supplyDepotCount)
 {
     return (commandCenterCount * 10) + (supplyDepotCount * 8);    
