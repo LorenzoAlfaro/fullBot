@@ -43,5 +43,6 @@ public:
   int                   maxBuilding[3] = { 3, 20, 4 };                //CC, supplydepots, barracks
   int                   TaskCount = 0;                                //unique Task ID
   bool                  displayStats = true;
-
+  bool                  busy = false;
+  int                   callBack = 0;
 };

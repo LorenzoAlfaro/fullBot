@@ -46,10 +46,11 @@ enum class taskStatus {
 //Started -> Completed //if building completes
 
 enum class action {
-    BuildSupplyDepot,
-    BuildBarrack,
-    BuildExtractor,
-    BuildEngineeringBay,
+    BuildSupplyDepot = 109,
+    BuildBarrack = 111,
+    BuildExtractor = 110,
+    BuildEngineeringBay = 122,
+    BuildTurret = 124,
     researchStim
 };
 

@@ -3,10 +3,10 @@
 using namespace BWAPI;
 using namespace std;
 
-std::array<int, 12>* TaskFun::findTaskAssignedToUnit(int UnitID, std::list<std::array<int, 12>> &Tasks)
+array<int, 12>* TaskFun::findTaskAssignedToUnit(int UnitID, list<array<int, 12>> &Tasks)
 {
     bool found = false;
-    std::array<int, 12>* mytask; //pass the address of the array//initialize first to something
+    array<int, 12>* mytask; //pass the address of the array//initialize first to something
 
     for (auto& task : Tasks)
     {
@@ -28,7 +28,7 @@ std::array<int, 12>* TaskFun::findTaskAssignedToUnit(int UnitID, std::list<std::
     
 }
 
-std::array<int, 12>* TaskFun::findTaskAssignedToID(int TaskID, std::list<std::array<int, 12>>& Tasks)
+array<int, 12>* TaskFun::findTaskAssignedToID(int TaskID, list<array<int, 12>>& Tasks)
 {
     bool found = false;
     array<int, 12>* mytask; //pass the address of the array//initialize first to something
@@ -74,7 +74,7 @@ bool TaskFun::TaskQueued(list<array<int, 12>> &myTaskQueue, int taskOwner, int a
     return taskInQueue;
 }
 
-std::array<int, 3> TaskFun::resourceCost(const int action)
+array<int, 3> TaskFun::resourceCost(const int action)
 {
     array<int, 3> price = { 0,0 };
     switch (action)
@@ -101,9 +101,9 @@ std::array<int, 3> TaskFun::resourceCost(const int action)
     return price;
 }
 
-bool TaskFun::mineralsAvailable(std::array<int, 12> task, int CurrentMinerals)
+bool TaskFun::mineralsAvailable(array<int, 12> task, int CurrentMinerals)
 {    
-    std::array<int, 3> price = resourceCost(task[(int)tsk::Action]);
+    array<int, 3> price = resourceCost(task[(int)tsk::Action]);
     if (CurrentMinerals >= price[0])
     {        
         return true;
@@ -114,9 +114,9 @@ bool TaskFun::mineralsAvailable(std::array<int, 12> task, int CurrentMinerals)
     }    
 }
 
-bool TaskFun::gasAvailable(std::array<int, 12> task, int CurrentGas)
+bool TaskFun::gasAvailable(array<int, 12> task, int CurrentGas)
 {    
-    std::array<int, 3> price = resourceCost(task[(int)tsk::Action]);
+    array<int, 3> price = resourceCost(task[(int)tsk::Action]);
     if (CurrentGas >= price[1])
     {
         return true;
@@ -127,7 +127,7 @@ bool TaskFun::gasAvailable(std::array<int, 12> task, int CurrentGas)
     }    
 }
 
-bool TaskFun::tasksWaitingResources(std::list<std::array<int, 12>> &myTaskQueue)
+bool TaskFun::tasksWaitingResources(list<array<int, 12>> &myTaskQueue)
 {
     //dont keep pumping units until we can start the building of depots or etc...
     bool waiting = false;
@@ -144,7 +144,7 @@ bool TaskFun::tasksWaitingResources(std::list<std::array<int, 12>> &myTaskQueue)
     return waiting;
 }
 
-void TaskFun::taskStartedUpdate(std::list<std::array<int, 12>> &myTaskQueue, Unit Building)
+void TaskFun::taskStartedUpdate(list<array<int, 12>> &myTaskQueue, Unit Building)
 {
     Unit builder = Building->getBuildUnit();    
     for (auto& task : myTaskQueue)
@@ -157,7 +157,7 @@ void TaskFun::taskStartedUpdate(std::list<std::array<int, 12>> &myTaskQueue, Uni
     }    
 }
 
-void TaskFun::taskCompleted(std::list<std::array<int, 12>> &myTaskQueue, Unit Building)
+void TaskFun::taskCompleted(list<array<int, 12>> &myTaskQueue, Unit Building)
 {    
     for (auto& task : myTaskQueue)
     {
@@ -169,7 +169,7 @@ void TaskFun::taskCompleted(std::list<std::array<int, 12>> &myTaskQueue, Unit Bu
     }    
 }
 
-bool TaskFun::taskStatusUpdate(int ID, std::list<std::array<int, 12>> &Tasks, int newID, int newStatus)
+bool TaskFun::taskStatusUpdate(int ID, list<array<int, 12>> &Tasks, int newID, int newStatus)
 {
     bool updatedTask = false;
     for (auto& task : Tasks)
@@ -233,25 +233,27 @@ void TaskFun::startTask(array<int, 12>& Task, Unit builder)
 
     const TilePosition targetBuildLocation(Task[(int)tsk::X], Task[(int)tsk::Y]);
 
-    switch (Task[(int)tsk::Action])
-    {
+    BuildManager::buildBuilding(builder, Task[(int)tsk::Action], Colors::Blue, targetBuildLocation);
 
-    case (int)action::BuildSupplyDepot:
+    //switch (Task[(int)tsk::Action])
+    //{
 
-        BuildManager::buildBuilding(builder, UnitTypes::Terran_Supply_Depot, Colors::Blue, targetBuildLocation);
+    //case (int)action::BuildSupplyDepot:
 
-        break; //optional
-    case (int)action::BuildBarrack:
+    //    BuildManager::buildBuilding(builder, UnitTypes::Terran_Supply_Depot, Colors::Blue, targetBuildLocation);
 
-        BuildManager::buildBuilding(builder, UnitTypes::Terran_Barracks, Colors::Green, targetBuildLocation);
+    //    break; //optional
+    //case (int)action::BuildBarrack:
 
-        break; //optional
+    //    BuildManager::buildBuilding(builder, UnitTypes::Terran_Barracks, Colors::Green, targetBuildLocation);
 
-     // you can have any number of case statements.
-    default: //Optional
-        //statement(s);
-        break;
-    }
+    //    break; //optional
+
+    // // you can have any number of case statements.
+    //default: //Optional
+    //    //statement(s);
+    //    break;
+    //}
 
     callBack(Task, 200, (int)taskStatus::PendingStart); //things can happen during travel time
 }
@@ -259,7 +261,7 @@ void TaskFun::startTask(array<int, 12>& Task, Unit builder)
 void TaskFun::logTaskUpdate(array<int, 12>& task)
 {
     ofstream myfile;
-    myfile.open("TaskRecord.txt", std::ofstream::app);
+    myfile.open("TaskRecord.txt", ofstream::app);
     myfile << task[(int)tsk::TimeStamp] << " "
         << task[(int)tsk::Delay] << " "
         << task[(int)tsk::Action] << " "

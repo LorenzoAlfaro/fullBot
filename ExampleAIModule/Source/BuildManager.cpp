@@ -50,22 +50,24 @@ void BuildManager::buildBuilding(const Unit &supplyBuilder, const UnitType Build
 TilePosition BuildManager::returnBuildPosition(int action, Unit SCV, int maxRange)
 {
     TilePosition myBuildingLocation;
-    switch (action)
-    {
-    case (int)action::BuildSupplyDepot:
 
-        myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, SCV->getTilePosition(), maxRange);
-        break; //optional
-    case (int)action::BuildBarrack:
+    return Broodwar->getBuildLocation(action, SCV->getTilePosition(), maxRange); //action maps to the unit type enum
+    //switch (action)
+    //{
+    //case (int)action::BuildSupplyDepot:
 
-        myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition(), maxRange);
-        break; //optional
+    //    myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, SCV->getTilePosition(), maxRange);
+    //    break; //optional
+    //case (int)action::BuildBarrack:
 
-     // you can have any number of case statements.
-    default: //Optional
-        myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition(), maxRange);
-        //statement(s);
-        break;
-    }
-    return myBuildingLocation;
+    //    myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition(), maxRange);
+    //    break; //optional
+
+    // // you can have any number of case statements.
+    //default: //Optional
+    //    myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition(), maxRange);
+    //    //statement(s);
+    //    break;
+    //}
+    //return myBuildingLocation;
 }

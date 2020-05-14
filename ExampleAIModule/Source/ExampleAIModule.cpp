@@ -33,7 +33,7 @@ void ExampleAIModule::onFrame()
     }
 
     if (auxFun::validFrame())
-    {                             
+    {           
         TaskEngine::taskManager(taskQueue,frameCount,minerals,gas,UnitFun::getUnitList(Terran_Command_Center,myUnits,deadUnits).front(),Miners,Builders);
        
         ProductionManager::Manage(minerals,gas,frameCount,taskQueue,TaskCount,deadUnits,barracksCount,SCVcount,maxBuilding,maxUnit,roomNeeded>emptySupply,roomNeeded);
@@ -42,16 +42,75 @@ void ExampleAIModule::onFrame()
         
         if (GetKeyState('I') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
         {
-            Position myPos = auxFun::getMousePosition();
-            CommMngr::attackUnits(UnitFun::getUnitList(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);            
+            if (frameCount >= callBack)
+            {
+                Position myPos = auxFun::getMousePosition();
+                CommMngr::attackUnits(UnitFun::getUnitList(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
+                callBack = frameCount + 60;
+            }
+
         }
         if (GetKeyState('Q') & 0x8000/*Check if high-order bit is set (1 << 15) LEFT CLICK*/)
         {
-            auxFun::LeftClick();// I cant believe this works!              
+            if (frameCount >= callBack)
+            {
+                auxFun::LeftClick();// I cant believe this works!   
+                callBack = frameCount + 60;
+            }            
         }
         if (GetKeyState('W') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
         {
-            auxFun::RightClick();
+            if (frameCount >= callBack)
+            {
+                auxFun::RightClick();
+                callBack = frameCount + 60;
+            }
+            
+        }
+        if (GetKeyState('U') & 0x8000)
+        {            
+            if (frameCount >= callBack)
+            {
+                TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, (int)taskOwner::Commander, (int)action::BuildEngineeringBay, TaskCount);
+                callBack = frameCount + 60;
+            }                        
+        }
+        if (GetKeyState('Y') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
+        {    
+            if (frameCount >= callBack)
+            {
+                TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, (int)taskOwner::Commander, UnitTypes::Terran_Command_Center, TaskCount);
+                callBack = frameCount + 60;
+            }
+            
+        }
+        if (GetKeyState('T') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
+        {
+            if (frameCount >= callBack)
+            {
+                TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, (int)taskOwner::Commander, UnitTypes::Terran_Missile_Turret, TaskCount);
+                callBack = frameCount + 60;
+            }
+            //The code here executes ONCE at the moment the other key was released            
+            
+        }
+        if (GetKeyState('R') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
+        {
+            if (frameCount >= callBack)
+            {
+                TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, (int)taskOwner::Commander, UnitTypes::Terran_Refinery, TaskCount);
+                callBack = frameCount + 60;
+            }
+            
+        }
+        if (GetKeyState('E') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
+        {
+            if (frameCount >= callBack)
+            {
+                TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, (int)taskOwner::Commander, UnitTypes::Terran_Barracks, TaskCount);
+                callBack = frameCount + 60;
+            }
+            
         }
     }    
 }
@@ -173,9 +232,10 @@ void ExampleAIModule::onSendText(string text)
     }
     if (text == "e")
     {
-        Unit builder = UnitFun::getBuilder(Builders);
-        builder->move(myPos);
-        builder->build(Terran_Engineering_Bay, builder->getTilePosition());
+        TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, (int)taskOwner::Commander, (int)action::BuildEngineeringBay, TaskCount);
+        //Unit builder = UnitFun::getBuilder(Builders);
+        //builder->move(myPos);
+        //builder->build(Terran_Engineering_Bay, builder->getTilePosition());
     }
     
     if (text == "u")
