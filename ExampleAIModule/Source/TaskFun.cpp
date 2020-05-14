@@ -101,9 +101,24 @@ array<int, 3> TaskFun::resourceCost(const int action)
     return price;
 }
 
+array<int, 3> TaskFun::resourceCost2(const int action)
+{
+    UnitType myUnit = action;
+
+    myUnit.gasPrice();
+    myUnit.mineralPrice();
+    myUnit.buildTime();
+
+    array<int, 3> price = { 0,0,0 };
+    price[0] = myUnit.mineralPrice();
+    price[1] = myUnit.gasPrice();    
+    price[2] = myUnit.buildTime(); //time needed in frames    
+    return price;
+}
+
 bool TaskFun::mineralsAvailable(array<int, 12> task, int CurrentMinerals)
 {    
-    array<int, 3> price = resourceCost(task[(int)tsk::Action]);
+    array<int, 3> price = resourceCost2(task[(int)tsk::Action]);
     if (CurrentMinerals >= price[0])
     {        
         return true;
@@ -116,7 +131,7 @@ bool TaskFun::mineralsAvailable(array<int, 12> task, int CurrentMinerals)
 
 bool TaskFun::gasAvailable(array<int, 12> task, int CurrentGas)
 {    
-    array<int, 3> price = resourceCost(task[(int)tsk::Action]);
+    array<int, 3> price = resourceCost2(task[(int)tsk::Action]);
     if (CurrentGas >= price[1])
     {
         return true;
@@ -195,7 +210,7 @@ void TaskFun::assessTask(array<int, 12>& newTask)
 
 void TaskFun::CreateTask(list<array<int, 12>>& myTaskQueue,int timeStamp,int delay,int taskOwner,int action,int& TaskCount)
 {
-    array<int, 3> price = TaskFun::resourceCost(action);
+    array<int, 3> price = TaskFun::resourceCost2(action);
     array<int, 12> mytask;
     mytask[(int)tsk::TimeStamp] = timeStamp;
     mytask[(int)tsk::Delay] = delay;

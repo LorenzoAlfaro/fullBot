@@ -152,6 +152,7 @@ void ExampleAIModule::onUnitCreate(Unit unit)
         }
     }       
 }
+
 void ExampleAIModule::onUnitComplete(Unit unit)
 {
     if (IsOwned(unit))

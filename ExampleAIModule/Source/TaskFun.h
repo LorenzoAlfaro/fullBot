@@ -13,6 +13,7 @@ public:
     static array<int, 12>* findTaskAssignedToID(int TaskID, list<array<int, 12>>& Tasks);
 	static bool TaskQueued(list<array<int, 12>>& myTaskQueue, int taskOwner, int action);
     static array<int, 3> TaskFun::resourceCost(const int action);
+    static array<int, 3> TaskFun::resourceCost2(const int action);
     static bool mineralsAvailable(array<int, 12> task, int CurrentMinerals);
     static bool gasAvailable(array<int, 12> task, int CurrentMinerals);
     static bool tasksWaitingResources(list<array<int, 12>>& myTaskQueue);
