@@ -4,7 +4,6 @@
 #include "TaskFun.h"
 #include "CommMngr.h"
 using namespace std;
-using namespace BWAPI;
 using namespace UnitTypes;
 
 class UserInterface

@@ -1,5 +1,8 @@
 #pragma once
 #include <BWAPI.h>
+#include "UnitFun.h"
+using namespace Filter;
+using namespace std;
 using namespace BWAPI;
 
 

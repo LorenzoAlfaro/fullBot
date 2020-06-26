@@ -1,6 +1,4 @@
 #include "ExampleAIModule.h"
-
-
 //TODO: instead of defining an amount of marines, define the porcentage from the total food supply quota i.e 50% marines = 100 marines or 50 vultures
 //TODO: fix bug, TASK ID is not being represented corectly
 //Change Task Array to use Task Enum instead of indexes
@@ -33,7 +31,7 @@ void ExampleAIModule::onFrame()
     {           
         TaskEngine::taskManager(taskQueue,frameCount,minerals,gas,UnitFun::getUnitList(Terran_Command_Center,myUnits,deadUnits).front(),Miners,Builders);
        
-        ProductionManager::Manage(minerals,gas,frameCount,taskQueue,TaskCount,deadUnits,barracksCount,SCVcount,maxBuilding,maxUnit,roomNeeded>emptySupply,roomNeeded);
+        ProductionManager::Manage(minerals,gas,frameCount,taskQueue,deadUnits,barracksCount,SCVcount,maxBuilding,maxUnit,roomNeeded>emptySupply,roomNeeded);
         //eventually productionManager will be another task run by taskManager            
         CommMngr::scvManager(Miners);//go mine for me minions!
 
@@ -68,9 +66,9 @@ void ExampleAIModule::onUnitCreate(Unit unit)
                 mytask = *pointer;
             }            
             //only for buildings
-            if (TaskFun::taskStatusUpdate(builderID, taskQueue, BuildingID, (int)taskStatus::Started))
+            if (TaskFun::taskStatusUpdate(builderID, taskQueue, BuildingID, Started))
             {
-                Broodwar->sendText("Started task id: %d : %s", mytask[(int)tsk::ID], unit->getType().c_str());
+                Broodwar->sendText("Started task id: %d : %s", mytask[ID], unit->getType().c_str());
             }
             else
             {
@@ -93,9 +91,9 @@ void ExampleAIModule::onUnitComplete(Unit unit)
                 mytask = *pointer;
             }
 
-            if (TaskFun::taskStatusUpdate(unit->getID(), taskQueue, unit->getID(), (int)taskStatus::Completed))
+            if (TaskFun::taskStatusUpdate(unit->getID(), taskQueue, unit->getID(), Completed))
             {
-                Broodwar->sendText("Completed task id: %d : %s", mytask[(int)tsk::ID], unit->getType().c_str());
+                Broodwar->sendText("Completed task id: %d : %s", mytask[ID], unit->getType().c_str());
             }
             else
             {

@@ -1,7 +1,4 @@
 #include "CommMngr.h"
-#include "UnitFun.h"
-using namespace Filter;
-using namespace std;
 
 
 void CommMngr::attackUnits(list<Unit> units, Position myPos)

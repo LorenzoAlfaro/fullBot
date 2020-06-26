@@ -1,9 +1,9 @@
 #pragma once
-
-//#include <iostream>
 #include "auxFun.h"
-using namespace BWAPI; //can't remove this without errors
 using namespace std;
+using namespace Filter;
+using namespace UnitTypes;
+
 class UnitFun
 {
 public:

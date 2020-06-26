@@ -1,7 +1,5 @@
 #include "UserInterface.h"
 
-
-
 void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUnits, list<array<int, 12>>& taskQueue)
 {
 
@@ -10,7 +8,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
         if (frameCount >= callBack)
         {
             Position myPos = auxFun::getMousePosition();
-            CommMngr::attackUnits(UnitFun::getUnitList(UnitTypes::Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
+            CommMngr::attackUnits(UnitFun::getUnitList(Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
             callBack = frameCount + 60;
         }
 
@@ -36,7 +34,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
     {
         if (frameCount >= callBack)
         {
-            TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, (int)taskOwner::Commander, Terran_Engineering_Bay);
+            TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, taskOwner::Commander, Terran_Engineering_Bay);
             callBack = frameCount + 60;
         }
     }
@@ -44,7 +42,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
     {
         if (frameCount >= callBack)
         {
-            TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, (int)taskOwner::Commander, Terran_Command_Center);
+            TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, taskOwner::Commander, Terran_Command_Center);
             callBack = frameCount + 60;
         }
 
@@ -53,7 +51,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
     {
         if (frameCount >= callBack)
         {
-            TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, (int)taskOwner::Commander, Terran_Missile_Turret);
+            TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, taskOwner::Commander, Terran_Missile_Turret);
             callBack = frameCount + 60;
         }
         //The code here executes ONCE at the moment the other key was released            
@@ -63,7 +61,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
     {
         if (frameCount >= callBack)
         {
-            TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, (int)taskOwner::Commander, Terran_Refinery);
+            TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, taskOwner::Commander, Terran_Refinery);
             callBack = frameCount + 60;
         }
 
@@ -72,7 +70,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
     {
         if (frameCount >= callBack)
         {
-            TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, (int)taskOwner::Commander, Terran_Barracks);
+            TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, taskOwner::Commander, Terran_Barracks);
             callBack = frameCount + 60;
         }
 
@@ -119,7 +117,7 @@ void UserInterface::ReadInput(string text, list<int> deadUnits, bool& displaySta
     }
     if (text == "e")
     {
-        //TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, (int)taskOwner::Commander, (int)action::BuildEngineeringBay);
+        //TaskFun::CreateTask(taskQueue, Broodwar->getFrameCount(), 0, taskOwner::Commander, action::BuildEngineeringBay);
         //Unit builder = UnitFun::getBuilder(Builders);
         //builder->move(myPos);
         //builder->build(Terran_Engineering_Bay, builder->getTilePosition());

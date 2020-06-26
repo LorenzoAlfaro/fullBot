@@ -1,8 +1,12 @@
 #pragma once
 #include <BWAPI.h>
 #include "UnitFun.h"
+#include "TaskFun.h";
+#include <iostream>
 
 using namespace BWAPI;
+using namespace Filter;
+
 class BuildManager
 {
 public:

@@ -1,9 +1,5 @@
 #include "BuildManager.h"
-#include "TaskFun.h";
-#include <iostream>
 
-using namespace BWAPI;
-using namespace Filter;
 
 void BuildManager::createEventTag(const Unit &Building, Error lastErr)
 {
@@ -54,11 +50,11 @@ TilePosition BuildManager::returnBuildPosition(int action, Unit SCV, int maxRang
     return Broodwar->getBuildLocation(action, SCV->getTilePosition(), maxRange); //action maps to the unit type enum
     //switch (action)
     //{
-    //case (int)action::BuildSupplyDepot:
+    //case action::BuildSupplyDepot:
 
     //    myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, SCV->getTilePosition(), maxRange);
     //    break; //optional
-    //case (int)action::BuildBarrack:
+    //case action::BuildBarrack:
 
     //    myBuildingLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, SCV->getTilePosition(), maxRange);
     //    break; //optional

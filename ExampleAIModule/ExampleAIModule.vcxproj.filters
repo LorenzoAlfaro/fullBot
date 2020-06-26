@@ -16,13 +16,13 @@
       <Filter>AuxFun</Filter>
     </ClCompile>
     <ClCompile Include="Source\TaskFun.cpp">
-      <Filter>TaskFun</Filter>
+      <Filter>MainMachine\Tasks\TaskFun</Filter>
     </ClCompile>
     <ClCompile Include="Source\TaskEngine.cpp">
-      <Filter>TaskEngine</Filter>
+      <Filter>MainMachine\Tasks\TaskEngine</Filter>
     </ClCompile>
     <ClCompile Include="Source\ProductionManager.cpp">
-      <Filter>ProductionManager</Filter>
+      <Filter>MainMachine\ProductionManager</Filter>
     </ClCompile>
     <ClCompile Include="Source\FileIO.cpp">
       <Filter>FileIO</Filter>
@@ -47,13 +47,13 @@
       <Filter>AuxFun</Filter>
     </ClInclude>
     <ClInclude Include="Source\TaskFun.h">
-      <Filter>TaskFun</Filter>
+      <Filter>MainMachine\Tasks\TaskFun</Filter>
     </ClInclude>
     <ClInclude Include="Source\TaskEngine.h">
-      <Filter>TaskEngine</Filter>
+      <Filter>MainMachine\Tasks\TaskEngine</Filter>
     </ClInclude>
     <ClInclude Include="Source\ProductionManager.h">
-      <Filter>ProductionManager</Filter>
+      <Filter>MainMachine\ProductionManager</Filter>
     </ClInclude>
     <ClInclude Include="Source\FileIO.h">
       <Filter>FileIO</Filter>
@@ -78,20 +78,26 @@
     <Filter Include="AuxFun">
       <UniqueIdentifier>{3f92d090-a3fb-4dde-ad4c-b846db85038f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="TaskFun">
-      <UniqueIdentifier>{6ba0dd50-2c4e-4821-953c-8bb22b708a3a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="TaskEngine">
-      <UniqueIdentifier>{22506c3e-c2a2-49da-b953-367d68cebeda}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ProductionManager">
-      <UniqueIdentifier>{023a210a-d442-4563-bac0-30424473e62e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="FileIO">
       <UniqueIdentifier>{7e92348d-d296-4529-a214-b3046669c627}</UniqueIdentifier>
     </Filter>
     <Filter Include="UserInterface">
       <UniqueIdentifier>{aeea4e39-780b-4a0d-a462-acf42074d9ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MainMachine">
+      <UniqueIdentifier>{a4005215-60ba-42d3-a509-a2315bf74036}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MainMachine\ProductionManager">
+      <UniqueIdentifier>{023a210a-d442-4563-bac0-30424473e62e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MainMachine\Tasks">
+      <UniqueIdentifier>{478cb1fc-db49-47f3-b06c-0f1c5facc549}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MainMachine\Tasks\TaskEngine">
+      <UniqueIdentifier>{22506c3e-c2a2-49da-b953-367d68cebeda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MainMachine\Tasks\TaskFun">
+      <UniqueIdentifier>{6ba0dd50-2c4e-4821-953c-8bb22b708a3a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

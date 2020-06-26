@@ -27,7 +27,7 @@ public:
     static void logTaskUpdate(array<int, 12>& task);
 };
 
-enum class taskStatus {
+enum  taskStatus {
     Created,        //try to assign
     //Reviewed,       //-Not being used    
     waitingMin,     //* the task is waiting for minerals, set callback time, try to assign after callbacktime
@@ -46,7 +46,7 @@ enum class taskStatus {
 //PendingStart -> Cancelled //if SCV got blocked
 //Started -> Completed //if building completes
 
-enum class action {
+enum  action {
     BuildSupplyDepot = 109,
     BuildBarrack = 111,
     BuildExtractor = 110,
@@ -55,13 +55,13 @@ enum class action {
     researchStim
 };
 
-enum class taskOwner {
+enum  taskOwner {
     ProductionManager,
     StratManager,
     Commander
 };
 
-enum class tsk
+enum  tsk
 {
     TimeStamp,
     Delay,

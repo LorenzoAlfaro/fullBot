@@ -1,15 +1,8 @@
 #include "UnitFun.h"
 
-
-using namespace BWAPI;
-using namespace Filter;
-using namespace std;
-
-
 Unit UnitFun::getSCV(Unit CommandCenter, list<int> &Miners, list<int> &Builders)
 {
-    Unit worker = CommandCenter->getClosestUnit(GetType == UnitTypes::Terran_Supply_Depot.whatBuilds().first &&
-        (IsIdle || IsGatheringMinerals) && IsOwned);
+    Unit worker = CommandCenter->getClosestUnit(GetType == Terran_Supply_Depot.whatBuilds().first && (IsIdle || IsGatheringMinerals) && IsOwned);
     Miners.remove(worker->getID());//change duty to builder
     Builders.push_back(worker->getID());
     return worker;

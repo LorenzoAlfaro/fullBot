@@ -1,11 +1,6 @@
 #include "ProductionManager.h"
-#include "TaskFun.h"
-#include "UnitFun.h"
-#include "Buildmanager.h"
-#include "auxFun.h"
-#include "CommMngr.h"
-using namespace UnitTypes;
-void ProductionManager::Manage(int minerals, int gas, int frameCount, list<array<int, 12>>& myTaskQueue, int& myTaskCount, list<int> myDeadUnits, int BarracksCount, int SCVCount, int myMaxBuilding[],int myMaxUnit[], bool almostSupplyBlocked, int roomNeeded)
+
+void ProductionManager::Manage(int minerals, int gas, int frameCount, list<array<int, 12>>& myTaskQueue, list<int> myDeadUnits, int BarracksCount, int SCVCount, int myMaxBuilding[],int myMaxUnit[], bool almostSupplyBlocked, int roomNeeded)
 {           
     if (!almostSupplyBlocked ) //build scvs, marines and barracs!
     {
@@ -24,9 +19,9 @@ void ProductionManager::Manage(int minerals, int gas, int frameCount, list<array
                 {
                     if (SCVCount > 10) //wait until we have 10 SCVs
                     {
-                        if (!TaskFun::TaskQueued(myTaskQueue, (int)taskOwner::ProductionManager, (int)action::BuildBarrack))//Don't create tasks if we already have a task in queue
+                        if (!TaskFun::TaskQueued(myTaskQueue, taskOwner::ProductionManager, Terran_Barracks))//Don't create tasks if we already have a task in queue
                         {
-                            TaskFun::CreateTask(myTaskQueue, frameCount, 0, (int)taskOwner::ProductionManager, (int)action::BuildBarrack);
+                            TaskFun::CreateTask(myTaskQueue, frameCount, 0, taskOwner::ProductionManager, Terran_Barracks);
                         }
                     }
                 }                                
@@ -35,13 +30,13 @@ void ProductionManager::Manage(int minerals, int gas, int frameCount, list<array
     }
     else //We need more Depots
     {
-        if (!TaskFun::TaskQueued(myTaskQueue, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot))
+        if (!TaskFun::TaskQueued(myTaskQueue, taskOwner::ProductionManager, Terran_Supply_Depot))
         {
             if (Broodwar->self()->supplyTotal() != 400)
             {
                 for (int i = 0; i < roomNeeded; i += 7)//create more than one task as the production ramps up
                 {
-                    TaskFun::CreateTask(myTaskQueue, frameCount, 0, (int)taskOwner::ProductionManager, (int)action::BuildSupplyDepot);
+                    TaskFun::CreateTask(myTaskQueue, frameCount, 0, taskOwner::ProductionManager, Terran_Supply_Depot);
                 }
             }            
         }

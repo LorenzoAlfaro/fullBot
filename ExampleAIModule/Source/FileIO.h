@@ -3,6 +3,9 @@
 #include <iostream>
 #include <fstream>
 #include <BWAPI.h>
+
+
+using namespace std;
 class FileIO
 {
 public:

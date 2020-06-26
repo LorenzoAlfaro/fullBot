@@ -1,8 +1,5 @@
 #include "TaskFun.h"
 
-using namespace BWAPI;
-using namespace std;
-
 array<int, 12>* TaskFun::findTaskAssignedToUnit(int UnitID, list<array<int, 12>> &Tasks)
 {
     bool found = false;
@@ -10,7 +7,7 @@ array<int, 12>* TaskFun::findTaskAssignedToUnit(int UnitID, list<array<int, 12>>
 
     for (auto& task : Tasks)
     {
-        if (task[(int)tsk::UID] == UnitID) //
+        if (task[UID] == UnitID) //
         {
             mytask = &task;
             found = true;
@@ -35,7 +32,7 @@ array<int, 12>* TaskFun::findTaskAssignedToID(int TaskID, list<array<int, 12>>& 
 
     for (auto& task : Tasks)
     {
-        if (task[(int)tsk::ID] == TaskID) //
+        if (task[ID] == TaskID) //
         {
             mytask = &task;
         }
@@ -56,14 +53,12 @@ bool TaskFun::TaskQueued(list<array<int, 12>> &myTaskQueue, int taskOwner, int a
     bool taskInQueue = false;
     for (auto& task : myTaskQueue)
     {
-        if (task[(int)tsk::Owner] == taskOwner)
+        if (task[Owner] == taskOwner)
         {
-            if (task[(int)tsk::Action] == action)//task action, build supplydepot, build barrack, etc
-            {
-                int status = task[(int)tsk::Status];
+            if (task[Action] == action)//task action, build supplydepot, build barrack, etc
+            {                
                 //found a task that belongs to me
-                if (status != (int)taskStatus::Completed &&
-                    status != (int)taskStatus::Cancelled)
+                if (task[Status] != Completed && task[Status] != Cancelled)
                 {
                     taskInQueue = true;
                 }
@@ -79,14 +74,14 @@ array<int, 3> TaskFun::resourceCost(const int action)
     array<int, 3> price = { 0,0 };
     switch (action)
     {
-    case (int)action::BuildBarrack:
+    case action::BuildBarrack:
 
         price[0] = 150;
         price[1] = 0;
         price[2] = 50; //time needed in seconds
 
         break;
-    case (int)action::BuildSupplyDepot:
+    case action::BuildSupplyDepot:
 
         price[0] = 100;
         price[1] = 0;
@@ -114,28 +109,23 @@ array<int, 3> TaskFun::resourceCost2(const int action)
 
 bool TaskFun::mineralsAvailable(array<int, 12> task, int CurrentMinerals)
 {    
-    array<int, 3> price = resourceCost2(task[(int)tsk::Action]);
+    array<int, 3> price = resourceCost2(task[Action]);
     if (CurrentMinerals >= price[0])
     {        
         return true;
     }
-    else
-    {
-        return false;
-    }    
+    return false;    
 }
 
 bool TaskFun::gasAvailable(array<int, 12> task, int CurrentGas)
 {    
-    array<int, 3> price = resourceCost2(task[(int)tsk::Action]);
+    array<int, 3> price = resourceCost2(task[Action]);
     if (CurrentGas >= price[1])
     {
         return true;
-    }
-    else
-    {
-        return false;
-    }    
+    }       
+    return false;
+        
 }
 
 bool TaskFun::tasksWaitingResources(list<array<int, 12>> &myTaskQueue)
@@ -144,10 +134,8 @@ bool TaskFun::tasksWaitingResources(list<array<int, 12>> &myTaskQueue)
     bool waiting = false;
     for (auto& task : myTaskQueue)
     {
-        int status = task[(int)tsk::Status];
-        if (status == (int)taskStatus::waitingGas ||
-            status == (int)taskStatus::PendingStart ||  //make sure production doesn't steal minerals while scv travelling
-            status == (int)taskStatus::waitingMin)
+        int status = task[Status];
+        if (status == waitingGas || status == PendingStart || status == waitingMin)//make sure production doesn't steal minerals while scv travelling
         {
             waiting = true;
         }
@@ -162,8 +150,8 @@ void TaskFun::taskStartedUpdate(list<array<int, 12>> &myTaskQueue, Unit Building
     {
         if (&task == TaskFun::findTaskAssignedToID(builder->getID(), myTaskQueue))
         {
-            task[(int)tsk::Status] = (int)taskStatus::Started;
-            task[(int)tsk::UID] = Building->getID(); //updated the task scvID to the building currently in progress
+            task[Status] = Started;
+            task[UID] = Building->getID(); //updated the task scvID to the building currently in progress
         }
     }    
 }
@@ -174,8 +162,8 @@ void TaskFun::taskCompleted(list<array<int, 12>> &myTaskQueue, Unit Building)
     {
         if (&task == TaskFun::findTaskAssignedToID(Building->getID(), myTaskQueue))
         {
-            task[(int)tsk::Status] = (int)taskStatus::Completed;
-            task[(int)tsk::UID] = Building->getID(); //updated the task scvID to the building currently in progress
+            task[Status] = Completed;
+            task[UID] = Building->getID(); //updated the task scvID to the building currently in progress
         }
     }    
 }
@@ -185,10 +173,10 @@ bool TaskFun::taskStatusUpdate(int ID, list<array<int, 12>> &Tasks, int newID, i
     bool updatedTask = false;
     for (auto& task : Tasks)
     {
-        if (task[(int)tsk::UID] == ID)
+        if (task[UID] == ID)
         {            
-            task[(int)tsk::Status] = newStatus;
-            task[(int)tsk::UID] = newID;
+            task[Status] = newStatus;
+            task[UID] = newID;
             updatedTask = true;
         }
     }
@@ -208,19 +196,19 @@ void TaskFun::CreateTask(list<array<int, 12>>& myTaskQueue,int timeStamp,int del
 {
     array<int, 3> price = TaskFun::resourceCost2(action);
     array<int, 12> mytask;
-    mytask[(int)tsk::TimeStamp] = timeStamp;
-    mytask[(int)tsk::Delay] = delay;
-    mytask[(int)tsk::Action] = action;
-    mytask[(int)tsk::UID] = 0;
-    mytask[(int)tsk::Owner] = taskOwner;
-    mytask[(int)tsk::Status] = (int)taskStatus::Created;
-    //mytask[(int)tsk::ID] = TaskCount;
-    mytask[(int)tsk::ID] = myTaskQueue.size();
-    mytask[(int)tsk::X] = 0;
-    mytask[(int)tsk::Y] = 0;
-    mytask[(int)tsk::Minerals] = price[0];
-    mytask[(int)tsk::Gas] = price[1];
-    mytask[(int)tsk::Duration] = price[2];
+    mytask[TimeStamp] = timeStamp;
+    mytask[Delay] = delay;
+    mytask[Action] = action;
+    mytask[UID] = 0;
+    mytask[Owner] = taskOwner;
+    mytask[Status] = Created;
+    //mytask[ID] = TaskCount;
+    mytask[ID] = myTaskQueue.size();
+    mytask[X] = 0;
+    mytask[Y] = 0;
+    mytask[Minerals] = price[0];
+    mytask[Gas] = price[1];
+    mytask[Duration] = price[2];
     
     myTaskQueue.push_back(mytask);
     //TaskCount += 1;
@@ -230,9 +218,9 @@ void TaskFun::CreateTask(list<array<int, 12>>& myTaskQueue,int timeStamp,int del
 void TaskFun::callBack(array<int, 12>& Task, int When, int Why)
 {
     //do we have resources? assign, no? set callback time
-    Task[(int)tsk::TimeStamp] = Broodwar->getFrameCount(); //reset timer
-    Task[(int)tsk::Delay] = When; //frames, should be determined by the income rate, (miners working)
-    Task[(int)tsk::Status] = Why;
+    Task[TimeStamp] = Broodwar->getFrameCount(); //reset timer
+    Task[Delay] = When; //frames, should be determined by the income rate, (miners working)
+    Task[Status] = Why;
 }
 
 void TaskFun::startTask(array<int, 12>& Task, Unit builder)
@@ -243,19 +231,19 @@ void TaskFun::startTask(array<int, 12>& Task, Unit builder)
     //targetBuildLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, builder->getTilePosition());
     //TODO: better target location method needed
 
-    const TilePosition targetBuildLocation(Task[(int)tsk::X], Task[(int)tsk::Y]);
+    const TilePosition targetBuildLocation(Task[X], Task[Y]);
 
-    BuildManager::buildBuilding(builder, Task[(int)tsk::Action], Colors::Blue, targetBuildLocation);
+    BuildManager::buildBuilding(builder, Task[Action], Colors::Blue, targetBuildLocation);
 
-    //switch (Task[(int)tsk::Action])
+    //switch (Task[Action])
     //{
 
-    //case (int)action::BuildSupplyDepot:
+    //case action::BuildSupplyDepot:
 
     //    BuildManager::buildBuilding(builder, UnitTypes::Terran_Supply_Depot, Colors::Blue, targetBuildLocation);
 
     //    break; //optional
-    //case (int)action::BuildBarrack:
+    //case action::BuildBarrack:
 
     //    BuildManager::buildBuilding(builder, UnitTypes::Terran_Barracks, Colors::Green, targetBuildLocation);
 
@@ -267,25 +255,25 @@ void TaskFun::startTask(array<int, 12>& Task, Unit builder)
     //    break;
     //}
 
-    callBack(Task, 200, (int)taskStatus::PendingStart); //things can happen during travel time
+    callBack(Task, 200, PendingStart); //things can happen during travel time
 }
 
 void TaskFun::logTaskUpdate(array<int, 12>& task)
 {
     ofstream myfile;
     myfile.open("TaskRecord.txt", ofstream::app);
-    myfile << task[(int)tsk::TimeStamp] << " "
-        << task[(int)tsk::Delay] << " "
-        << task[(int)tsk::Action] << " "
-        << task[(int)tsk::UID] << " "
-        << task[(int)tsk::Owner] << " "
-        << task[(int)tsk::Status] << " "
-        << task[(int)tsk::ID] << " "
-        << task[(int)tsk::X] << " "
-        << task[(int)tsk::Y] << " "
-        << task[(int)tsk::Minerals] << " "
-        << task[(int)tsk::Gas] << " "
-        << task[(int)tsk::Duration] << " "
+    myfile << task[TimeStamp] << " "
+        << task[Delay] << " "
+        << task[Action] << " "
+        << task[UID] << " "
+        << task[Owner] << " "
+        << task[Status] << " "
+        << task[ID] << " "
+        << task[X] << " "
+        << task[Y] << " "
+        << task[Minerals] << " "
+        << task[Gas] << " "
+        << task[Duration] << " "
         << Broodwar->getFrameCount() << '\n';
 
     myfile.close();

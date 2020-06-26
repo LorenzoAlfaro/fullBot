@@ -1,8 +1,5 @@
 #include "FileIO.h"
-#include <iostream>
-#include <fstream>
 
-using namespace std;
 
 bool FileIO::readStatsCoordinates(int StatsCoordinates[][2])
 {   //simple functions useful for readings the settings for displaying the stats

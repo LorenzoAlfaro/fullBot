@@ -1,9 +1,8 @@
 #pragma once
 #include <BWAPI.h>
-
-#include "UnitFun.h"
-#include "CommMngr.h"
-#include "auxFun.h"
+//#include "UnitFun.h"
+//#include "CommMngr.h"
+//#include "auxFun.h"
 #include "TaskFun.h"
 #include "TaskEngine.h"
 #include "ProductionManager.h"
