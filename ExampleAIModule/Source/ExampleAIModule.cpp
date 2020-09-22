@@ -10,121 +10,160 @@
 
 #pragma region MainEvents
 void ExampleAIModule::onFrame()
-{          
-    Player BW = Broodwar->self();
-    const int frameCount = Broodwar->getFrameCount();
-    const int minerals =                    BW->minerals();
-    const int gas =                         BW->gas();
-    const Unitset myUnits =                 BW->getUnits();
-    const int emptySupply =                 BW->supplyTotal() - BW->supplyUsed();
-    const int barracksCount =               UnitFun::getUnitCount(myUnits,Terran_Barracks);
-    const int CommandCenterCount =          UnitFun::getUnitCount(myUnits,Terran_Command_Center);
-    const int SCVcount =                    UnitFun::getUnitCount(myUnits,Terran_SCV);
-    const int marineCount =                 UnitFun::getUnitCount(myUnits,Terran_Marine);
-    const int roomNeeded =                  auxFun::roomNeeded(CommandCenterCount, barracksCount);
-    if (displayStats)
+{   
+    try
     {
-        auxFun::displayInsights2(roomNeeded,emptySupply,SCVcount,barracksCount,marineCount,StatsCoordinates,Builders.size(),deadUnits.size(),taskQueue.size());
+        Player BW = Broodwar->self();
+        const int frameCount = Broodwar->getFrameCount();
+        const int minerals = BW->minerals();
+        const int gas = BW->gas();
+        const Unitset myUnits = BW->getUnits();
+        const int emptySupply = BW->supplyTotal() - BW->supplyUsed();
+        const int barracksCount = UnitFun::getUnitCount(myUnits, Terran_Barracks);
+        const int CommandCenterCount = UnitFun::getUnitCount(myUnits, Terran_Command_Center);
+        const int SCVcount = UnitFun::getUnitCount(myUnits, Terran_SCV);
+        const int marineCount = UnitFun::getUnitCount(myUnits, Terran_Marine);
+        const int roomNeeded = auxFun::roomNeeded(CommandCenterCount, barracksCount);
+        if (displayStats)
+        {
+            auxFun::displayInsights2(roomNeeded, emptySupply, SCVcount, barracksCount, marineCount, StatsCoordinates, Builders.size(), deadUnits.size(), taskQueue.size());
+        }
+
+        if (auxFun::validFrame())
+        {
+            TaskEngine::taskManager(taskQueue, frameCount, minerals, gas, UnitFun::getUnitList(Terran_Command_Center, myUnits, deadUnits).front(), Miners, Builders);
+
+            ProductionManager::Manage(minerals, gas, frameCount, taskQueue, deadUnits, barracksCount, SCVcount, maxBuilding, maxUnit, roomNeeded > emptySupply, roomNeeded);
+            //eventually productionManager will be another task run by taskManager            
+            CommMngr::scvManager(Miners);//go mine for me minions!
+
+            UserInterface::ReadCommand(frameCount, callBack, deadUnits, taskQueue);
+
+        }
+    }
+    catch (const std::exception&)
+    {
+        Broodwar->sendText("On Frame Failed");
     }
 
-    if (auxFun::validFrame())
-    {           
-        TaskEngine::taskManager(taskQueue,frameCount,minerals,gas,UnitFun::getUnitList(Terran_Command_Center,myUnits,deadUnits).front(),Miners,Builders);
-       
-        ProductionManager::Manage(minerals,gas,frameCount,taskQueue,deadUnits,barracksCount,SCVcount,maxBuilding,maxUnit,roomNeeded>emptySupply,roomNeeded);
-        //eventually productionManager will be another task run by taskManager            
-        CommMngr::scvManager(Miners);//go mine for me minions!
-
-        UserInterface::ReadCommand(frameCount, callBack, deadUnits, taskQueue);
-               
-    }    
+    
 }
 
 void ExampleAIModule::onUnitCreate(Unit unit)
 {
-
-    if (IsOwned(unit))
-    {        
-        if (unit->getType() == Terran_SCV)
+    try
+    {
+        if (IsOwned(unit))
         {
-            Miners.push_back(unit->getID());//assign to mine
-        }
-        
-        if (!taskQueue.empty() && !unit->canAttack()
-            && unit->getType() != Terran_SCV
-            && unit->getType() != Terran_Marine)
-        {
-            Unit builder = unit->getBuildUnit();
-            int builderID = builder->getID();
-            int BuildingID = unit->getID();
+            if (unit->getType() == Terran_SCV)
+            {
+                Miners.push_back(unit->getID());//assign to mine
+            }
+
+            if (!taskQueue.empty() && !unit->canAttack()
+                && unit->getType() != Terran_SCV
+                && unit->getType() != Terran_Marine)
+            {
+                Unit builder = unit->getBuildUnit();
+                int builderID = builder->getID();
+                int BuildingID = unit->getID();
 
 
-            array<int, 12> mytask = {0,0,0,0,0,0,0};
-            array<int, 12>* pointer = TaskFun::findTaskAssignedToUnit(builderID, taskQueue);
-            if (pointer != nullptr)
-            {
-                mytask = *pointer;
-            }            
-            //only for buildings
-            if (TaskFun::taskStatusUpdate(builderID, taskQueue, BuildingID, Started))
-            {
-                Broodwar->sendText("Started task id: %d : %s", mytask[ID], unit->getType().c_str());
-            }
-            else
-            {
-                Broodwar->sendText("Failed update to started task id: %d : %s", unit->getID(), unit->getType().c_str());
+                array<int, 12> mytask = { 0,0,0,0,0,0,0 };
+                array<int, 12>* pointer = TaskFun::findTaskAssignedToUnit(builderID, taskQueue);
+                if (pointer != nullptr)
+                {
+                    mytask = *pointer;
+                }
+                //only for buildings
+                if (TaskFun::taskStatusUpdate(builderID, taskQueue, BuildingID, Started))
+                {
+                    Broodwar->sendText("Started task id: %d : %s", mytask[ID], unit->getType().c_str());
+                }
+                else
+                {
+                    Broodwar->sendText("Failed update to started task id: %d : %s", unit->getID(), unit->getType().c_str());
+                }
             }
         }
-    }       
+    }
+    catch (const std::exception&)
+    {
+        Broodwar->sendText("On Unite Create Failed");
+    }
+
+          
 }
 
 void ExampleAIModule::onUnitComplete(Unit unit)
 {
-    if (IsOwned(unit))
+    try
     {
-        if (!taskQueue.empty() && !unit->canAttack()) //avoid running in buildings
+        if (IsOwned(unit))
         {
-            array<int, 12> mytask = { 0,0,0,0,0,0,0 };
-            array<int, 12>* pointer = TaskFun::findTaskAssignedToUnit(unit->getID(), taskQueue);
-            if (pointer != nullptr)
+            if (!taskQueue.empty() && !unit->canAttack()) //avoid running in buildings
             {
-                mytask = *pointer;
-            }
+                array<int, 12> mytask = { 0,0,0,0,0,0,0 };
+                array<int, 12>* pointer = TaskFun::findTaskAssignedToUnit(unit->getID(), taskQueue);
+                if (pointer != nullptr)
+                {
+                    mytask = *pointer;
+                }
 
-            if (TaskFun::taskStatusUpdate(unit->getID(), taskQueue, unit->getID(), Completed))
-            {
-                Broodwar->sendText("Completed task id: %d : %s", mytask[ID], unit->getType().c_str());
+                if (TaskFun::taskStatusUpdate(unit->getID(), taskQueue, unit->getID(), Completed))
+                {
+                    Broodwar->sendText("Completed task id: %d : %s", mytask[ID], unit->getType().c_str());
+                }
+                else
+                {
+                    Broodwar->sendText("failed update to completed task id: %d : %s", unit->getID(), unit->getType().c_str());
+                }
             }
-            else
-            {
-                Broodwar->sendText("failed update to completed task id: %d : %s", unit->getID(), unit->getType().c_str());
-            }
+            //TODO: test remove  
+          //taskQueue.remove(TaskFun::findTaskAssignedToID(unit->getID(),taskQueue));
+          //updateUnitCount(true, unit);
         }
-        //TODO: test remove  
-      //taskQueue.remove(TaskFun::findTaskAssignedToID(unit->getID(),taskQueue));
-      //updateUnitCount(true, unit);
     }
-    
+    catch (const std::exception&)
+    {
+        Broodwar->sendText("On Unite Complete Failed");            
+    }
+        
 }
 
 void ExampleAIModule::onUnitDestroy(Unit unit)
 {
-   
-    if (IsOwned(unit))
-    {        
-        deadUnits.push_back(unit->getID());
+    try
+    {
+        if (IsOwned(unit))
+        {
+            deadUnits.push_back(unit->getID());
+        }
     }
+    catch (const std::exception&)
+    {
+        Broodwar->sendText("On Unite Die Failed");
+    }
+    
 
 }
 
 void ExampleAIModule::onSendText(string text)
 {     
-    UserInterface::ReadInput(text, deadUnits, displayStats, auxFun::getMousePosition());
-   
-    // Send the text to the game if it is not being processed.
-    Broodwar->sendText("%s", text.c_str());    
-    // Make sure to use %s and pass the text as a parameter,
-    // otherwise you may run into problems when you use the %(percent) character!
+    try
+    {
+        UserInterface::ReadInput(text, deadUnits, displayStats, auxFun::getMousePosition());
+
+        // Send the text to the game if it is not being processed.
+        Broodwar->sendText("%s", text.c_str());
+        // Make sure to use %s and pass the text as a parameter,
+        // otherwise you may run into problems when you use the %(percent) character!
+    }
+    catch (const std::exception&)
+    {
+        Broodwar->sendText("On Send Text Failed");
+    }
+    
 }
 
 void ExampleAIModule::onStart()
@@ -154,7 +193,7 @@ void ExampleAIModule::onStart()
         // Retrieve you and your enemy's races. enemy() will just return the first enemy.
         // If you wish to deal with multiple enemies then you must use enemies().
         if (Broodwar->enemy()) // First make sure there is an enemy
-            Broodwar << "Welcome to the Jungle v1.0 " << Broodwar->self()->getRace() << " vs " << Broodwar->enemy()->getRace() << endl;
+            Broodwar << "Welcome to the Jungle v1.1 " << Broodwar->self()->getRace() << " vs " << Broodwar->enemy()->getRace() << endl;
         
     }   
 }
