@@ -7,9 +7,35 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
     {
         if (frameCount >= callBack)
         {
-            Position myPos = auxFun::getMousePosition();
-            CommMngr::attackUnits(UnitFun::getUnitList(Terran_Marine, Broodwar->self()->getUnits(), deadUnits), myPos);
-            callBack = frameCount + 60;
+            Broodwar->sendText("ATTACK!");
+            Unit myMarine = UnitFun::getUnitList(Terran_Marine, Broodwar->self()->getUnits(), deadUnits).front();
+
+            TilePosition myTile = myMarine->getTilePosition();
+
+            Broodwar->sendText("Tile X %d :", myTile.x);
+            Broodwar->sendText("Tile Y %d :", myTile.y);
+
+            myTile.x += 1;            
+
+            Position newPosition = (Position)myTile;
+
+            WalkPosition walkPos = (WalkPosition)myTile;
+            
+
+            if (Broodwar->isWalkable(walkPos))
+            {
+                Position myPos = auxFun::getMousePosition();
+                CommMngr::attackUnits(UnitFun::getUnitList(Terran_Marine, Broodwar->self()->getUnits(), deadUnits), newPosition);
+                callBack = frameCount + 60;
+            }
+            else
+            {
+                Broodwar->sendText("Cant walk there");
+                callBack = frameCount + 60;
+                    
+            }
+
+            
         }
 
     }
