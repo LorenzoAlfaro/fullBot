@@ -78,6 +78,13 @@ Position auxFun::getMousePosition()
     return myPos;
 }
 
+Position auxFun::getUnitPosition(Unit centerHere)
+{
+    Position myPos(centerHere->getPosition().x - 320,
+        centerHere->getPosition().y- 120);
+    return myPos;
+}
+
 void auxFun::displayInsights2(int roomNeeded, int supplyLeft2, int SCVcount, int barracksCount, int marineCount, int StatsCoordinates[][2], int Builders, int deadUnits,int taskQueueCount)
 {
     //int supplyLeft2 = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();
