@@ -2,7 +2,7 @@
 
 void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUnits, list<array<int, 12>>& taskQueue)
 {
-    int step = 32;
+    int step = 24;
     if (GetKeyState('A') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
     {
         if (frameCount >= callBack)
