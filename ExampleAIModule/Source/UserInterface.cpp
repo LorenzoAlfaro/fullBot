@@ -8,7 +8,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
         if (frameCount >= callBack)
         {      
             //Broodwar->sendText("A");
-            Unit myMarine = UnitFun::getUnitList(Terran_Marine, Broodwar->self()->getUnits(), deadUnits).front();
+            Unit myMarine = UnitFun::getUnitList(Hero_Jim_Raynor_Marine, Broodwar->self()->getUnits(), deadUnits).front();
             TilePosition myTile = myMarine->getTilePosition();
             Position movehere = myMarine->getPosition();
             movehere.x -= step;
@@ -23,7 +23,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
             }
             else
             {
-                Broodwar->sendText("Cant walk there");
+                //Broodwar->sendText("Cant walk there");
                 callBack = frameCount + 1;
             }
         }
@@ -34,7 +34,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
         if (frameCount >= callBack)
         {         
             //Broodwar->sendText("D"); //it is subtracting Y
-            Unit myMarine = UnitFun::getUnitList(Terran_Marine, Broodwar->self()->getUnits(), deadUnits).front();
+            Unit myMarine = UnitFun::getUnitList(Hero_Jim_Raynor_Marine, Broodwar->self()->getUnits(), deadUnits).front();
             TilePosition myTile = myMarine->getTilePosition();
             Position movehere = myMarine->getPosition();
             movehere.x += step;            
@@ -48,7 +48,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
             }
             else
             {
-                Broodwar->sendText("Cant walk there");
+                //Broodwar->sendText("Cant walk there");
                 callBack = frameCount + 1;
             }
         }
@@ -59,7 +59,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
         if (frameCount >= callBack)
         {            
            // Broodwar->sendText("S");
-            Unit myMarine = UnitFun::getUnitList(Terran_Marine, Broodwar->self()->getUnits(), deadUnits).front();
+            Unit myMarine = UnitFun::getUnitList(Hero_Jim_Raynor_Marine, Broodwar->self()->getUnits(), deadUnits).front();
             TilePosition myTile = myMarine->getTilePosition();
             Position movehere = myMarine->getPosition();
             movehere.y += step;            
@@ -73,7 +73,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
             }
             else
             {
-                Broodwar->sendText("Cant walk there");
+                //Broodwar->sendText("Cant walk there");
                 callBack = frameCount + 1;
             }
         }
@@ -85,7 +85,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
         if (frameCount >= callBack)//it is subtracting X
         {      
             //Broodwar->sendText("W");
-            Unit myMarine = UnitFun::getUnitList(Terran_Marine, Broodwar->self()->getUnits(), deadUnits).front();
+            Unit myMarine = UnitFun::getUnitList(Hero_Jim_Raynor_Marine, Broodwar->self()->getUnits(), deadUnits).front();
             TilePosition myTile = myMarine->getTilePosition();
             Position movehere = myMarine->getPosition();
             movehere.y -= step;
@@ -101,7 +101,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
             }
             else
             {
-                Broodwar->sendText("Cant walk there");
+                //Broodwar->sendText("Cant walk there");
                 callBack = frameCount + 5;
             }
         }
@@ -112,7 +112,7 @@ void UserInterface::ReadCommand(int frameCount, int& callBack, list<int> deadUni
         if (frameCount >= callBack)
         {
             Broodwar->sendText("ATTACK!");
-            Unit myMarine = UnitFun::getUnitList(Terran_Marine, Broodwar->self()->getUnits(), deadUnits).front();
+            Unit myMarine = UnitFun::getUnitList(Hero_Jim_Raynor_Marine, Broodwar->self()->getUnits(), deadUnits).front();
 
             TilePosition myTile = myMarine->getTilePosition();
 
