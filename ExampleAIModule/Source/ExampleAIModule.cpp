@@ -31,11 +31,12 @@ void ExampleAIModule::onFrame()
 
         if (auxFun::validFrame())
         {
-            TaskEngine::taskManager(taskQueue, frameCount, minerals, gas, UnitFun::getUnitList(Terran_Command_Center, myUnits, deadUnits).front(), Miners, Builders);
+            Walker::Walk(JimRaynor, false, frameCount, callBack);
+            //TaskEngine::taskManager(taskQueue, frameCount, minerals, gas, UnitFun::getUnitList(Terran_Command_Center, myUnits, deadUnits).front(), Miners, Builders);
 
-            ProductionManager::Manage(minerals, gas, frameCount, taskQueue, deadUnits, barracksCount, SCVcount, maxBuilding, maxUnit, roomNeeded > emptySupply, roomNeeded);
+            //ProductionManager::Manage(minerals, gas, frameCount, taskQueue, deadUnits, barracksCount, SCVcount, maxBuilding, maxUnit, roomNeeded > emptySupply, roomNeeded);
             //eventually productionManager will be another task run by taskManager            
-            CommMngr::scvManager(Miners);//go mine for me minions!
+            //CommMngr::scvManager(Miners);//go mine for me minions!
 
             UserInterface::ReadCommand(frameCount, callBack, deadUnits, taskQueue);
 
@@ -186,6 +187,9 @@ void ExampleAIModule::onStart()
     // Set the command optimization level so that common commands can be grouped
     // and reduce the bot's APM (Actions Per Minute).
     Broodwar->setCommandOptimizationLevel(2);
+
+    //AI Jim Raynor
+    JimRaynor = UnitFun::getUnitList(Hero_Jim_Raynor_Marine, Broodwar->self()->getUnits(), deadUnits).front();
 
     // Check if this is a replay
     if (!Broodwar->isReplay())

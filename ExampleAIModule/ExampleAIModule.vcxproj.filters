@@ -30,6 +30,9 @@
     <ClCompile Include="Source\UserInterface.cpp">
       <Filter>UserInterface</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Walker.cpp">
+      <Filter>CommandManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -60,6 +63,9 @@
     </ClInclude>
     <ClInclude Include="Source\UserInterface.h">
       <Filter>UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Walker.h">
+      <Filter>CommandManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -108,6 +108,7 @@
     <ClCompile Include="Source\TaskFun.cpp" />
     <ClCompile Include="Source\UnitFun.cpp" />
     <ClCompile Include="Source\UserInterface.cpp" />
+    <ClCompile Include="Source\Walker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -121,6 +122,7 @@
     <ClInclude Include="Source\TaskFun.h" />
     <ClInclude Include="Source\UnitFun.h" />
     <ClInclude Include="Source\UserInterface.h" />
+    <ClInclude Include="Source\Walker.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BWAPILIB\BWAPILIB.vcxproj">

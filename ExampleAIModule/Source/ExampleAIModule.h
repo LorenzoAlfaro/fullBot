@@ -8,6 +8,7 @@
 #include "ProductionManager.h"
 #include "FileIO.h"
 #include "UserInterface.h"
+#include "Walker.h"
 using namespace BWAPI;
 using namespace Filter;
 using namespace std;
@@ -48,4 +49,5 @@ public:
   bool                  displayStats = true;
   bool                  busy = false;
   int                   callBack = 0;
+  Unit					JimRaynor;
 };
