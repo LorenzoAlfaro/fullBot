@@ -1,6 +1,93 @@
 #include "Walker.h"
 
-int step = 24;
+
+int step = 32; //tile is 32
+list<TilePosition>  walked; //Walked tiles
+
+list<TilePosition>  unWalked; //Walked tiles
+
+list<TilePosition>  options; //Walkable options
+
+
+
+
+
+bool included(list<TilePosition >  walked, TilePosition currentPos)
+{
+    for (auto& position : walked)
+    {
+        if ((currentPos.x == position.x) &&
+            (currentPos.y == position.y))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+TilePosition myNextMovement(list<TilePosition>  walked, Position currentPos, list<TilePosition>& Unexplored)
+{
+    //scan your options, only back track when there is dead end. Choose left when possible
+    options.clear(); //cleanup
+    //Unexplored.clear();
+    
+    
+    
+    Position Right = currentPos;
+    Right.x += step;
+    if (Broodwar->isWalkable((WalkPosition)Right))
+    {
+        options.push_back((TilePosition)Right);
+    }
+    Position Up = currentPos;
+    Up.y -= step;
+    if (Broodwar->isWalkable((WalkPosition)Up))
+    {
+        options.push_back((TilePosition)Up);
+    }
+    Position Down = currentPos;
+    Down.y += step;
+    if (Broodwar->isWalkable((WalkPosition)Down))
+    {
+        options.push_back((TilePosition)Down);
+    }
+    Position Left = currentPos;
+    Left.x -= step;
+    if (Broodwar->isWalkable((WalkPosition)Left))
+    {
+        options.push_back((TilePosition)Left);
+    }
+
+    for each (TilePosition myOption  in options)
+    {
+        if (!included(walked, myOption)) //what options have I walked already, remove
+        {
+            Unexplored.push_front(myOption); //create a stack structure FIFO
+            Broodwar->sendText("Unexplored Tiles: %d", Unexplored.size());
+        }
+    }
+
+    TilePosition nextMovement;
+    if (Unexplored.size() != 0)
+    {
+        nextMovement = Unexplored.front();
+        if ((TilePosition)currentPos == nextMovement)
+        {
+            Unexplored.pop_front(); //give time for the marine to get there
+        }
+                
+    }
+    else
+    {
+        nextMovement = (TilePosition)currentPos;
+    }
+    
+    
+    return nextMovement;
+    
+}
+
+
 
 void Walker::moveLeft(Unit myUnit, bool Attack) {
     //if (GetKeyState('A') & 0x8000/*Check if high-order bit is set (1 << 15)*/)
@@ -10,7 +97,15 @@ void Walker::moveLeft(Unit myUnit, bool Attack) {
         //TilePosition myTile = myUnit->getTilePosition();
         Position movehere = myUnit->getPosition();
         movehere.x -= step;
-        myUnit->move(movehere);
+        if (!Attack)
+        {
+            myUnit->move(movehere);
+        }
+        else
+        {
+            myUnit->attack(movehere);
+        }
+        
         Position myPos = auxFun::getUnitPosition(myUnit);
         Broodwar->setScreenPosition(myPos);
 
@@ -26,7 +121,14 @@ void Walker::moveLeft(Unit myUnit, bool Attack) {
 void Walker::moveRight(Unit myUnit, bool Attack) {    
     Position movehere = myUnit->getPosition();
     movehere.x += step;
-    myUnit->move(movehere);
+    if (!Attack)
+    {
+        myUnit->move(movehere);
+    }
+    else
+    {
+        myUnit->attack(movehere);
+    }
     Position myPos = auxFun::getUnitPosition(myUnit);
     Broodwar->setScreenPosition(myPos);    
     return;    
@@ -34,79 +136,67 @@ void Walker::moveRight(Unit myUnit, bool Attack) {
 void Walker::moveUp(Unit myUnit, bool Attack) {    
     Position movehere = myUnit->getPosition();
     movehere.y -= step;
-    myUnit->move(movehere);
+    if (!Attack)
+    {
+        myUnit->move(movehere);
+    }
+    else
+    {
+        myUnit->attack(movehere);
+    }
     Position myPos = auxFun::getUnitPosition(myUnit);
     Broodwar->setScreenPosition(myPos);    
     return;    
 }
-void Walker::moveDown(Unit myUnit, bool Attack) {    
+void Walker::moveToPosition(Unit myUnit, bool Attack, Position moveHere) {        
+    if (!Attack)
+    {
+        myUnit->move(moveHere);
+    }
+    else
+    {
+        myUnit->attack(moveHere);
+    }
+    Position myPos = auxFun::getUnitPosition(myUnit);
+    Broodwar->setScreenPosition(myPos);    
+    return;    
+}
+
+void Walker::moveDown(Unit myUnit, bool Attack) {
     Position movehere = myUnit->getPosition();
     movehere.y += step;
-    myUnit->move(movehere);
+    if (!Attack)
+    {
+        myUnit->move(movehere);
+    }
+    else
+    {
+        myUnit->attack(movehere);
+    }
     Position myPos = auxFun::getUnitPosition(myUnit);
-    Broodwar->setScreenPosition(myPos);    
-    return;    
+    Broodwar->setScreenPosition(myPos);
+    return;
 }
 
-void Walker::Walk(Unit myUnit, bool Attack, int frameCount, int& callBack)
+void Walker::Walk(Unit myUnit, bool Attack, int frameCount, int& callBack, list<TilePosition>&  Unexplored)
 {
-    //figure logic to keep moving
-                           
-
+    //figure logic to keep moving                           
     //TilePosition myTile = myUnit->getTilePosition();
-
     //Position newPosition = (Position)myTile;
-
     if (frameCount >= callBack)
     {
-        Position nextMovement = myUnit->getPosition();
+        cout << "trying console";        
+        Position currentPos = myUnit->getPosition();
+        //add the new position to the list
 
+        walked.push_back((TilePosition)currentPos);
+                        
+        moveToPosition(myUnit, Attack, (Position)myNextMovement(walked, currentPos, Unexplored));
 
-        int x = nextMovement.x;
-        int y = nextMovement.y;
-
-        int x0 = x;
-        int y0 = y;
-
-        nextMovement.x -= step;
-
-        if (Broodwar->isWalkable((WalkPosition)nextMovement))
-        {
-            moveLeft(myUnit, Attack);
-        }
-
-        nextMovement.x = x;
-        nextMovement.y = y;
-
-        nextMovement.y += step;
-
-        if (Broodwar->isWalkable((WalkPosition)nextMovement))
-        {
-            moveDown(myUnit, Attack);
-        }
-
-        nextMovement.x = x;
-        nextMovement.y = y;
-
-        nextMovement.y -= step;
-
-        if (Broodwar->isWalkable((WalkPosition)nextMovement))
-        {
-            moveUp(myUnit, Attack);
-        }
-
-        nextMovement.x = x;
-        nextMovement.y = y;
-
-        nextMovement.x += step;
-
+        Broodwar->sendText("Unexplored Tiles: %d", Unexplored.size());        
+        
         callBack = frameCount + 20;
-
         return;
-    }
-
-
-      
+    }          
 }
-
 

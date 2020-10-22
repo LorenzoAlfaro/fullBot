@@ -7,7 +7,7 @@
 //Implement error handling
 //Add logic to build turrets
 //Able to create control groups with more than 12 units 
-
+using namespace std;
 #pragma region MainEvents
 void ExampleAIModule::onFrame()
 {   
@@ -31,7 +31,7 @@ void ExampleAIModule::onFrame()
 
         if (auxFun::validFrame())
         {
-            Walker::Walk(JimRaynor, false, frameCount, callBack);
+            Walker::Walk(JimRaynor, true, frameCount, callBack,Unexplored);
             //TaskEngine::taskManager(taskQueue, frameCount, minerals, gas, UnitFun::getUnitList(Terran_Command_Center, myUnits, deadUnits).front(), Miners, Builders);
 
             //ProductionManager::Manage(minerals, gas, frameCount, taskQueue, deadUnits, barracksCount, SCVcount, maxBuilding, maxUnit, roomNeeded > emptySupply, roomNeeded);
@@ -169,6 +169,7 @@ void ExampleAIModule::onSendText(string text)
 
 void ExampleAIModule::onStart()
 {
+    cout << "Start";
     if (!FileIO::readStatsCoordinates(StatsCoordinates))
     {
         Broodwar->sendText("Unable to open file");//cout << "Unable to open file"
@@ -189,7 +190,14 @@ void ExampleAIModule::onStart()
     Broodwar->setCommandOptimizationLevel(2);
 
     //AI Jim Raynor
-    JimRaynor = UnitFun::getUnitList(Hero_Jim_Raynor_Marine, Broodwar->self()->getUnits(), deadUnits).front();
+    list<Unit> raynors = UnitFun::getUnitList(Hero_Jim_Raynor_Marine, Broodwar->self()->getUnits(), deadUnits);
+
+    if (raynors.size() > 0)
+    {
+        JimRaynor = raynors.front();
+    }
+    
+    
 
     // Check if this is a replay
     if (!Broodwar->isReplay())
