@@ -63,7 +63,7 @@ TilePosition myNextMovement(list<TilePosition>  walked, Position currentPos, lis
         if (!included(walked, myOption)) //what options have I walked already, remove
         {
             Unexplored.push_front(myOption); //create a stack structure FIFO
-            Broodwar->sendText("Unexplored Tiles: %d", Unexplored.size());
+            //Broodwar->sendText("Unexplored Tiles: %d", Unexplored.size());
         }
     }
 
@@ -193,9 +193,9 @@ void Walker::Walk(Unit myUnit, bool Attack, int frameCount, int& callBack, list<
                         
         moveToPosition(myUnit, Attack, (Position)myNextMovement(walked, currentPos, Unexplored));
 
-        Broodwar->sendText("Unexplored Tiles: %d", Unexplored.size());        
+        //Broodwar->sendText("Unexplored Tiles: %d", Unexplored.size());        
         
-        callBack = frameCount + 20;
+        callBack = frameCount + 1;
         return;
     }          
 }
