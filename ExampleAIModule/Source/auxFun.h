@@ -14,7 +14,7 @@ public:
 	static bool isUnitDead(list<int>& deadUnits, int id);
 	static Position getMousePosition();
 	static Position getUnitPosition(Unit centerHere);
-	static void displayInsights2(int roomNeeded, int supplyLeft2, int SCVcount, int barracksCount, int marineCount, int StatsCoordinates[][2], int Builders, int deadUnits, int taskQueueCount);
+	static void displayInsights2(int roomNeeded, int supplyLeft2, int SCVcount, int barracksCount, int marineCount, int StatsCoordinates[][2], int Builders, int deadUnits, int taskQueueCount, int Unexplored);
 	static void LeftClick();
 	static void RightClick();
 };

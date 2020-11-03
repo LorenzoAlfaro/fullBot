@@ -26,7 +26,7 @@ void ExampleAIModule::onFrame()
         const int roomNeeded = auxFun::roomNeeded(CommandCenterCount, barracksCount);
         if (displayStats)
         {
-            auxFun::displayInsights2(roomNeeded, emptySupply, SCVcount, barracksCount, marineCount, StatsCoordinates, Builders.size(), deadUnits.size(), taskQueue.size());
+            auxFun::displayInsights2(roomNeeded, emptySupply, SCVcount, barracksCount, marineCount, StatsCoordinates, Builders.size(), deadUnits.size(), taskQueue.size(), Unexplored.size());
         }
 
         if (auxFun::validFrame())

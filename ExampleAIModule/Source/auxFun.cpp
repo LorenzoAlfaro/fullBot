@@ -1,5 +1,6 @@
 #include "auxFun.h"
 
+
 int auxFun::SupplyTotal(int commandCenterCount, int supplyDepotCount)
 {
     return (commandCenterCount * 10) + (supplyDepotCount * 8);    
@@ -85,25 +86,26 @@ Position auxFun::getUnitPosition(Unit centerHere)
     return myPos;
 }
 
-void auxFun::displayInsights2(int roomNeeded, int supplyLeft2, int SCVcount, int barracksCount, int marineCount, int StatsCoordinates[][2], int Builders, int deadUnits,int taskQueueCount)
+void auxFun::displayInsights2(int roomNeeded, int supplyLeft2, int SCVcount, int barracksCount, int marineCount, int StatsCoordinates[][2], int Builders, int deadUnits,int taskQueueCount, int Unexplored)
 {
     //int supplyLeft2 = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();
     Broodwar->drawTextScreen(StatsCoordinates[0][0], StatsCoordinates[0][1], "FPS: %d", Broodwar->getFPS());
     //Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
-    Broodwar->drawTextScreen(StatsCoordinates[1][0], StatsCoordinates[1][1], "Brks: %d", barracksCount);
-    Broodwar->drawTextScreen(StatsCoordinates[2][0], StatsCoordinates[2][1], "Mrn: %d", marineCount);
-    Broodwar->drawTextScreen(StatsCoordinates[3][0], StatsCoordinates[3][1], "SCV: %d", SCVcount);
-    Broodwar->drawTextScreen(StatsCoordinates[4][0], StatsCoordinates[4][1], "Bldrs: %d", Builders);
+    //Broodwar->drawTextScreen(StatsCoordinates[1][0], StatsCoordinates[1][1], "Brks: %d", barracksCount);
+    Broodwar->drawTextScreen(StatsCoordinates[1][0], StatsCoordinates[1][1], "Tiles to explore: %d", Unexplored);
+    //Broodwar->drawTextScreen(StatsCoordinates[2][0], StatsCoordinates[2][1], "Mrn: %d", marineCount);
+    //Broodwar->drawTextScreen(StatsCoordinates[3][0], StatsCoordinates[3][1], "SCV: %d", SCVcount);
+    //Broodwar->drawTextScreen(StatsCoordinates[4][0], StatsCoordinates[4][1], "Bldrs: %d", Builders);
     Broodwar->drawTextScreen(StatsCoordinates[5][0], StatsCoordinates[5][1], "Dead: %d ", deadUnits);
     //Broodwar->drawTextScreen(StatsCoordinates[6][0], StatsCoordinates[6][1], "Mouse Cursor: %d  %d", Broodwar->getMousePosition().x, Broodwar->getMousePosition().y);
     //Broodwar->drawTextScreen(StatsCoordinates[7][0], StatsCoordinates[7][1], "Screen: %d  %d", Broodwar->getScreenPosition().x, Broodwar->getScreenPosition().y);
 
     //Broodwar->drawTextScreen(StatsCoordinates[8][0], StatsCoordinates[8][1], "supply limit: %d ", supplyLeft);
-    Broodwar->drawTextScreen(StatsCoordinates[9][0], StatsCoordinates[9][1], "Empty Supply: %d ", supplyLeft2 / 2);
-    Broodwar->drawTextScreen(StatsCoordinates[10][0], StatsCoordinates[10][1], "Room Needed: %d ", roomNeeded / 2);
-    Broodwar->drawTextScreen(StatsCoordinates[11][0], StatsCoordinates[11][1], "Tasks: %d ", taskQueueCount);
-    Broodwar->drawTextScreen(StatsCoordinates[12][0], StatsCoordinates[12][1], "APM: %d ", Broodwar->getAPM());
-    Broodwar->drawTextScreen(StatsCoordinates[13][0], StatsCoordinates[13][1], "FrameCount: %d ", Broodwar->getFrameCount());
+    //Broodwar->drawTextScreen(StatsCoordinates[9][0], StatsCoordinates[9][1], "Empty Supply: %d ", supplyLeft2 / 2);
+    //Broodwar->drawTextScreen(StatsCoordinates[10][0], StatsCoordinates[10][1], "Room Needed: %d ", roomNeeded / 2);
+    //Broodwar->drawTextScreen(StatsCoordinates[11][0], StatsCoordinates[11][1], "Tasks: %d ", taskQueueCount);
+    //Broodwar->drawTextScreen(StatsCoordinates[12][0], StatsCoordinates[12][1], "APM: %d ", Broodwar->getAPM());
+    //Broodwar->drawTextScreen(StatsCoordinates[13][0], StatsCoordinates[13][1], "FrameCount: %d ", Broodwar->getFrameCount());
 
 }
 

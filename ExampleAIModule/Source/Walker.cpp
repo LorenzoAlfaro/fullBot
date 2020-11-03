@@ -1,7 +1,7 @@
 #include "Walker.h"
 
 
-int step = 32; //tile is 32
+int step = 36; //tile is 32
 list<TilePosition>  walked; //Walked tiles
 
 list<TilePosition>  unWalked; //Walked tiles
@@ -25,6 +25,7 @@ bool included(list<TilePosition >  walked, TilePosition currentPos)
 
     return false;
 }
+
 TilePosition myNextMovement(list<TilePosition>  walked, Position currentPos, list<TilePosition>& Unexplored)
 {
     //scan your options, only back track when there is dead end. Choose left when possible
@@ -39,18 +40,16 @@ TilePosition myNextMovement(list<TilePosition>  walked, Position currentPos, lis
     {
         options.push_back((TilePosition)Right);
     }
-    Position Up = currentPos;
-    Up.y -= step;
-    if (Broodwar->isWalkable((WalkPosition)Up))
-    {
-        options.push_back((TilePosition)Up);
-    }
+    
+    
+    
     Position Down = currentPos;
     Down.y += step;
     if (Broodwar->isWalkable((WalkPosition)Down))
     {
         options.push_back((TilePosition)Down);
     }
+    
     Position Left = currentPos;
     Left.x -= step;
     if (Broodwar->isWalkable((WalkPosition)Left))
@@ -58,9 +57,16 @@ TilePosition myNextMovement(list<TilePosition>  walked, Position currentPos, lis
         options.push_back((TilePosition)Left);
     }
 
+    Position Up = currentPos;
+    Up.y -= step;
+    if (Broodwar->isWalkable((WalkPosition)Up))
+    {
+        options.push_back((TilePosition)Up);
+    }
+
     for each (TilePosition myOption  in options)
     {
-        if (!included(walked, myOption)) //what options have I walked already, remove
+        if (!included(walked, myOption) && !included(Unexplored, myOption)) //what options have I walked already, remove
         {
             Unexplored.push_front(myOption); //create a stack structure FIFO
             //Broodwar->sendText("Unexplored Tiles: %d", Unexplored.size());
@@ -70,8 +76,10 @@ TilePosition myNextMovement(list<TilePosition>  walked, Position currentPos, lis
     TilePosition nextMovement;
     if (Unexplored.size() != 0)
     {
+
+        TilePosition currentTile = (TilePosition)currentPos;
         nextMovement = Unexplored.front();
-        if ((TilePosition)currentPos == nextMovement)
+        if (currentTile == nextMovement)
         {
             Unexplored.pop_front(); //give time for the marine to get there
         }
@@ -183,19 +191,32 @@ void Walker::Walk(Unit myUnit, bool Attack, int frameCount, int& callBack, list<
     //figure logic to keep moving                           
     //TilePosition myTile = myUnit->getTilePosition();
     //Position newPosition = (Position)myTile;
-    if (frameCount >= callBack)
+    if (frameCount >= callBack && !myUnit->isUnderAttack())
     {
-        cout << "trying console";        
+        
+        //cout << "trying console";        
         Position currentPos = myUnit->getPosition();
         //add the new position to the list
 
-        walked.push_back((TilePosition)currentPos);
-                        
-        moveToPosition(myUnit, Attack, (Position)myNextMovement(walked, currentPos, Unexplored));
+
+
+        TilePosition tileWalked = (TilePosition)currentPos;
+
+        if (included(Unexplored, tileWalked))
+        {
+            Unexplored.remove(tileWalked); //give time for the marine to get there
+        }
+
+
+        walked.push_back(tileWalked);
+
+        TilePosition myNextTile = myNextMovement(walked, currentPos, Unexplored);
+        
+        moveToPosition(myUnit, Attack, (Position)myNextTile);
 
         //Broodwar->sendText("Unexplored Tiles: %d", Unexplored.size());        
         
-        callBack = frameCount + 1;
+        callBack = frameCount + 0;
         return;
     }          
 }
