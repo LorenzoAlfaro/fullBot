@@ -65,7 +65,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" "C:\Users\%USERNAME%\Documents\StarCraft\bwapi-data\AI"</Command>
+      <Command>copy "$(TargetPath)" "C:\Users\%USERNAME%\Documents\StarCraft_\bwapi-data\AI"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
